@@ -1,0 +1,11 @@
+[Unit]
+Description=Tukano daemon for startup services
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/tukano/venv/bin/python /home/pi/tukano/rpi_startup.py > /home/pi/tukano/logs/startup_service.log 2>&1
+User=pi
+
+[Install]
+WantedBy=multi-user.target
