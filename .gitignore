@@ -4,3 +4,5 @@ venv
 data/
 logs/
 reblujo
+mav.*
+
