@@ -1,9 +1,8 @@
-import time
-
 import settings
 
 from dronekit import connect
 
+from tasks import collect_data
 
 def wakeup():
     """
@@ -12,10 +11,12 @@ def wakeup():
     print("Yawning...")
     print(settings.MAVLINK_ADDRESS)
 
-    vehicle = connect(settings.MAVLINK_ADDRESS)
+    dragone = connect(settings.MAVLINK_ADDRESS, wait_ready=True)
 
-    while vehicle.location.global_relative_frame.alt < 10:
-        v_alt = vehicle.location.global_relative_frame.alt
-        print(">> Altitude = %.1f m" % v_alt)
-        time.sleep(1)
+    return dragone
 
+def fly_away(drone):
+    """
+    Call and perform neccesary tasks here
+    """
+    collect_data(drone)
