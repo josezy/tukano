@@ -1,17 +1,10 @@
-import time
-import serial
 
-ser = serial.Serial(
-    port='/dev/ttyAMA0',
-    baudrate = 9600,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=1
-)
+from src import settings
+from src.dragon import wakeup
 
-counter = 0
-while 1:
-    ser.write('Write counter: %d \n' % counter)
-    time.sleep(1)
-    counter += 1
+
+if __name__ == "__main__":
+    try:
+        wakeup()
+    except:
+        raise
