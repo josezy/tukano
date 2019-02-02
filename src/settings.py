@@ -24,10 +24,10 @@ AM2302_PINS = {
     'out': 4,
 }
 
-# BMP183 Temperature, Pressure sensor (SPI Interface)
+# BMP183 Temperature, Pressure sensor
 BMP183_PINS = {
     'sck': 11,
-    'mosi': 10,
-    'miso': 9,
+    'sdi': 10,
+    'sdo': 9,
     'cs': 22,
 }
