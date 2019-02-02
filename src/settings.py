@@ -26,8 +26,8 @@ AM2302_PINS = {
 
 # BMP183 Temperature, Pressure sensor
 BMP183_PINS = {
-    'sck': 11,
-    'sdi': 10,
-    'sdo': 9,
-    'cs': 22,
+    'sck': 5,
+    'sdo': 6,
+    'sdi': 13,
+    'cs': 26,
 }
