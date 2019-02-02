@@ -1,7 +1,4 @@
-
-from src import settings
 from src.dragon import wakeup, fly_away
-
 
 if __name__ == "__main__":
     try:
