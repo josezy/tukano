@@ -31,3 +31,21 @@ BMP183_PINS = {
     'sdi': 13,
     'cs': 26,
 }
+
+################################################################################
+#### Flight tasks parameters
+################################################################################
+
+ALT_THRESHOLD = 10              # Collect data above N meters
+DATA_COLLECT_TIMESPAN = 200     # Collect data every N milliseconds
+
+
+################################################################################
+#### Redis config
+################################################################################
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_DB = 0
+
+REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
+
