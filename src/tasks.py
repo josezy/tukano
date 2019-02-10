@@ -31,5 +31,5 @@ def load_json_file(filename):
     try:
         infile = open(input_file, 'r')
         return json.load(infile)
-    except IOError, ValueError:
+    except (IOError, ValueError):
         return {}
