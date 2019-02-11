@@ -1,4 +1,4 @@
-# import redis
+import time
 import settings
 
 from datetime import datetime
@@ -25,12 +25,19 @@ def fly_away(drone):
     print("Running flight {}".format(flight_name))
 
     filename = "{}.json".format(flight_name)
-    # redis_queue = redis.Redis(**settings.REDIS_CONF)
+    last_sample_ts = time.time()
+
     while True:
         try:
             drone_altitude = drone.location.global_relative_frame.alt
-            if drone_altitude > settings.ALT_THRESHOLD:
-                collect_data(drone, filename, settings.DATA_COLLECT_TIMESPAN)
+            enough_altitude = drone_altitude > settings.ALT_THRESHOLD
+            elapsed_time = time.time() - last_sample_ts
+            enough_timespan = elapsed_time > settings.DATA_COLLECT_TIMESPAN
+
+            if enough_altitude and enough_timespan:
+                last_sample_ts = time.time()
+                collect_data(drone, filename)
+
         except Exception as e:
             # TODO: log errors
             raise e

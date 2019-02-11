@@ -4,8 +4,8 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/home/pi/tukano/venv/bin/python /home/pi/tukano/rpi_startup.py > /home/pi/tukano/data/logs/startup_service.log 2>&1
-User=pi
+User=tukano
+ExecStart=/home/pi/tukano/venv/bin/python /home/pi/tukano/rpi_startup.py &> /home/pi/tukano/data/logs/startup_service.log
 
 [Install]
 WantedBy=multi-user.target

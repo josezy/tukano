@@ -1,35 +1,49 @@
+import os
 import json
-import time
 
 from datetime import datetime
 
 from settings import DATA_DIR
+from celery_tasks import am2302_measure
 
-def collect_data(drone, filename, time_span=0, max_samples=float('inf')):
-    data_collected = load_json_file(filename)
+def collect_data(drone, filename):
 
-    for s in range(10):
-        data_collected[s] = {
-            'ts': str(datetime.now()),
+    # this is a syncronous job that blocks normal flow
+    am2302_data = am2302_measure()
+
+    new_data = {
+        'dt': str(datetime.now()),
+        'pos': {
             'lat': drone.location.global_relative_frame.lat,
             'lon': drone.location.global_relative_frame.lon,
             'alt': drone.location.global_relative_frame.alt,
-        }
-        print(data_collected[s])
-        time.sleep(0.5)
+        },
+        'am2302': am2302_data,
+    }
+    print(new_data)
 
-    save_json_file(filename, data_collected)
+    append_json_file(filename, new_data)
 
+def append_json_file(filename, new_data):
+    file_path = "{}/{}".format(DATA_DIR, filename)
 
-def save_json_file(filename, json_data):
-    output_file = "{}/{}".format(DATA_DIR, filename)
-    with open(output_file, 'w') as outfile:
-        json.dump(json_data, outfile)
+    data_collected = load_json_file(file_path)
 
-def load_json_file(filename):
-    input_file = "{}/{}".format(DATA_DIR, filename)
-    try:
-        infile = open(input_file, 'r')
-        return json.load(infile)
-    except (IOError, ValueError):
+    # append data to 'data_collected' dict
+    data_collected[len(data_collected)] = new_data
+
+    save_json_file(file_path, data_collected)
+
+def save_json_file(file_path, json_data):
+    with open(file_path, 'w') as fp:
+        json.dump(json_data, fp)
+
+def load_json_file(file_path):
+    if not os.path.isfile(file_path):
+        with open(file_path, 'w+') as fp:
+            json.dump({}, fp)
         return {}
+
+    with open(file_path, 'r') as fp:
+        data = json.load(fp)
+    return data

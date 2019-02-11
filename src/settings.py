@@ -37,7 +37,7 @@ BMP183_PINS = {
 ################################################################################
 
 ALT_THRESHOLD = 10              # Collect data above N meters
-DATA_COLLECT_TIMESPAN = 200     # Collect data every N milliseconds
+DATA_COLLECT_TIMESPAN = 0.2     # Collect data every Z seconds
 
 
 ################################################################################
