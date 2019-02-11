@@ -1,7 +1,7 @@
 import os
 
 
-MAVLINK_ADDRESS = "udp:127.0.0.1:14551"
+MAVLINK_ADDRESS = "udp:192.168.1.53:14551"
 
 
 ################################################################################
@@ -11,8 +11,8 @@ MAVLINK_ADDRESS = "udp:127.0.0.1:14551"
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(SRC_DIR)
 
-DATA_DIR = "%s/data" % BASE_DIR
-LOGS_DIR = "%s/logs" % BASE_DIR
+DATA_DIR = "{}/data".format(BASE_DIR)
+LOGS_DIR = "{}/logs".format(BASE_DIR)
 
 
 ################################################################################
