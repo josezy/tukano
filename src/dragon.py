@@ -13,7 +13,15 @@ def wakeup():
     print("Yawning...")
     print(settings.MAVLINK_ADDRESS)
 
-    dragone = connect(settings.MAVLINK_ADDRESS, wait_ready=True)
+    dragone = None
+    tries = 0
+
+    while not dragone:
+        try:
+            dragone = connect(settings.MAVLINK_ADDRESS, wait_ready=True)
+        except Exception as e:
+            tries += 1
+            print("Try #{} failed: {}".format(tries, e))
 
     return dragone
 
