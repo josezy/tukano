@@ -21,7 +21,7 @@ def fly_away(drone):
     """
     Call and perform neccesary tasks here
     """
-    flight_name = datetime.now().strftime("%Y_%M_%d_%H_%M")
+    flight_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
     print("Running flight {}".format(flight_name))
 
     filename = "{}.json".format(flight_name)
