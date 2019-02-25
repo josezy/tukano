@@ -1,4 +1,6 @@
 import time
+import json
+import redis
 import settings
 
 from datetime import datetime
@@ -6,19 +8,24 @@ from dronekit import connect
 
 from tasks import collect_data
 
+redis_queue = redis.Redis(**settings.REDIS_CONF)
+
 def wakeup():
     """
     Wake up and connect to mavlink
     """
     print("Yawning...")
-    print(settings.MAVLINK_ADDRESS)
+    print(settings.MAVLINK_VEHICLE_ADDRESS)
 
     dragone = None
     tries = 0
 
     while not dragone:
         try:
-            dragone = connect(settings.MAVLINK_ADDRESS, wait_ready=True)
+            dragone = connect(
+                settings.MAVLINK_VEHICLE_ADDRESS,
+                wait_ready=True
+            )
         except Exception as e:
             tries += 1
             print("Try #{} failed: {}".format(tries, e))
@@ -32,7 +39,9 @@ def fly_away(drone):
     flight_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
     print("Running flight {}".format(flight_name))
 
-    filename = "{}.json".format(flight_name)
+    # Clean redis queue
+    redis_queue.flushdb()
+
     last_sample_ts = time.time()
 
     while True:
@@ -44,7 +53,8 @@ def fly_away(drone):
 
             if enough_altitude and enough_timespan:
                 last_sample_ts = time.time()
-                collect_data(drone, filename)
+                new_data = collect_data(drone)
+                redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
 
         except Exception as e:
             # TODO: log errors
