@@ -15,7 +15,7 @@ def wakeup():
     Wake up and connect to mavlink
     """
     print("Yawning...")
-    print(settings.MAVLINK_VEHICLE_ADDRESS)
+    print(settings.MAVLINK_TUKANO_ADDRESS)
 
     dragone = None
     tries = 0
@@ -23,7 +23,7 @@ def wakeup():
     while not dragone:
         try:
             dragone = connect(
-                settings.MAVLINK_VEHICLE_ADDRESS,
+                settings.MAVLINK_TUKANO_ADDRESS,
                 wait_ready=True
             )
         except Exception as e:
