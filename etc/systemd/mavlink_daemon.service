@@ -1,0 +1,11 @@
+[Unit]
+Description=Tukano MAVLink daemon to inject custom messages between UAV and GCS
+After=multi-user.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=/home/pi/tukano/venv/bin/python /home/pi/tukano/mavlink_daemon.py &> /home/pi/tukano/data/logs/mavlink_daemon.log
+
+[Install]
+WantedBy=multi-user.target
