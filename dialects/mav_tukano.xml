@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<mavlink>
+  <include>common.xml</include>
+  <include>ardupilotmega.xml</include>
+  <dialect>1</dialect>
+  <messages>
+  </messages>
+</mavlink>

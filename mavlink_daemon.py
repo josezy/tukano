@@ -1,3 +1,9 @@
+"""
+    Remember to generate MAVLink library with
+    mavgen.py --wire-protocol=2.0 --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    after changing dialects/mav_tukano.xml, otherwise this code may not work
+"""
+
 import time
 import json
 import redis
@@ -56,7 +62,7 @@ while True:
             samples += 1
 
         if data:
-            gcs_link.mav.statustext_send(
+            gcs_link.mav.statustext_long_send(
                 mavutil.mavlink.MAV_SEVERITY_INFO,
                 "TUKANO_DATA {}".format(json.dumps(data))
             )

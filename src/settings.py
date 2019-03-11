@@ -1,5 +1,7 @@
 import os
 
+os.environ['MAVLINK_DIALECT'] = "mav_tukano"
+
 ################################################################################
 #### Directory contants
 ################################################################################
@@ -51,9 +53,9 @@ BMP183_PINS = {
 ################################################################################
 
 ALT_THRESHOLD = 10                      # Collect data above N meters
-DATA_COLLECT_TIMESPAN = 0.2             # Collect data every Z seconds
-MAX_SAMPLES_PER_MAVLINK_MESSAGE = 10    # Amount of samples to send over 1 mav msg
-MAVLINK_SAMPLES_TIMESPAN = 3            # Time between custom mavlink messages
+DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
+MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Amount of samples to send over 1 mav msg
+MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
 ################################################################################
 #### Redis config
