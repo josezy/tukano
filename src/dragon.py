@@ -58,4 +58,4 @@ def fly_away(drone):
 
         except Exception as e:
             # TODO: log errors
-            raise e
+            print(e)

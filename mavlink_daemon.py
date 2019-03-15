@@ -19,6 +19,9 @@ while no_vehicle:
         vehicle_link = mavutil.mavlink_connection(
             settings.MAVLINK_VEHICLE_ADDRESS
         )
+        print("Vehicle connected at {}".format(
+            settings.MAVLINK_VEHICLE_ADDRESS
+        ))
         no_vehicle = False
     except Exception as e:
         print(e)
@@ -28,6 +31,7 @@ gcs_link = mavutil.mavlink_connection(
     settings.MAVLINK_GCS_ADDRESS,
     input=False,
 )
+print("GCS stablished at {}".format(settings.MAVLINK_GCS_ADDRESS))
 
 print("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
@@ -44,10 +48,12 @@ while True:
 
     vehicle_msg = vehicle_link.recv_msg()
     if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
+        # print(vehicle_msg)
         gcs_link.mav.send(vehicle_msg)
 
     gcs_msg = gcs_link.recv_msg()
     if gcs_msg and gcs_msg.get_type() != 'BAD_DATA':
+        # print(gcs_msg)
         vehicle_link.mav.send(gcs_msg)
 
     if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:

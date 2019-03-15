@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sensors import am2302_measure
+from sensor_tasks import am2302_measure
 
 def collect_data(drone):
 
