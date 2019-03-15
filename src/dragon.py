@@ -22,10 +22,7 @@ def wakeup():
 
     while not dragone:
         try:
-            dragone = connect(
-                settings.MAVLINK_TUKANO_ADDRESS,
-                wait_ready=True
-            )
+            dragone = connect(settings.MAVLINK_TUKANO_ADDRESS)
         except Exception as e:
             tries += 1
             print("Try #{} failed: {}".format(tries, e))
