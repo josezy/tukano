@@ -13,18 +13,20 @@ DATA_DIR = "{}/data".format(BASE_DIR)
 LOGS_DIR = "{}/logs".format(BASE_DIR)
 
 ################################################################################
-#### Connection strings (only one pair must be uncommented)
+#### Connection strings (only one group must be uncommented)
 ################################################################################
 
 ## Local connections for testing
-# MAVLINK_TUKANO_ADDRESS = "tcp:127.0.0.1:5762"
-# MAVLINK_VEHICLE_ADDRESS = "tcp:127.0.0.1:5760"
-# MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
+MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14552"
+MAVLINK_VEHICLE_ADDRESS = "tcp:127.0.0.1:5760"
+MAVLINK_GROUND_ADDRESS = "udp:127.0.0.1:14551"
+MAVLINK_AIRCRAFT_ADDRESS = MAVLINK_GROUND_ADDRESS
+MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
 
 ## Remote connections for RPi testing
-MAVLINK_TUKANO_ADDRESS = "tcp:192.168.1.53:5762"
-MAVLINK_VEHICLE_ADDRESS = "tcp:192.168.1.53:5760"
-MAVLINK_GCS_ADDRESS = "udp:192.168.1.53:14551"
+# MAVLINK_TUKANO_ADDRESS = "tcp:192.168.1.53:5762"
+# MAVLINK_VEHICLE_ADDRESS = "tcp:192.168.1.53:5760"
+# MAVLINK_GCS_ADDRESS = "udp:192.168.1.53:14551"
 
 ## Real connections PixHawk <-> RPi <-> XBee (verify)
 # MAVLINK_TUKANO_ADDRESS = "tcp:127.0.0.1:5762"
@@ -52,7 +54,7 @@ BMP183_PINS = {
 #### Flight tasks parameters
 ################################################################################
 
-ALT_THRESHOLD = 10                      # Collect data above N meters
+ALT_THRESHOLD = 10000                   # Collect data above N milimeters
 DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Amount of samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages

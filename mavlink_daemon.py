@@ -12,9 +12,7 @@ from src import settings
 
 from pymavlink import mavutil
 
-no_vehicle = True
-
-while no_vehicle:
+while True:
     try:
         vehicle_link = mavutil.mavlink_connection(
             settings.MAVLINK_VEHICLE_ADDRESS
@@ -22,23 +20,30 @@ while no_vehicle:
         print("Vehicle connected at {}".format(
             settings.MAVLINK_VEHICLE_ADDRESS
         ))
-        no_vehicle = False
+        break
     except Exception as e:
         print(e)
         print("Retrying MAVLink vehicle connection...")
 
-gcs_link = mavutil.mavlink_connection(
-    settings.MAVLINK_GCS_ADDRESS,
+ground_link = mavutil.mavlink_connection(
+    settings.MAVLINK_GROUND_ADDRESS,
     input=False,
 )
-print("GCS stablished at {}".format(settings.MAVLINK_GCS_ADDRESS))
+print("Ground at {}".format(settings.MAVLINK_GROUND_ADDRESS))
+
+tukano_link = mavutil.mavlink_connection(
+    settings.MAVLINK_TUKANO_ADDRESS,
+    input=False,
+)
+print("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO_ADDRESS))
 
 print("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
 print("Vehicle hearbeat received!")
 
-vehicle_link.logfile_raw = gcs_link
-gcs_link.logfile_raw = vehicle_link
+vehicle_link.logfile_raw = ground_link
+ground_link.logfile_raw = vehicle_link
+tukano_link.logfile_raw = vehicle_link
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 
@@ -49,12 +54,13 @@ while True:
     vehicle_msg = vehicle_link.recv_msg()
     if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
         # print(vehicle_msg)
-        gcs_link.mav.send(vehicle_msg)
+        ground_link.mav.send(vehicle_msg)
+        tukano_link.mav.send(vehicle_msg)
 
-    gcs_msg = gcs_link.recv_msg()
-    if gcs_msg and gcs_msg.get_type() != 'BAD_DATA':
-        # print(gcs_msg)
-        vehicle_link.mav.send(gcs_msg)
+    ground_msg = ground_link.recv_msg()
+    if ground_msg and ground_msg.get_type() != 'BAD_DATA':
+        # print(ground_msg)
+        vehicle_link.mav.send(ground_msg)
 
     if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:
         samples = 0
@@ -68,7 +74,7 @@ while True:
             samples += 1
 
         if data:
-            gcs_link.mav.statustext_long_send(
+            ground_link.mav.statustext_send(
                 mavutil.mavlink.MAV_SEVERITY_INFO,
                 "TUKANO_DATA {}".format(json.dumps(data))
             )

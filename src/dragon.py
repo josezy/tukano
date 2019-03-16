@@ -4,7 +4,7 @@ import redis
 import settings
 
 from datetime import datetime
-from dronekit import connect
+from pymavlink import mavutil
 
 from tasks import collect_data
 
@@ -17,15 +17,18 @@ def wakeup():
     print("Yawning...")
     print(settings.MAVLINK_TUKANO_ADDRESS)
 
-    dragone = None
-    tries = 0
-
-    while not dragone:
+    while True:
         try:
-            dragone = connect(settings.MAVLINK_TUKANO_ADDRESS)
+            dragone = mavutil.mavlink_connection(
+                settings.MAVLINK_TUKANO_ADDRESS
+            )
+            break
         except Exception as e:
-            tries += 1
-            print("Try #{} failed: {}".format(tries, e))
+            print(e)
+            print("Retrying MAVLink vehicle connection...")
+
+    dragone.wait_heartbeat()
+    print("Hearbeat received!")
 
     return dragone
 
@@ -43,14 +46,16 @@ def fly_away(drone):
 
     while True:
         try:
-            drone_altitude = drone.location.global_relative_frame.alt
-            enough_altitude = drone_altitude > settings.ALT_THRESHOLD
+            gps_raw = drone.recv_match(type="GPS_RAW_INT", blocking=True)
+
+            enough_altitude = gps_raw.alt > settings.ALT_THRESHOLD
             elapsed_time = time.time() - last_sample_ts
             enough_timespan = elapsed_time > settings.DATA_COLLECT_TIMESPAN
 
             if enough_altitude and enough_timespan:
                 last_sample_ts = time.time()
-                new_data = collect_data(drone)
+                new_data = collect_data(gps_raw)
+                print(new_data)
                 redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
 
         except Exception as e:
