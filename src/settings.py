@@ -17,9 +17,9 @@ LOGS_DIR = "{}/logs".format(BASE_DIR)
 ################################################################################
 
 ## Local connections for testing
-MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14552"
 MAVLINK_VEHICLE_ADDRESS = "tcp:127.0.0.1:5760"
-MAVLINK_GROUND_ADDRESS = "udp:127.0.0.1:14551"
+MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14551"
+MAVLINK_GROUND_ADDRESS = "udp:127.0.0.1:14552"
 MAVLINK_AIRCRAFT_ADDRESS = MAVLINK_GROUND_ADDRESS
 MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
 
