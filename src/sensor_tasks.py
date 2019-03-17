@@ -12,8 +12,8 @@ def am2302_measure():
     # humidity, temperature = 90 + 3 * random(), 17 + 3 * random()
     data = {
         'ts': time.time(),
-        'humidity': float("{:.3f}".format(humidity)),
-        'temperature': float("{:.3f}".format(temperature)),
+        'humidity': float("{:.2f}".format(humidity)),
+        'temperature': float("{:.2f}".format(temperature)),
     }
     return data
 
