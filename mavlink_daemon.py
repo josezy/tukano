@@ -1,6 +1,6 @@
 """
     Remember to generate MAVLink library with
-    mavgen.py --wire-protocol=2.0 --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
     after changing dialects/mav_tukano.xml, otherwise this code may not work
 """
 
@@ -53,13 +53,11 @@ while True:
 
     vehicle_msg = vehicle_link.recv_msg()
     if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
-        # print(vehicle_msg)
         ground_link.mav.send(vehicle_msg)
         tukano_link.mav.send(vehicle_msg)
 
     ground_msg = ground_link.recv_msg()
     if ground_msg and ground_msg.get_type() != 'BAD_DATA':
-        # print(ground_msg)
         vehicle_link.mav.send(ground_msg)
 
     if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:
@@ -74,8 +72,12 @@ while True:
             samples += 1
 
         if data:
-            ground_link.mav.statustext_send(
-                mavutil.mavlink.MAV_SEVERITY_INFO,
-                "TUKANO_DATA {}".format(json.dumps(data))
-            )
+            data_text = json.dumps(data)
+            data_len = len(data_text)
+            print("Sending data ({}): {}".format(data_len, data_text))
+            if data_len > 254:
+                print("MESSAGE TOO LONG TO SEND")
+            else:
+                ground_link.mav.tukano_data_send(data_text)
+
         last_t = time.time()

@@ -1,8 +1,12 @@
 <?xml version="1.0"?>
 <mavlink>
-  <include>common.xml</include>
-  <include>ardupilotmega.xml</include>
-  <dialect>1</dialect>
-  <messages>
-  </messages>
+    <include>common.xml</include>
+    <include>ardupilotmega.xml</include>
+    <dialect>1</dialect>
+    <messages>
+        <message id="99" name="TUKANO_DATA">
+            <description>String containing custom data for specific applications.</description>
+            <field type="char[254]" name="text">Data text message, without null termination character.</field>
+        </message>
+    </messages>
 </mavlink>
