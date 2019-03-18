@@ -1,0 +1,86 @@
+#!/bin/bash
+
+REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+
+function info {
+    echo -e "\\n$(tput bold)$(tput setaf 4)" "$@" "$(tput sgr0)"
+}
+function success {
+    echo -e "\\n$(tput bold)" "$@" "$(tput sgr0)"
+}
+function error {
+    echo -e "\\n$(tput bold)$(tput setaf 1)" "$@" "$(tput sgr0)"
+}
+
+
+success " 🔵    Setup: Development Machine w/ supervisord"
+    if [[ "$(uname)" != 'Linux' ]]; then
+        error "Not on Linux!: $(uname)"
+        exit 1
+    fi
+    ln -fs "$REPO_DIR" /opt/tukano
+echo "       Installing from $REPO_DIR..."
+
+
+
+info "[1/5] Installing system packages..."
+    apt update
+    apt install -y python2.7 python2-pip python2.7-dev python-dev \
+                   virtualenv redis-server git supervisor
+
+    systemctl stop redis-server
+    systemctl disable redis-server
+
+echo "   √   Apt packages installed:"
+echo "           Python, redis, supervisor and some others..."
+
+
+
+info "[2/5] Install utility commands..."
+    echo "      Add the following to your \$PATH, then press enter once finished:"
+    echo "           /opt/tukano/bin"
+    bash -c "which tukano" | grep -q /opt/tukano/bin || read
+    if bash -c "which tukano" | grep -q /opt/tukano/bin; then
+        true
+    else
+        echo "PATH=$PATH"
+        error "/opt/bin/tukano was not found in your \$PATH, please set it and run this script again"
+        exit 1
+    fi
+success "   √   'tukano' command now points to $(bash -c "which tukano") from your \$PATH"
+
+
+
+info "[3/5] Seting up pip + virtualenv..."
+    python2 --version | grep -q "Python 2.7" || exit 1
+    pip2 install -q --upgrade pip setuptools virtualenv
+    [ -d venv ] || virtualenv -p "$(which python2.7)" venv
+    set +u
+    source venv/bin/activate
+    set -u
+success "   √   Virtualenv is active: $(which python) ($(python --version))"
+
+
+
+info "[4/5] Installing python dependencies..."
+    pip install -r requirements.txt
+success "   √   PyPI requirements are installed: requirements.txt"
+
+
+
+info "[5/5] Setting up supervisor configuration..."
+    rm -f /etc/supervisor/supervisord.conf
+    ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+success "   √   Linked supervisor conf file"
+
+
+
+success " ✅ Done."
+    echo "       - Commands can be run using 'tukano' command:"
+    echo "           e.g. tukano reload"
+    echo "                tukano stop"
+    echo "       - Data is stored in tukano/data/"
+
+
+supervisorctl status all
+exit 0
