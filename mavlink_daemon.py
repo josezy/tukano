@@ -22,8 +22,7 @@ while True:
         ))
         break
     except Exception as e:
-        print(e)
-        print("Retrying MAVLink vehicle connection...")
+        time.sleep(3)
 
 ground_link = mavutil.mavlink_connection(
     settings.MAVLINK_GROUND_ADDRESS,
