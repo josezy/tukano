@@ -1,0 +1,32 @@
+#!/bin/bash
+
+REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+FUNCTION="$1"
+ARG1="$2"
+ARG2="$3"
+ARG3="$4"
+ARG4="$5"
+
+
+function info {
+    echo -e "\\n$(tput bold)$(tput setaf 4)" "$@" "$(tput sgr0)"
+}
+function error {
+    echo -e "\\n$(tput bold)$(tput setaf 1)" "$@" "$(tput sgr0)"
+}
+
+function reload {
+    supervisorctl reload
+    supervisorctl update
+    sleep 1
+    supervisorctl status all
+    info " > Daemons and services reloaded"
+}
+
+function stop {
+    supervisorctl stop tukano-base:
+    info " > Daemons and services stopped"
+}
+
+
+$FUNCTION $ARG1 $ARG2 $ARG3 $ARG4
