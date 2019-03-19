@@ -44,7 +44,7 @@ info "[2/5] Install utility commands..."
         true
     else
         echo "PATH=$PATH"
-        error "/opt/bin/tukano was not found in your \$PATH, please set it and run this script again"
+        error "/opt/tukano/bin was not found in your \$PATH, please set it and run this script again"
         exit 1
     fi
 success "   √   'tukano' command now points to $(bash -c "which tukano") from your \$PATH"
