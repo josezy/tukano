@@ -37,6 +37,13 @@ MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
 #### External hardware pins
 ################################################################################
 
+# RGB Led for status indication
+LED_PINS = {
+    'red': 12,
+    'green': 16,
+    'blue': 20,
+}
+
 # AM2302 Temperature, Humidity sensor
 AM2302_PINS = {
     'out': 4,
