@@ -13,6 +13,10 @@ def led_on(color):
         state = GPIO.HIGH if led_color == color else GPIO.LOW
         GPIO.output(led_pin, state)
 
+def led_off():
+    for _, led_pin in LED_PINS.items():
+        GPIO.output(led_pin, GPIO.LOW)
+
 
 def error():
     led_on('red')
