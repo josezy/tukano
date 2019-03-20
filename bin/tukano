@@ -28,5 +28,8 @@ function stop {
     info " > Daemons and services stopped"
 }
 
+function links {
+    ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+}
 
 $FUNCTION $ARG1 $ARG2 $ARG3 $ARG4
