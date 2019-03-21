@@ -9,6 +9,7 @@ import json
 import redis
 
 from src import settings
+from src.leds import info, led_off
 
 from pymavlink import mavutil
 
@@ -71,12 +72,15 @@ while True:
             samples += 1
 
         if data:
+            info()
             data_text = json.dumps(data)
             data_len = len(data_text)
             print("Sending data ({}): {}".format(data_len, data_text))
             if data_len > 254:
                 print("MESSAGE TOO LONG TO SEND")
+                error()
             else:
                 ground_link.mav.tukano_data_send(data_text)
+                led_off()
 
         last_t = time.time()
