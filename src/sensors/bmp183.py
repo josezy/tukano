@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import numpy
+import ctypes
 
 
 class bmp183():
@@ -164,17 +164,17 @@ class bmp183():
 
         def read_calibration_data(self):
                 # Read calibration data
-                self.AC1 = numpy.int16(self.read_word(self.BMP183_REG['CAL_AC1']))
-                self.AC2 = numpy.int16(self.read_word(self.BMP183_REG['CAL_AC2']))
-                self.AC3 = numpy.int16(self.read_word(self.BMP183_REG['CAL_AC3']))
-                self.AC4 = numpy.uint16(self.read_word(self.BMP183_REG['CAL_AC4']))
-                self.AC5 = numpy.uint16(self.read_word(self.BMP183_REG['CAL_AC5']))
-                self.AC6 = numpy.uint16(self.read_word(self.BMP183_REG['CAL_AC6']))
-                self.B1 = numpy.int16(self.read_word(self.BMP183_REG['CAL_B1']))
-                self.B2 = numpy.int16(self.read_word(self.BMP183_REG['CAL_B2']))
-                self.MB = numpy.int16(self.read_word(self.BMP183_REG['CAL_MB']))
-                self.MC = numpy.int16(self.read_word(self.BMP183_REG['CAL_MC']))
-                self.MD = numpy.int16(self.read_word(self.BMP183_REG['CAL_MD']))
+                self.AC1 = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_AC1'])).value
+                self.AC2 = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_AC2'])).value
+                self.AC3 = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_AC3'])).value
+                self.AC4 = ctypes.c_uint16(self.read_word(self.BMP183_REG['CAL_AC4'])).value
+                self.AC5 = ctypes.c_uint16(self.read_word(self.BMP183_REG['CAL_AC5'])).value
+                self.AC6 = ctypes.c_uint16(self.read_word(self.BMP183_REG['CAL_AC6'])).value
+                self.B1 = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_B1'])).value
+                self.B2 = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_B2'])).value
+                self.MB = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_MB'])).value
+                self.MC = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_MC'])).value
+                self.MD = ctypes.c_int16(self.read_word(self.BMP183_REG['CAL_MD'])).value
 
         def measure_temperature(self):
                 # Start temperature measurement
@@ -182,7 +182,7 @@ class bmp183():
                 # Wait
                 time.sleep(self.BMP183_CMD['TEMP_WAIT'])
                 # Read uncmpensated temperature
-                self.UT = numpy.int32(self.read_word(self.BMP183_REG['DATA']))
+                self.UT = ctypes.c_int32(self.read_word(self.BMP183_REG['DATA'])).value
                 self.calculate_temperature()
 
         def measure_pressure(self):
@@ -196,7 +196,7 @@ class bmp183():
                         # Wait for conversion
                         time.sleep(self.BMP183_CMD['OVERSAMPLE_3_WAIT'])
                         # Store uncmpensated pressure for averaging
-                        UP[i] = numpy.int32(self.read_word(self.BMP183_REG['DATA'], 3))
+                        UP[i] = ctypes.c_int32(self.read_word(self.BMP183_REG['DATA'], 3)).value
 
                 self.UP = (UP[0] + UP[1] + UP[2]) / 3
                 self.calculate_pressure()
@@ -207,13 +207,13 @@ class bmp183():
                 X1 = (self.B2 * (self.B6 * self.B6 / 2 ** 12)) / 2 ** 11
                 X2 = self.AC2 * self.B6 / 2 ** 11
                 X3 = X1 + X2
-                self.B3 = (((numpy.uint32(self.AC1 * 4 + X3)) << self.BMP183_CMD['OVERSAMPLE_3']) + 2) / 4
+                self.B3 = (((ctypes.c_uint32(self.AC1 * 4 + X3).value) << self.BMP183_CMD['OVERSAMPLE_3']) + 2) / 4
                 X1 = self.AC3 * self.B6 / 2 ** 13
                 X2 = (self.B1 * (self.B6 * self.B6 / 2 ** 12)) / 2 ** 16
                 X3 = ((X1 + X2) + 2) / 2 ** 2
-                self.B4 = numpy.uint32(self.AC4 * (X3 + 32768) / 2 ** 15)
-                self.B7 = (numpy.uint32(self.UP) - self.B3) * (50000 >> self.BMP183_CMD['OVERSAMPLE_3'])
-                p = numpy.uint32((self.B7 * 2) / self.B4)
+                self.B4 = ctypes.c_uint32(self.AC4 * (X3 + 32768) / 2 ** 15).value
+                self.B7 = (ctypes.c_uint32(self.UP).value - self.B3) * (50000 >> self.BMP183_CMD['OVERSAMPLE_3'])
+                p = ctypes.c_uint32((self.B7 * 2) / self.B4).value
                 X1 = (p / 2 ** 8) * (p / 2 ** 8)
                 X1 = int(X1 * 3038) / 2 ** 16
                 X2 = int(-7357 * p) / 2 ** 16

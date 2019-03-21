@@ -3,7 +3,6 @@ celery
 flake8
 ipdb
 ipython
-numpy
 pymavlink
 redis
 RPi.GPIO
