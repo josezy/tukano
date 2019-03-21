@@ -4,6 +4,7 @@ from settings import LED_PINS
 
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 for _, led_pin in LED_PINS.items():
     GPIO.setup(led_pin, GPIO.OUT)
 
