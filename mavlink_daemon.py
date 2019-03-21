@@ -9,7 +9,7 @@ import json
 import redis
 
 from src import settings
-from src.leds import info, led_off
+from src.leds import error, info, success, led_off
 
 from pymavlink import mavutil
 
@@ -21,8 +21,10 @@ while True:
         print("Vehicle connected at {}".format(
             settings.MAVLINK_VEHICLE_ADDRESS
         ))
+        success()
         break
     except Exception as e:
+        error()
         time.sleep(3)
 
 ground_link = mavutil.mavlink_connection(
@@ -48,6 +50,8 @@ tukano_link.logfile_raw = vehicle_link
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 
 last_t = time.time()
+
+led_off()
 
 while True:
 
