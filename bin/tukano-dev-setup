@@ -74,6 +74,11 @@ info "[5/5] Setting up supervisor configuration..."
 success "   √   Linked supervisor conf file"
 
 
+info "[5/5] Generating MAVLink custom dialect..."
+    source venv/bin/activate
+    mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    deactivate
+success "   √   Dialect generated"
 
 success " ✅ Done."
     echo "       - Commands can be run using 'tukano' command:"

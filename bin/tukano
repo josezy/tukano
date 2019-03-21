@@ -28,8 +28,11 @@ function stop {
     info " > Daemons and services stopped"
 }
 
-function links {
-    ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+function setup {
+    sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+    source venv/bin/activate
+    mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    deactivate
 }
 
 $FUNCTION $ARG1 $ARG2 $ARG3 $ARG4
