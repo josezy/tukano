@@ -37,7 +37,7 @@ MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
 #### External hardware pins
 ################################################################################
 
-# ⚠️⚠️⚠️ BE SURE TO NEVER REPEAT PINS⚠️⚠️⚠️
+# !!!!!! BE SURE TO NEVER REPEAT PINS!!!!!!
 
 # RGB Led for status indication
 LED_PINS = {
