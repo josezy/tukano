@@ -26,7 +26,7 @@ echo "       Installing from $REPO_DIR..."
 info "[1/4] Installing system packages..."
     apt update
     apt install -y python2.7 python-pip python2.7-dev python-dev \
-                   virtualenv redis-server git supervisor
+                   virtualenv redis-server supervisor
 
     systemctl stop redis-server
     systemctl disable redis-server
