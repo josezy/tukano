@@ -35,4 +35,8 @@ function setup {
     deactivate
 }
 
+function sitl {
+    dronekit-sitl copter --home=6.149014,-75.393962,0,180
+}
+
 $FUNCTION $ARG1 $ARG2 $ARG3 $ARG4
