@@ -37,7 +37,7 @@ echo "           Python, redis, supervisor and some others..."
 
 
 info "[2/4] Seting up pip + virtualenv..."
-    pip2 install -q --upgrade pip setuptools virtualenv
+    pip2 install --upgrade pip setuptools virtualenv
     [ -d venv ] || virtualenv -p "$(which python2.7)" venv
     source venv/bin/activate
 success "   √   Virtualenv is active: $(which python) ($(python --version))"
