@@ -37,7 +37,6 @@ echo "           Python, redis, supervisor and some others..."
 
 
 info "[2/4] Seting up pip + virtualenv..."
-    python2 --version | grep -q "Python 2.7" || exit 1
     pip2 install -q --upgrade pip setuptools virtualenv
     [ -d venv ] || virtualenv -p "$(which python2.7)" venv
     source venv/bin/activate
