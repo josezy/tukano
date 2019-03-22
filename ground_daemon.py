@@ -1,4 +1,5 @@
 import json
+import time
 
 from src import settings
 from src.util import append_json_file
@@ -47,3 +48,5 @@ while True:
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)
+
+    time.sleep(settings.SLEEPING_TIME)

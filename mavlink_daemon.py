@@ -88,3 +88,5 @@ while True:
                 led_off()
 
         last_t = time.time()
+
+    time.sleep(settings.SLEEPING_TIME)
