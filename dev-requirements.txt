@@ -1,4 +1,5 @@
-Adafruit-DHT
-RPi.GPIO
+flake8
+ipdb
+ipython
 
 -r base-requirements.txt

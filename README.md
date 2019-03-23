@@ -5,7 +5,7 @@ Software running on a Raspberry connected to a Pixhawk for multiple aerial purpo
 
 ### Setup
 
-To install packages and setup enviroment run (or follow by steps) the `bin/tukano-dev-setup` file
+To install packages and setup enviroment run (or follow by steps) the `bin/tukano-setup` file
 
 ---
 

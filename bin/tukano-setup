@@ -54,10 +54,20 @@ success "   √   PyPI requirements are installed: requirements.txt"
 
 
 info "[4/4] Setting up supervisor configuration..."
+    echo " > Creating symbolic links..."
     sudo rm -f /etc/supervisor/supervisord.conf
     sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
-success "   √   Linked supervisor conf file"
 
+    echo " > Creating data/logs dir..."
+    sudo mkdir "$REPO_DIR/data"
+    sudo mkdir "$REPO_DIR/data/logs"
+
+    echo " > Reloading supervisor service..."
+    sudo service supervisor reload
+    sleep 3
+    supervisorctl status
+
+success "   √   Supervisor is up a running"
 
 
 success " ✅ Done."
@@ -67,5 +77,4 @@ success " ✅ Done."
     echo "       - Data is stored in tukano/data/"
 
 
-supervisorctl status all
 exit 0
