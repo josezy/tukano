@@ -56,6 +56,8 @@ def fly_away(drone):
             if enough_altitude and enough_timespan:
                 last_sample_ts = time.time()
                 new_data = collect_data(gps_raw)
+                if settings.VERBOSE:
+                    print(new_data)
                 redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
 
         except Exception as e:
