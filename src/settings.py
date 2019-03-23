@@ -3,6 +3,7 @@ import os
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 SLEEPING_TIME = 0.000001
+VERBOSE = True
 
 ################################################################################
 #### Directory contants
