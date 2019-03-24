@@ -22,6 +22,11 @@ def load_json_file(file_path):
             json.dump({}, fp)
         return {}
 
-    with open(file_path, 'r') as fp:
-        data = json.load(fp)
+    with open(file_path, 'r+') as fp:
+        try:
+            data = json.load(fp)
+        except Exception as e:
+            fp.truncate(0)
+            json.dump({}, fp)
+            data = {}
     return data

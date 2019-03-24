@@ -30,7 +30,8 @@ print("Aircraft hearbeat received!")
 def incoming_msg(msg):
     data = json.loads(msg.text)
     append_json_file("data_collected.json", data)
-    print(data)
+    if settings.VERBOSE:
+        print(data)
 
 while True:
     m = aircraft_link.recv()
