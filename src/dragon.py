@@ -47,7 +47,10 @@ def fly_away(drone):
 
     while True:
         try:
-            gps_raw = drone.recv_match(type="GPS_RAW_INT", blocking=True)
+            gps_raw = drone.recv_match(
+                type="GLOBAL_POSITION_INT",
+                blocking=True
+            )
 
             enough_altitude = gps_raw.alt > settings.ALT_THRESHOLD
             elapsed_time = time.time() - last_sample_ts
