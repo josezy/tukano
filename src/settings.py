@@ -3,7 +3,7 @@ import os
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 SLEEPING_TIME = 0.000001
-VERBOSE = True
+VERBOSE = False
 
 ################################################################################
 #### Directory contants
@@ -16,36 +16,36 @@ DATA_DIR = "{}/data".format(BASE_DIR)
 LOGS_DIR = "{}/logs".format(BASE_DIR)
 
 ################################################################################
-#### Connection strings (only one group must be uncommented)
+#### Connection parameters
 ################################################################################
 
-## Local connections for testing
-# MAVLINK_VEHICLE_ADDRESS = "tcp:127.0.0.1:5760"
-# MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14551"
-# MAVLINK_GROUND_ADDRESS = "udp:127.0.0.1:14552"
-# MAVLINK_AIRCRAFT_ADDRESS = MAVLINK_GROUND_ADDRESS
-# MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
+## Aircraft connections
+MAVLINK_VEHICLE = {
+    'device': "tcp:localhost:5760", # SITL on local PC
+    # 'device': "tcp:192.168.1.53:5760", # SITL on remote PC
+    # 'device': "/dev/ttyAMA0", # UART on ARM architectures
+    # 'device': "/dev/ttyS0", # UART on x86 and x86_64 architectures
+    'baud': 57600,
+}
+MAVLINK_TUKANO = {
+    'device': "udp:127.0.0.1:14551",
+}
+MAVLINK_GROUND = {
+    # 'device': "/dev/ttyUSB0",
+    'device': "udp:127.0.0.1:14552",
+    'baud': 115200,
+}
 
-## Remote connections for RPi testing via LAN
-# MAVLINK_VEHICLE_ADDRESS = "tcp:192.168.1.53:5760"
-# MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14551"
-# MAVLINK_GROUND_ADDRESS = "tcp:192.168.1.53:5765"
-# MAVLINK_AIRCRAFT_ADDRESS = "/dev/ttyUSB0"
-# MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
+## Ground connections
+MAVLINK_AIRCRAFT = {
+    # 'device': "/dev/ttyUSB0",
+    'device': "udp:127.0.0.1:14552",
+    'baud': 115200,
+}
+MAVLINK_GCS = {
+    'device': "udp:127.0.0.1:14550",
+}
 
-## Remote connections for RPi testing via XBee
-MAVLINK_VEHICLE_ADDRESS = "tcp:192.168.1.53:5760"
-MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14551"
-MAVLINK_GROUND_ADDRESS = "/dev/ttyUSB0"
-MAVLINK_AIRCRAFT_ADDRESS = "/dev/ttyUSB0"
-MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
-
-## Real connections PixHawk <-> RPi <-> XBee (verify)
-# MAVLINK_VEHICLE_ADDRESS = "/dev/ttyUSB0"
-# MAVLINK_TUKANO_ADDRESS = "udp:127.0.0.1:14551"
-# MAVLINK_GROUND_ADDRESS = "/dev/ttyAMA0"
-# MAVLINK_AIRCRAFT_ADDRESS = "/dev/ttyUSB0"
-# MAVLINK_GCS_ADDRESS = "udp:127.0.0.1:14550"
 
 ################################################################################
 #### External hardware pins

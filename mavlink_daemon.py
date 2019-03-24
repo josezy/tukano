@@ -15,11 +15,9 @@ from pymavlink import mavutil
 
 while True:
     try:
-        vehicle_link = mavutil.mavlink_connection(
-            settings.MAVLINK_VEHICLE_ADDRESS
-        )
+        vehicle_link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
         print("Vehicle connected at {}".format(
-            settings.MAVLINK_VEHICLE_ADDRESS
+            settings.MAVLINK_VEHICLE['device']
         ))
         success()
         break
@@ -28,16 +26,16 @@ while True:
         time.sleep(3)
 
 ground_link = mavutil.mavlink_connection(
-    settings.MAVLINK_GROUND_ADDRESS,
     input=False,
+    **settings.MAVLINK_GROUND
 )
-print("Ground at {}".format(settings.MAVLINK_GROUND_ADDRESS))
+print("Ground at {}".format(settings.MAVLINK_GROUND['device']))
 
 tukano_link = mavutil.mavlink_connection(
-    settings.MAVLINK_TUKANO_ADDRESS,
     input=False,
+    **settings.MAVLINK_TUKANO
 )
-print("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO_ADDRESS))
+print("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO['device']))
 
 print("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()

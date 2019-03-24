@@ -8,20 +8,15 @@ from pymavlink import mavutil
 
 while True:
     try:
-        aircraft_link = mavutil.mavlink_connection(
-            settings.MAVLINK_AIRCRAFT_ADDRESS
-        )
-        print("Aircraft connected at {}".format(settings.MAVLINK_AIRCRAFT_ADDRESS))
+        aircraft_link = mavutil.mavlink_connection(**settings.MAVLINK_AIRCRAFT)
+        print("Aircraft at {}".format(settings.MAVLINK_AIRCRAFT['device']))
         break
     except Exception as e:
         print(e)
         print("Retrying MAVLink aircraft connection...")
 
-gcs_link = mavutil.mavlink_connection(
-    settings.MAVLINK_GCS_ADDRESS,
-    input=False,
-)
-print("GCS stablished at {}".format(settings.MAVLINK_GCS_ADDRESS))
+gcs_link = mavutil.mavlink_connection(input=False, **settings.MAVLINK_GCS)
+print("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
 
 aircraft_link.wait_heartbeat()
 print("Aircraft hearbeat received!")

@@ -16,13 +16,11 @@ def wakeup():
     Wake up and connect to mavlink
     """
     print("Yawning...")
-    print(settings.MAVLINK_TUKANO_ADDRESS)
+    print(settings.MAVLINK_TUKANO['device'])
 
     while True:
         try:
-            dragone = mavutil.mavlink_connection(
-                settings.MAVLINK_TUKANO_ADDRESS
-            )
+            dragone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
             break
         except Exception as e:
             print(e)
