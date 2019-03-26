@@ -1,6 +1,8 @@
 import json
 import time
 
+from datetime import datetime
+
 from src import settings
 from src.util import append_json_file
 
@@ -22,9 +24,11 @@ aircraft_link.wait_heartbeat()
 print("Aircraft hearbeat received!")
 
 
+session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
+
 def incoming_msg(msg):
     data = json.loads(msg.text)
-    append_json_file("data_collected.json", data)
+    append_json_file("{}.json".format(session_name), data)
     if settings.VERBOSE:
         print(data)
 
