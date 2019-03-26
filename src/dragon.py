@@ -45,18 +45,18 @@ def fly_away(drone):
 
     while True:
         try:
-            gps_raw = drone.recv_match(
+            position = drone.recv_match(
                 type="GLOBAL_POSITION_INT",
                 blocking=True
             )
 
-            enough_altitude = gps_raw.alt > settings.ALT_THRESHOLD
+            enough_altitude = position.alt > settings.ALT_THRESHOLD
             elapsed_time = time.time() - last_sample_ts
             enough_timespan = elapsed_time > settings.DATA_COLLECT_TIMESPAN
 
             if enough_altitude and enough_timespan:
                 last_sample_ts = time.time()
-                new_data = collect_data(gps_raw)
+                new_data = collect_data(position)
                 if settings.VERBOSE:
                     print(new_data)
                 redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
