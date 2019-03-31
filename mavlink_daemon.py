@@ -74,7 +74,7 @@ while True:
             if not sample:
                 break
 
-            data.append(sample)
+            data.append(json.loads(sample))
             samples += 1
 
         if data:
