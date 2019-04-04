@@ -1,12 +1,11 @@
 import json
 import time
+import settings
 
 from datetime import datetime
-
-from src import settings
-from src.util import append_json_file
-
 from pymavlink import mavutil
+
+from util.util import append_json_file
 
 while True:
     try:

@@ -1,6 +1,8 @@
+import sys
 import time
 import Adafruit_DHT
 
+sys.path.append("..")
 import settings
 
 def am2302_measure():

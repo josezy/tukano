@@ -7,11 +7,11 @@
 import time
 import json
 import redis
-
-from src import settings
-from src.leds import error, info, success, led_off
+import settings
 
 from pymavlink import mavutil
+
+from util.leds import error, info, success, led_off
 
 while True:
     try:

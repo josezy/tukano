@@ -7,7 +7,7 @@ from datetime import datetime
 from pymavlink import mavutil
 
 from tasks import collect_data
-from leds import error
+from util.leds import error
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 
@@ -65,3 +65,11 @@ def fly_away(drone):
             # TODO: log errors
             error()
             print(e)
+
+
+if __name__ == "__main__":
+    try:
+        dragone = wakeup()
+        fly_away(dragone)
+    except:
+        raise

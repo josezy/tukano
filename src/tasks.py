@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sensor_tasks import am2302_measure
+from sensors.sensor_tasks import am2302_measure
 
 def collect_data(position):
 
