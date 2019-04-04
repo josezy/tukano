@@ -69,9 +69,12 @@ info "[4/4] Setting up supervisor configuration..."
 
 success "   √   Supervisor is up a running"
 
-info "Setting up supervisor configuration..."
+if [[ $PATH == *"/opt/tukano/bin"* ]]; then
+    echo " > 'tukano' command is in \$PATH"
+else
     echo " > Adding 'tukano' to PATH..."
     echo "PATH=/opt/tukano/bin:\$PATH" >> ~/.bashrc
+fi
 
 success " ✅ Done."
     echo "       - Commands can be run using 'tukano' command:"
