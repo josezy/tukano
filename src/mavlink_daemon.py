@@ -45,7 +45,11 @@ vehicle_link.logfile_raw = ground_link
 ground_link.logfile_raw = vehicle_link
 tukano_link.logfile_raw = vehicle_link
 
-redis_queue = redis.Redis(**settings.REDIS_CONF)
+try:
+    redis_queue = redis.Redis(**settings.REDIS_CONF)
+except Exception as e:
+    error()
+    raise e
 
 last_t = time.time()
 
