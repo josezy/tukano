@@ -22,8 +22,8 @@ def am2302_measure():
     return data
 
 def take_pic():
-    cam = PiCamera()
-    cam.rotation = 180
-
     pic_name = time.strftime("%Y%m%d_%H%M%S")
-    cam.capture("{}/{}.jpg".format(settings.PICS_DIR, pic_name))
+
+    with PiCamera() as cam:
+        cam.rotation = 180
+        cam.capture("{}/{}.jpg".format(settings.PICS_DIR, pic_name))
