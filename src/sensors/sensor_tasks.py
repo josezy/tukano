@@ -2,6 +2,8 @@ import sys
 import time
 import Adafruit_DHT
 
+from picamera import PiCamera
+
 sys.path.append("..")
 import settings
 
@@ -19,3 +21,9 @@ def am2302_measure():
     }
     return data
 
+def take_pic():
+    cam = PiCamera()
+    cam.rotation = 180
+
+    pic_name = time.strftime("%Y%m%d_%H%M%S")
+    cam.capture("{}/{}.jpg".format(settings.PICS_DIR, pic_name))
