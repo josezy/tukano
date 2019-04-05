@@ -1,4 +1,3 @@
-celery
 pymavlink
 pyserial
 redis
