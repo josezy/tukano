@@ -23,7 +23,8 @@ def am2302_measure():
 
 def take_pic():
     pic_name = time.strftime("%Y%m%d_%H%M%S")
+    pic_path = "{}/{}.jpg".format(settings.PICS_DIR, pic_name)
 
     with PiCamera() as cam:
         cam.rotation = 180
-        cam.capture("{}/{}.jpg".format(settings.PICS_DIR, pic_name))
+        cam.capture(pic_path)
