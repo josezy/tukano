@@ -57,6 +57,7 @@ info "--> Setting up supervisor configuration..."
     sudo mkdir "$REPO_DIR/data"
     sudo mkdir "$REPO_DIR/data/logs"
     sudo mkdir "$REPO_DIR/data/pics"
+    sudo mkdir "$REPO_DIR/data/faces"
 
 
 info "--> Setting up supervisor configuration..."
