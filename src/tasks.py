@@ -38,21 +38,6 @@ def collect_data(position):
 
 
 
-
-
-def take_pic():
-    from picamera import PiCamera
-
-    pic_name = "{}.jpg".format(time.strftime("%Y%m%d_%H%M%S"))
-    pic_path = "{}/{}".format(settings.PICS_DIR, pic_name)
-
-    with PiCamera() as cam:
-        cam.rotation = 180
-        cam.capture(pic_path)
-
-    return pic_path
-
-
 def extract_faces(pic_path):
     import os
     import face_recognition
@@ -80,6 +65,9 @@ class camera(object):
 
     cam = None
 
+    _pic_dir = settings.PICS_DIR
+    _vid_dir = settings.VIDEOS_DIR
+
     def __init__(self):
         from picamera import PiCamera
         self.cam = PiCamera()
@@ -89,10 +77,26 @@ class camera(object):
         self.cam.close()
         self.cam = None
 
-    def start_recording(self, output_name):
-        output_path = "{}/{}".format(settings.VIDEOS_DIR, output_name)
-        self.cam.start_recording(output_path)
+    def _ts_name(self):
+        return time.strftime("%Y%m%d_%H%M%S")
+
+    def take_pic(self, filename=None):
+        pic_path = "{}/{}.jpg".format(
+            self._pic_dir,
+            filename or self._ts_name()
+        )
+        self.cam.capture(pic_path, use_video_port=True)
+
+        return pic_path.split('/')[-1]
+
+    def start_recording(self, filename=None):
+        self.vid_path = "{}/{}.h264".format(
+            self._vid_dir,
+            filename or self._ts_name()
+        )
+        self.cam.start_recording(self.vid_path)
         
     def stop_recording(self):
         self.cam.stop_recording()
+        return self.vid_path.split('/')[-1]
 
