@@ -75,24 +75,24 @@ def extract_faces(pic_path):
         pil_image.save(face_path)
 
 
-class cam(object):
+class camera(object):
     """PiCamera class abstraction with custom methods"""
 
-    from picamera import PiCamera
-    camera = None
+    cam = None
 
     def __init__(self):
         print("init...")
-        camera = PiCamera()
+        from picamera import PiCamera
+        cam = PiCamera()
 
     def __del__(self):
         print("del...")
-        del camera
+        del cam
 
     def start_recording(self, output_name):
         output_path = "{}/{}".format(settings.VIDEOS_DIR, output_name)
-        camera.start_recording(output_path)
+        cam.start_recording(output_path)
         
     def stop_recording(self):
-        camera.stop_recording()
+        cam.stop_recording()
 
