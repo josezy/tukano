@@ -81,14 +81,13 @@ class camera(object):
     cam = None
 
     def __init__(self):
-        print("init...")
         from picamera import PiCamera
         self.cam = PiCamera()
         self.cam.rotation = 180
 
     def __del__(self):
-        print("del...")
-        del self.cam
+        self.cam.close()
+        self.cam = None
 
     def start_recording(self, output_name):
         output_path = "{}/{}".format(settings.VIDEOS_DIR, output_name)
