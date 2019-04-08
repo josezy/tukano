@@ -14,6 +14,7 @@ BASE_DIR = os.path.dirname(SRC_DIR)
 
 DATA_DIR = "{}/data".format(BASE_DIR)
 PICS_DIR = "{}/pics".format(DATA_DIR)
+FACES_DIR = "{}/faces".format(DATA_DIR)
 VIDEOS_DIR = "{}/videos".format(DATA_DIR)
 
 ################################################################################

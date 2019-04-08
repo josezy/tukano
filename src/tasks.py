@@ -38,6 +38,26 @@ def collect_data(position):
 
 
 
+def extract_faces(pic_path):
+    import os
+    import face_recognition
+    from PIL import Image
+
+    image = face_recognition.load_image_file(pic_path)
+    face_locations = face_recognition.face_locations(image)
+    index = 0
+
+    for face_location in face_locations:
+        top, right, bottom, left = face_location
+        face_image = image[top:bottom, left:right]
+        pil_image = Image.fromarray(face_image)
+
+        face_path = "{}/face_{}.jpg".format(settings.FACES_DIR, index)
+        while os.path.isfile(face_path):
+            index += 1
+            face_path = "{}/face_{}.jpg".format(settings.FACES_DIR, index)
+
+        pil_image.save(face_path)
 
 
 class camera(object):
