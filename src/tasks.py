@@ -84,6 +84,7 @@ class camera(object):
         print("init...")
         from picamera import PiCamera
         self.cam = PiCamera()
+        self.cam.rotation = 180
 
     def __del__(self):
         print("del...")
