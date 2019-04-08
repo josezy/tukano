@@ -83,16 +83,16 @@ class camera(object):
     def __init__(self):
         print("init...")
         from picamera import PiCamera
-        cam = PiCamera()
+        self.cam = PiCamera()
 
     def __del__(self):
         print("del...")
-        del cam
+        del self.cam
 
     def start_recording(self, output_name):
         output_path = "{}/{}".format(settings.VIDEOS_DIR, output_name)
-        cam.start_recording(output_path)
+        self.cam.start_recording(output_path)
         
     def stop_recording(self):
-        cam.stop_recording()
+        self.cam.stop_recording()
 
