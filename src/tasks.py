@@ -67,13 +67,13 @@ class camera(object):
 
     def _gps_exif(self, lat, lon, alt):
         lat_d, lat_m, lat_s = self._decdeg_to_dms(abs(lat))
-        fractional_lat_str = "{:.0f}/1,{:.0f}/1,{}/100".format(
+        fractional_lat_str = "{:.0f}/1,{:.0f}/1,{:.0f}/100".format(
             lat_d, lat_m, lat_s * 100
         )
         lat_ref = 'N' if lat > 0 else 'S'
 
         lon_d, lon_m, lon_s = self._decdeg_to_dms(abs(lon))
-        fractional_lon_str = "{:.0f}/1,{:.0f}/1,{}/100".format(
+        fractional_lon_str = "{:.0f}/1,{:.0f}/1,{:.0f}/100".format(
             lon_d, lon_m, lon_s * 100
         )
         lon_ref = 'E' if lon > 0 else 'W'
