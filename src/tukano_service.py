@@ -1,6 +1,4 @@
 import time
-import json
-import redis
 import settings
 
 from datetime import datetime
@@ -9,7 +7,6 @@ from pymavlink import mavutil
 from tasks import collect_data, camera
 from util.leds import error
 
-redis_queue = redis.Redis(**settings.REDIS_CONF)
 
 print("Initialising...")
 print(settings.MAVLINK_TUKANO['device'])
