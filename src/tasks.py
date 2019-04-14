@@ -19,7 +19,13 @@ def am2302_measure():
 
 
 def collect_data(position):
+    if position.alt < settings.ALT_THRESHOLD:
+        return
+
+    import redis, json
     from datetime import datetime
+
+    redis_queue = redis.Redis(**settings.REDIS_CONF)
 
     # this is a syncronous job that blocks normal flow
     # TODO: run sensor mesasures async, then get the last sensed value here
@@ -34,7 +40,10 @@ def collect_data(position):
         },
         'am2302': am2302_data,
     }
-    return new_data
+
+    if settings.VERBOSE:
+        print(new_data)
+    redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
 
 
 
