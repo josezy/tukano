@@ -11,6 +11,7 @@ from util.leds import error
 print("Initialising...")
 print(settings.MAVLINK_TUKANO['device'])
 
+
 while True:
     try:
         drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
@@ -18,6 +19,7 @@ while True:
     except Exception as e:
         print(e)
         print("Retrying MAVLink vehicle connection...")
+
 
 drone.wait_heartbeat()
 print("Hearbeat received!")
