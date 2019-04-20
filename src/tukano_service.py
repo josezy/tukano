@@ -1,10 +1,10 @@
 import time
 import settings
 
-from datetime import datetime
 from pymavlink import mavutil
 
-from tasks import collect_data, camera
+from tasks import collect_data
+from camera import Camera
 from util.leds import error
 
 
@@ -22,16 +22,12 @@ while True:
 drone.wait_heartbeat()
 print("Hearbeat received!")
 
-# Clean redis queue
-redis_queue.flushdb()
 
-flight_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
-print("Running flight {}".format(flight_name))
-
-cam = camera()
+cam = Camera()
 cam.take_pic()
 
 last_sample_ts = time.time()
+
 
 while True:
     try:
@@ -39,13 +35,12 @@ while True:
             type="GLOBAL_POSITION_INT",
             blocking=True
         )
-        
+
         elapsed_time = time.time() - last_sample_ts
 
         if elapsed_time > settings.DATA_COLLECT_TIMESPAN:
             collect_data(position)
             last_sample_ts = time.time()
-
 
     except Exception as e:
         # TODO: log errors
