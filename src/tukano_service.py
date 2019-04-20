@@ -11,6 +11,7 @@ from util.leds import error
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 
+
 def wakeup():
     """
     Wake up and connect to mavlink
@@ -30,6 +31,7 @@ def wakeup():
     print("Hearbeat received!")
 
     return dragone
+
 
 def fly_away(drone):
     """
