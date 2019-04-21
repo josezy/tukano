@@ -5,9 +5,9 @@ os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 SLEEPING_TIME = 0.000001
 VERBOSE = False
 
-################################################################################
-#### Directory contants
-################################################################################
+###############################################################################
+# Directory contants
+###############################################################################
 
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(SRC_DIR)
@@ -16,16 +16,16 @@ DATA_DIR = "{}/data".format(BASE_DIR)
 PICS_DIR = "{}/pics".format(DATA_DIR)
 VIDEOS_DIR = "{}/videos".format(DATA_DIR)
 
-################################################################################
-#### Connection parameters
-################################################################################
+###############################################################################
+# Connection parameters
+###############################################################################
 
-## Aircraft connections
+# Aircraft connections
 MAVLINK_VEHICLE = {
-    # 'device': "tcp:localhost:5760", # SITL on local PC
-    # 'device': "tcp:192.168.1.53:5760", # SITL on remote PC
-    # 'device': "/dev/ttyAMA0", # UART on ARM architectures
-    'device': "/dev/ttyS0", # UART on x86 and x86_64 architectures
+    # 'device': "tcp:localhost:5760",  # SITL on local PC
+    # 'device': "tcp:192.168.1.53:5760",  # SITL on remote PC
+    # 'device': "/dev/ttyAMA0",  # UART on ARM architectures
+    'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures
     'baud': 57600,
 }
 MAVLINK_TUKANO = {
@@ -37,7 +37,7 @@ MAVLINK_GROUND = {
     'baud': 115200,
 }
 
-## Ground connections
+# Ground connections
 MAVLINK_AIRCRAFT = {
     'device': "/dev/ttyUSB0",
     # 'device': "udp:127.0.0.1:14552",
@@ -48,9 +48,9 @@ MAVLINK_GCS = {
 }
 
 
-################################################################################
-#### External hardware pins
-################################################################################
+###############################################################################
+# External hardware pins
+###############################################################################
 
 # !!!!!! BE SURE TO NEVER REPEAT PINS!!!!!!
 
@@ -74,22 +74,25 @@ BMP183_PINS = {
     'cs': 26,
 }
 
-################################################################################
-#### Flight tasks parameters
-################################################################################
+###############################################################################
+# Flight tasks parameters
+###############################################################################
 
-ALT_THRESHOLD = 10000                   # Collect data above N milimeters
+DATA_COLLECT_MIN_ALT = 10000            # Collect data above N milimeters
 DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
-MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Amount of samples to send over 1 mav msg
+
+TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
+
+MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
-################################################################################
-#### Redis config
-################################################################################
+###############################################################################
+# Redis config
+###############################################################################
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB = 2
 
 REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
 
-CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+# CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)

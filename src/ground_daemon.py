@@ -25,11 +25,13 @@ print("Aircraft hearbeat received!")
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
+
 def incoming_msg(msg):
     data = json.loads(msg.text)
     append_json_file("{}.json".format(session_name), data)
     if settings.VERBOSE:
         print(data)
+
 
 while True:
     m = aircraft_link.recv()
@@ -43,7 +45,6 @@ while True:
                     incoming_msg(msg)
             except Exception as e:
                 print(e)
-
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)

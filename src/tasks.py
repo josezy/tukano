@@ -27,7 +27,7 @@ def am2302_measure():
 
 
 def collect_data(position):
-    if position.alt < settings.ALT_THRESHOLD:
+    if position.alt < settings.DATA_COLLECT_MIN_ALT:
         return
 
     # this is a syncronous job that blocks normal flow
