@@ -28,7 +28,9 @@ print("Hearbeat received!")
 cam = Camera()
 cam.take_pic()
 
-last_sample_ts = time.time()
+now = time.time()
+timer_names = ['data_collect', 'take_pic']
+last_tss = {tn: now for tn in timer_names}
 
 
 while True:
@@ -38,11 +40,20 @@ while True:
             blocking=True
         )
 
-        elapsed_time = time.time() - last_sample_ts
+        now = time.time()
+        elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
 
-        if elapsed_time > settings.DATA_COLLECT_TIMESPAN:
+        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
             collect_data(position)
-            last_sample_ts = time.time()
+            last_tss['data_collect'] = now
+
+        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
+            cam.take_pic(gps_data={
+                'lat': position.lat,
+                'lon': position.lon,
+                'alt': position.alt
+            })
+            last_tss['take_pic'] = now
 
     except Exception as e:
         # TODO: log errors
