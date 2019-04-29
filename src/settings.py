@@ -86,6 +86,9 @@ TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
+RECORD_START_ALT = 12000                # Start recording video above N mm
+RECORD_STOP_ALT = 8000                  # Spot recording video below N mm
+
 ###############################################################################
 # Redis config
 ###############################################################################

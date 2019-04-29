@@ -26,7 +26,6 @@ print("Hearbeat received!")
 
 
 cam = Camera()
-cam.take_pic()
 
 now = time.time()
 timer_names = ['data_collect', 'take_pic']
@@ -54,6 +53,12 @@ while True:
                 'alt': position.alt
             })
             last_tss['take_pic'] = now
+
+        if position.alt > settings.RECORD_START_ALT and not cam.is_recording:
+            cam.start_recording()
+
+        if position.alt < settings.RECORD_STOP_ALT and cam.is_recording:
+            cam.stop_recording()
 
     except Exception as e:
         # TODO: log errors

@@ -12,6 +12,8 @@ class Camera(object):
     _pic_dir = settings.PICS_DIR
     _vid_dir = settings.VIDEOS_DIR
 
+    _state = None
+
     def __init__(self, rotation=0):
         self.cam = PiCamera()
         self.cam.rotation = rotation
@@ -72,7 +74,13 @@ class Camera(object):
             filename or self._ts_name()
         )
         self.cam.start_recording(self.vid_path)
+        self._state = 'RECORDING'
 
     def stop_recording(self):
         self.cam.stop_recording()
+        self._state = None
         return self.vid_path.split('/')[-1]
+
+    @property
+    def is_recording(self):
+        return self._state == 'RECORDING'
