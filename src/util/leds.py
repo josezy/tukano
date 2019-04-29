@@ -17,6 +17,7 @@ def led_on(color):
         GPIO.output(led_pin, state)
         # print("{} led ON".format(color))
 
+
 def led_off():
     for _, led_pin in LED_PINS.items():
         GPIO.output(led_pin, GPIO.LOW)
@@ -26,8 +27,10 @@ def led_off():
 def error():
     led_on('red')
 
+
 def info():
     led_on('blue')
+
 
 def success():
     led_on('green')
