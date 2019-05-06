@@ -46,7 +46,8 @@ while True:
             collect_data(position)
             last_tss['data_collect'] = now
 
-        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
+        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN and \
+                position.alt > settings.DATA_COLLECT_MIN_ALT:
             cam.take_pic(gps_data={
                 'lat': position.lat,
                 'lon': position.lon,
