@@ -32,7 +32,7 @@ def collect_data(position):
 
     # this is a syncronous job that blocks normal flow
     # TODO: run sensor mesasures async, then get the last sensed value here
-    am2302_data = am2302_measure()
+    # am2302_data = am2302_measure()
 
     new_data = {
         'dt': str(datetime.now()),
@@ -41,7 +41,8 @@ def collect_data(position):
             'lon': float(position.lon) / 10**7,
             'alt': float(position.alt) / 10**3,
         },
-        'am2302': am2302_data,
+        'am2302': "am2302_data",
+        'bmp183': "bmp183_data"
     }
 
     if settings.VERBOSE_LEVEL <= 1:
