@@ -29,7 +29,7 @@ session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 def incoming_msg(msg):
     data = json.loads(msg.text)
     append_json_file("{}.json".format(session_name), data)
-    if settings.VERBOSE:
+    if settings.VERBOSE_LEVEL <= 1:
         print(data)
 
 

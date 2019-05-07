@@ -44,6 +44,6 @@ def collect_data(position):
         'am2302': am2302_data,
     }
 
-    if settings.VERBOSE:
+    if settings.VERBOSE_LEVEL <= 1:
         print(new_data)
     redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))

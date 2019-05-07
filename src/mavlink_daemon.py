@@ -61,13 +61,13 @@ while True:
     if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
         ground_link.mav.send(vehicle_msg)
         tukano_link.mav.send(vehicle_msg)
-        if settings.VERBOSE:
+        if settings.VERBOSE_LEVEL <= 0:
             print(vehicle_msg)
 
     ground_msg = ground_link.recv_msg()
     if ground_msg and ground_msg.get_type() != 'BAD_DATA':
         vehicle_link.mav.send(ground_msg)
-        if settings.VERBOSE:
+        if settings.VERBOSE_LEVEL <= 0:
             print(ground_msg)
 
     if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:
@@ -85,7 +85,7 @@ while True:
             info()
             data_text = json.dumps(data)
             data_len = len(data_text)
-            if settings.VERBOSE:
+            if settings.VERBOSE_LEVEL <= 1:
                 print("Sending data ({}): {}".format(data_len, data_text))
             if data_len > 254:
                 print("MESSAGE TOO LONG TO SEND")
