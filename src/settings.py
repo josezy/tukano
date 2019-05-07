@@ -23,10 +23,10 @@ VIDEOS_DIR = "{}/videos".format(DATA_DIR)
 # Aircraft connections
 MAVLINK_VEHICLE = {
     # 'device': "tcp:localhost:5760",  # SITL on local PC
-    # 'device': "tcp:192.168.1.53:5760",  # SITL on remote PC
+    'device': "tcp:192.168.1.79:5760",  # SITL on remote PC
     # 'device': "/dev/ttyAMA0",  # UART on ARM architectures
-    'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures
-    'baud': 57600,
+    # 'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures
+    # 'baud': 57600,
 }
 MAVLINK_TUKANO = {
     'device': "udp:127.0.0.1:14551",
