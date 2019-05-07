@@ -1,77 +1,67 @@
 import time
-import json
-import redis
 import settings
 
-from datetime import datetime
 from pymavlink import mavutil
 
 from tasks import collect_data
+from camera import Camera
 from util.leds import error
 
-redis_queue = redis.Redis(**settings.REDIS_CONF)
+
+print("Initialising...")
+print(settings.MAVLINK_TUKANO['device'])
 
 
-def wakeup():
-    """
-    Wake up and connect to mavlink
-    """
-    print("Yawning...")
-    print(settings.MAVLINK_TUKANO['device'])
-
-    while True:
-        try:
-            dragone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
-            break
-        except Exception as e:
-            print(e)
-            print("Retrying MAVLink vehicle connection...")
-
-    dragone.wait_heartbeat()
-    print("Hearbeat received!")
-
-    return dragone
-
-
-def fly_away(drone):
-    """
-    Call and perform neccesary tasks here
-    """
-    flight_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    print("Running flight {}".format(flight_name))
-
-    # Clean redis queue
-    redis_queue.flushdb()
-
-    last_sample_ts = time.time()
-
-    while True:
-        try:
-            position = drone.recv_match(
-                type="GLOBAL_POSITION_INT",
-                blocking=True
-            )
-
-            enough_altitude = position.alt > settings.ALT_THRESHOLD
-            elapsed_time = time.time() - last_sample_ts
-            enough_timespan = elapsed_time > settings.DATA_COLLECT_TIMESPAN
-
-            if enough_altitude and enough_timespan:
-                last_sample_ts = time.time()
-                new_data = collect_data(position)
-                if settings.VERBOSE:
-                    print(new_data)
-                redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
-
-        except Exception as e:
-            # TODO: log errors
-            error()
-            print(e)
-
-
-if __name__ == "__main__":
+while True:
     try:
-        dragone = wakeup()
-        fly_away(dragone)
-    except:
-        raise
+        drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
+        break
+    except Exception as e:
+        print(e)
+        print("Retrying MAVLink vehicle connection...")
+
+
+drone.wait_heartbeat()
+print("Hearbeat received!")
+
+
+cam = Camera()
+
+now = time.time()
+timer_names = ['data_collect', 'take_pic']
+last_tss = {tn: now for tn in timer_names}
+
+
+while True:
+    try:
+        position = drone.recv_match(
+            type="GLOBAL_POSITION_INT",
+            blocking=True
+        )
+
+        now = time.time()
+        elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
+
+        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
+            collect_data(position)
+            last_tss['data_collect'] = now
+
+        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN and \
+                position.alt > settings.DATA_COLLECT_MIN_ALT:
+            cam.take_pic(gps_data={
+                'lat': float(position.lat) / 10**7,
+                'lon': float(position.lon) / 10**7,
+                'alt': float(position.alt) / 10**3
+            })
+            last_tss['take_pic'] = now
+
+        if position.alt > settings.RECORD_START_ALT and not cam.is_recording:
+            cam.start_recording()
+
+        if position.alt < settings.RECORD_STOP_ALT and cam.is_recording:
+            cam.stop_recording()
+
+    except Exception as e:
+        # TODO: log errors
+        error()
+        print(e)
