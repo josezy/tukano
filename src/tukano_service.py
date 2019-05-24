@@ -10,6 +10,7 @@ from util.leds import error, info, success
 
 
 info()
+logging.basicConfig(level=logging.DEBUG)
 logging.info("Initialising...")
 logging.warning("[W] Initialising...")
 logging.info(settings.MAVLINK_TUKANO['device'])
