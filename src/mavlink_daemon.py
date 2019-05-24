@@ -11,7 +11,7 @@ import settings
 
 from pymavlink import mavutil
 
-from util.leds import error, info, success, led_off
+# from util.leds import error, info, success, led_off
 
 while True:
     try:
@@ -19,10 +19,10 @@ while True:
         print("Vehicle connected at {}".format(
             settings.MAVLINK_VEHICLE['device']
         ))
-        success()
+        # success()
         break
     except Exception as e:
-        error()
+        # error()
         time.sleep(3)
 
 ground_link = mavutil.mavlink_connection(
@@ -48,12 +48,12 @@ tukano_link.logfile_raw = vehicle_link
 try:
     redis_queue = redis.Redis(**settings.REDIS_CONF)
 except Exception as e:
-    error()
+    # error()
     raise e
 
 last_t = time.time()
 
-led_off()
+# led_off()
 
 while True:
 
@@ -82,17 +82,17 @@ while True:
             samples += 1
 
         if data:
-            info()
+            # info()
             data_text = json.dumps(data)
             data_len = len(data_text)
             if settings.VERBOSE_LEVEL <= 1:
                 print("Sending data ({}): {}".format(data_len, data_text))
             if data_len > 254:
                 print("MESSAGE TOO LONG TO SEND")
-                error()
+                # error()
             else:
                 ground_link.mav.tukano_data_send(data_text)
-                led_off()
+                # led_off()
 
         last_t = time.time()
 
