@@ -1,5 +1,6 @@
 import time
 import settings
+import logging
 
 from pymavlink import mavutil
 
@@ -9,8 +10,9 @@ from util.leds import error, info, success
 
 
 info()
-print("Initialising...")
-print(settings.MAVLINK_TUKANO['device'])
+logging.info("Initialising...")
+logging.warning("[W] Initialising...")
+logging.info(settings.MAVLINK_TUKANO['device'])
 
 
 while True:
@@ -18,12 +20,12 @@ while True:
         drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
         break
     except Exception as e:
-        print(e)
-        print("Retrying MAVLink vehicle connection...")
+        logging.warning(e)
+        logging.warning("Retrying MAVLink vehicle connection...")
 
 
 drone.wait_heartbeat()
-print("Hearbeat received!")
+logging.info("Hearbeat received!")
 
 
 cam = Camera()
@@ -52,7 +54,7 @@ while True:
             collect_data(position)
             last_tss['data_collect'] = now
             if settings.VERBOSE_LEVEL <= 2:
-                print("[INFO] Data collected")
+                logging.info("Data collected")
 
         if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN and \
                 position.alt > settings.DATA_COLLECT_MIN_ALT:
@@ -63,20 +65,20 @@ while True:
             })
             last_tss['take_pic'] = now
             if settings.VERBOSE_LEVEL <= 2:
-                print("[INFO] Pic taken '{}'".format(pic_name))
+                logging.info("Pic taken '{}'".format(pic_name))
 
         if position.alt > settings.RECORD_START_ALT and not cam.is_recording:
             vid_name = cam.start_recording()
             if settings.VERBOSE_LEVEL <= 2:
-                print("[INFO] Recording video '{}'".format(vid_name))
+                logging.info("Recording video '{}'".format(vid_name))
 
         if position.alt < settings.RECORD_STOP_ALT and cam.is_recording:
             cam.stop_recording()
             if settings.VERBOSE_LEVEL <= 2:
-                print("[INFO] Video recordered at '{}'".format(vid_name))
+                logging.info("Video recordered '{}'".format(vid_name))
 
     except Exception as e:
         # TODO: log errors
         status = 'error'
         error()
-        print(e)
+        logging.warning(e)
