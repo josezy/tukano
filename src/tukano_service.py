@@ -36,7 +36,11 @@ cam = Camera()
 now = time.time()
 timer_names = ['data_collect', 'take_pic']
 last_tss = {tn: now for tn in timer_names}
-vehicle_armed = False
+
+vehicle = {
+    'armed': False,
+    'position': None
+}
 
 success()
 
@@ -46,42 +50,46 @@ while True:
         veh_msg_type = veh_msg and veh_msg.get_type()
         if veh_msg_type != 'BAD_DATA':
             if veh_msg_type == 'HEARBEAT':
-                vehicle_armed = bool(veh_msg.base_mode // 128)
+                vehicle['armed'] = bool(veh_msg.base_mode // 128)
 
-            # if veh_msg_type == 'GLOBAL_POSITION_INT':
-            #     position = veh_msg
+            if veh_msg_type == 'GLOBAL_POSITION_INT':
+                vehicle['position'] = {
+                    'lat': veh_msg.lat,
+                    'lon': veh_msg.lon,
+                    'alt': veh_msg.alt,
+                }
 
-        logging.debug("VEH_ARMED: {}".format(vehicle_armed))
-
-        position = drone.recv_match(
-            type="GLOBAL_POSITION_INT",
-            blocking=True
-        )
+        logging.debug("VEHICLE: {}".format(vehicle))
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
 
-        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN \
-                and position.alt > settings.DATA_COLLECT_MIN_ALT:
-            collect_data(position)
-            last_tss['data_collect'] = now
-            logging.info("Data collected")
+        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
+            if vehicle['armed'] and vehicle['position']:
+                if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
+                    collect_data(vehicle['position'])
+                    last_tss['data_collect'] = now
+                    logging.info("Data collected")
 
-        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN \
-                and position.alt > settings.DATA_COLLECT_MIN_ALT:
-            pic_name = cam.take_pic(gps_data={
-                'lat': float(position.lat) / 10**7,
-                'lon': float(position.lon) / 10**7,
-                'alt': float(position.alt) / 10**3
-            })
-            last_tss['take_pic'] = now
-            logging.info("Pic taken '{}'".format(pic_name))
+        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
+            if vehicle['armed']:
+                if vehicle['position']:
+                    pic_name = cam.take_pic(gps_data={
+                        'lat': float(vehicle['position']['lat']) / 10**7,
+                        'lon': float(vehicle['position']['lon']) / 10**7,
+                        'alt': float(vehicle['position']['alt']) / 10**3
+                    })
+                else:
+                    pic_name = cam.take_pic()
 
-        if position.alt > settings.RECORD_START_ALT and not cam.is_recording:
+                last_tss['take_pic'] = now
+                logging.info("Pic taken '{}'".format(pic_name))
+
+        if vehicle['armed'] and not cam.is_recording:
             vid_name = cam.start_recording()
             logging.info("Recording video '{}'".format(vid_name))
 
-        if position.alt < settings.RECORD_STOP_ALT and cam.is_recording:
+        if not vehicle['armed'] and cam.is_recording:
             cam.stop_recording()
             logging.info("Video recordered '{}'".format(vid_name))
 
