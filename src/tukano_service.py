@@ -59,7 +59,7 @@ while True:
                     'alt': veh_msg.alt,
                 }
 
-        logging.debug("VEHICLE: {}".format(vehicle))
+            logging.debug("VEHICLE: {}".format(vehicle))
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
