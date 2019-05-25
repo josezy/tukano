@@ -49,7 +49,7 @@ while True:
         veh_msg = drone.recv_msg()
         veh_msg_type = veh_msg and veh_msg.get_type()
         if veh_msg_type != 'BAD_DATA':
-            if veh_msg_type == 'HEARBEAT':
+            if veh_msg_type == 'HEARTBEAT':
                 vehicle['armed'] = bool(veh_msg.base_mode // 128)
 
             if veh_msg_type == 'GLOBAL_POSITION_INT':
