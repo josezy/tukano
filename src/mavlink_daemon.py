@@ -7,6 +7,7 @@
 import time
 import json
 import redis
+import serial
 import settings
 
 from pymavlink import mavutil
@@ -25,11 +26,16 @@ while True:
         # error()
         time.sleep(3)
 
-ground_link = mavutil.mavlink_connection(
-    input=False,
-    **settings.MAVLINK_GROUND
-)
-print("Ground at {}".format(settings.MAVLINK_GROUND['device']))
+
+try:
+    ground_link = mavutil.mavlink_connection(
+        input=False,
+        **settings.MAVLINK_GROUND
+    )
+    print("Ground at {}".format(settings.MAVLINK_GROUND['device']))
+except serial.SerialException:
+    ground_link = None
+
 
 tukano_link = mavutil.mavlink_connection(
     input=False,
@@ -41,8 +47,10 @@ print("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
 print("Vehicle hearbeat received!")
 
-vehicle_link.logfile_raw = ground_link
-ground_link.logfile_raw = vehicle_link
+if ground_link:
+    vehicle_link.logfile_raw = ground_link
+    ground_link.logfile_raw = vehicle_link
+
 tukano_link.logfile_raw = vehicle_link
 
 try:
@@ -59,12 +67,14 @@ while True:
 
     vehicle_msg = vehicle_link.recv_msg()
     if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
-        ground_link.mav.send(vehicle_msg)
+        if ground_link:
+            ground_link.mav.send(vehicle_msg)
+
         tukano_link.mav.send(vehicle_msg)
         if settings.VERBOSE_LEVEL <= 0:
             print(vehicle_msg)
 
-    ground_msg = ground_link.recv_msg()
+    ground_msg = ground_link and ground_link.recv_msg()
     if ground_msg and ground_msg.get_type() != 'BAD_DATA':
         vehicle_link.mav.send(ground_msg)
         if settings.VERBOSE_LEVEL <= 0:
