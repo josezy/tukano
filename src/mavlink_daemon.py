@@ -35,6 +35,7 @@ try:
     print("Ground at {}".format(settings.MAVLINK_GROUND['device']))
 except serial.SerialException:
     ground_link = None
+    print("NO GROUND LINK")
 
 
 tukano_link = mavutil.mavlink_connection(
