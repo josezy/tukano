@@ -36,11 +36,23 @@ cam = Camera()
 now = time.time()
 timer_names = ['data_collect', 'take_pic']
 last_tss = {tn: now for tn in timer_names}
+vehicle_armed = False
 
 success()
 
 while True:
     try:
+        veh_msg = drone.recv_msg()
+        veh_msg_type = veh_msg and veh_msg.get_type()
+        if veh_msg_type != 'BAD_DATA':
+            if veh_msg_type == 'HEARBEAT':
+                vehicle_armed = bool(veh_msg.base_mode // 128)
+
+            # if veh_msg_type == 'GLOBAL_POSITION_INT':
+            #     position = veh_msg
+
+        logging.debug("VEH_ARMED: {}".format(vehicle_armed))
+
         position = drone.recv_match(
             type="GLOBAL_POSITION_INT",
             blocking=True
