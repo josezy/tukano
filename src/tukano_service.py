@@ -30,6 +30,14 @@ while True:
 drone.wait_heartbeat()
 logging.info("Hearbeat received!")
 
+drone.mav.request_data_stream_send(
+    drone.target_system,
+    drone.target_component,
+    mavutil.mavlink.MAV_DATA_STREAM_POSITION,  # req_stream_id
+    1,  # Rate in Hertz
+    1  # Start/Stop
+)
+
 
 cam = Camera()
 
@@ -51,6 +59,7 @@ while True:
         if veh_msg_type != 'BAD_DATA':
             if veh_msg_type == 'HEARTBEAT':
                 vehicle['armed'] = bool(veh_msg.base_mode // 128)
+                logging.debug("VEHICLE: {}".format(vehicle))
 
             if veh_msg_type == 'GLOBAL_POSITION_INT':
                 vehicle['position'] = {
@@ -58,8 +67,7 @@ while True:
                     'lon': veh_msg.lon,
                     'alt': veh_msg.alt,
                 }
-
-            logging.debug("VEHICLE: {}".format(vehicle))
+                logging.debug("VEHICLE: {}".format(vehicle))
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
