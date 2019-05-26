@@ -30,14 +30,6 @@ while True:
 drone.wait_heartbeat()
 logging.info("Hearbeat received!")
 
-drone.mav.request_data_stream_send(
-    drone.target_system,
-    drone.target_component,
-    mavutil.mavlink.MAV_DATA_STREAM_POSITION,  # req_stream_id
-    1,  # Rate in Hertz
-    1  # Start/Stop
-)
-
 
 cam = Camera()
 
