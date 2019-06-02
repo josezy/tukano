@@ -52,11 +52,6 @@ logging.info("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
 logging.info("Vehicle hearbeat received!")
 
-if ground_link:
-    vehicle_link.logfile_raw = ground_link
-    ground_link.logfile_raw = vehicle_link
-
-tukano_link.logfile_raw = vehicle_link
 
 try:
     redis_queue = redis.Redis(**settings.REDIS_CONF)
@@ -68,20 +63,34 @@ last_t = time.time()
 
 while True:
 
-    vehicle_msg = vehicle_link.recv_msg()
-    if vehicle_msg and vehicle_msg.get_type() != 'BAD_DATA':
-        if ground_link:
-            ground_link.mav.send(vehicle_msg)
+    # From vehicle to ground/tukano
+    vehicle_m = vehicle_link.recv()
+    vehicle_msgs = vehicle_link.mav.parse_buffer(vehicle_m)
+    if vehicle_msgs:
+        for vehicle_msg in vehicle_msgs:
+            logging.debug("(VEHICLE_MSG) {}".format(vehicle_msg))
+            if ground_link:
+                ground_link.write(vehicle_msg.get_msgbuf())
 
-        tukano_link.mav.send(vehicle_msg)
-        if settings.VERBOSE_LEVEL <= 0:
-            print(vehicle_msg)
+            if tukano_link:
+                tukano_link.write(vehicle_msg.get_msgbuf())
 
-    ground_msg = ground_link and ground_link.recv_msg()
-    if ground_msg and ground_msg.get_type() != 'BAD_DATA':
-        vehicle_link.mav.send(ground_msg)
-        if settings.VERBOSE_LEVEL <= 0:
-            print(ground_msg)
+    # From ground to vehicle
+    if ground_link:
+        ground_m = ground_link.recv()
+        ground_msgs = ground_link.mav.parse_buffer(ground_m)
+        if ground_msgs:
+            for ground_msg in ground_msgs:
+                vehicle_link.write(ground_msg.get_msgbuf())
+                logging.debug("(GROUND_MSG) {}".format(ground_msg))
+
+    # From tukano to vehicle
+    tukano_m = tukano_link.recv()
+    tukano_msgs = tukano_link.mav.parse_buffer(tukano_m)
+    if tukano_msgs:
+        for tukano_msg in tukano_msgs:
+            vehicle_link.write(tukano_msg.get_msgbuf())
+            logging.debug("(TUKANO_MSG) {}".format(tukano_msg))
 
     if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:
         samples = 0
