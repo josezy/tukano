@@ -8,22 +8,26 @@ import time
 import json
 import redis
 import serial
+import logging
+
 import settings
 
 from pymavlink import mavutil
 
-# from util.leds import error, info, success, led_off
+
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
 
 while True:
     try:
         vehicle_link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
-        print("Vehicle connected at {}".format(
+        logging.info("Vehicle connected at {}".format(
             settings.MAVLINK_VEHICLE['device']
         ))
-        # success()
         break
     except Exception as e:
-        # error()
         time.sleep(3)
 
 
@@ -32,21 +36,21 @@ try:
         input=False,
         **settings.MAVLINK_GROUND
     )
-    print("Ground at {}".format(settings.MAVLINK_GROUND['device']))
+    logging.info("Ground at {}".format(settings.MAVLINK_GROUND['device']))
 except serial.SerialException:
     ground_link = None
-    print("NO GROUND LINK")
+    logging.warning("NO GROUND LINK at {}".format(settings.MAVLINK_GROUND))
 
 
 tukano_link = mavutil.mavlink_connection(
     input=False,
     **settings.MAVLINK_TUKANO
 )
-print("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO['device']))
+logging.info("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO['device']))
 
-print("Waiting for vehicle hearbeat")
+logging.info("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
-print("Vehicle hearbeat received!")
+logging.info("Vehicle hearbeat received!")
 
 if ground_link:
     vehicle_link.logfile_raw = ground_link
@@ -57,12 +61,10 @@ tukano_link.logfile_raw = vehicle_link
 try:
     redis_queue = redis.Redis(**settings.REDIS_CONF)
 except Exception as e:
-    # error()
     raise e
 
 last_t = time.time()
 
-# led_off()
 
 while True:
 
@@ -93,17 +95,13 @@ while True:
             samples += 1
 
         if data:
-            # info()
             data_text = json.dumps(data)
             data_len = len(data_text)
-            if settings.VERBOSE_LEVEL <= 1:
-                print("Sending data ({}): {}".format(data_len, data_text))
+            logging.info("Sending data ({}): {}".format(data_len, data_text))
             if data_len > 254:
-                print("MESSAGE TOO LONG TO SEND")
-                # error()
+                logging.warning("MESSAGE TOO LONG TO SEND")
             else:
                 ground_link.mav.tukano_data_send(data_text)
-                # led_off()
 
         last_t = time.time()
 
