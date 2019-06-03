@@ -12,10 +12,10 @@ from http import server
 PAGE="""\
 <html>
 <head>
-<title>Raspberry Pi - Surveillance Camera</title>
+<title>Tukano Stream</title>
 </head>
 <body>
-<center><h1>Raspberry Pi - Surveillance Camera</h1></center>
+<center><h1>Tukano Stream - RPi Camera</h1></center>
 <center><img src="stream.mjpg" width="640" height="480"></center>
 </body>
 </html>
@@ -92,4 +92,3 @@ with picamera.PiCamera(resolution='640x480', framerate=24) as camera:
         server.serve_forever()
     finally:
         camera.stop_recording()
-
