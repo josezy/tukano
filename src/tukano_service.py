@@ -97,7 +97,7 @@ while True:
             logging.info("Recording video '{}'".format(vid_name))
 
         if not vehicle['armed'] and cam.is_recording:
-            cam.stop_recording()
+            vid_name = cam.stop_recording()
             logging.info("Video recordered '{}'".format(vid_name))
 
     except Exception as e:
