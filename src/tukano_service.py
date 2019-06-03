@@ -62,9 +62,9 @@ while True:
 
             if veh_msg_type == 'GLOBAL_POSITION_INT':
                 vehicle['position'] = {
-                    'lat': veh_msg.lat,
-                    'lon': veh_msg.lon,
-                    'alt': veh_msg.alt,
+                    'lat': float(veh_msg.lat) / 10**7,
+                    'lon': float(veh_msg.lon) / 10**7,
+                    'alt': float(veh_msg.alt) / 10**3,
                 }
                 logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
 
@@ -82,9 +82,9 @@ while True:
             if vehicle['armed']:
                 if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={
-                        'lat': float(vehicle['position']['lat']) / 10**7,
-                        'lon': float(vehicle['position']['lon']) / 10**7,
-                        'alt': float(vehicle['position']['alt']) / 10**3
+                        'lat': vehicle['position']['lat'],
+                        'lon': vehicle['position']['lon'],
+                        'alt': vehicle['position']['alt']
                     })
                 else:
                     pic_name = cam.take_pic()

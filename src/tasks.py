@@ -35,9 +35,9 @@ def collect_data(position):
     new_data = {
         'dt': str(datetime.now()),
         'pos': {
-            'lat': float(position['lat']) / 10**7,
-            'lon': float(position['lon']) / 10**7,
-            'alt': float(position['alt']) / 10**3,
+            'lat': position['lat'],
+            'lon': position['lon'],
+            'alt': position['alt'],
         },
         'am2302': "am2302_data",
         'bmp183': "bmp183_data"

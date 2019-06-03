@@ -103,7 +103,7 @@ while True:
             data.append(json.loads(sample))
             samples += 1
 
-        if data:
+        if data and ground_link:
             data_text = json.dumps(data)
             data_len = len(data_text)
             logging.info("Sending data ({}): {}".format(data_len, data_text))
