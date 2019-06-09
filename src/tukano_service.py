@@ -4,7 +4,7 @@ import logging
 
 from pymavlink import mavutil
 
-from tasks import collect_data
+from tasks import collect_data, prepare_data
 from camera import Camera
 from util.leds import error, info, success
 
@@ -30,11 +30,18 @@ while True:
 drone.wait_heartbeat()
 logging.info("Hearbeat received!")
 
+drone.mav.request_data_stream_send(
+    drone.target_system,
+    drone.target_component,
+    mavutil.mavlink.MAV_DATA_STREAM_POSITION,  # req_stream_id
+    1,  # Rate in Hertz
+    1  # Start/Stop
+)
 
 cam = Camera()
 
 now = time.time()
-timer_names = ['data_collect', 'take_pic']
+timer_names = ['data_collect', 'data_send', 'take_pic']
 last_tss = {tn: now for tn in timer_names}
 
 vehicle = {
@@ -48,18 +55,21 @@ while True:
     try:
         veh_msg = drone.recv_msg()
         veh_msg_type = veh_msg and veh_msg.get_type()
-        if veh_msg_type != 'BAD_DATA':
-            if veh_msg_type == 'HEARTBEAT':
-                vehicle['armed'] = bool(veh_msg.base_mode // 128)
-                logging.debug("VEHICLE: {}".format(vehicle))
+        if veh_msg_type and veh_msg_type != 'BAD_DATA':
+            if veh_msg.get_srcComponent() == settings.VEHICLE_COMPONENT \
+                    and veh_msg.get_srcSystem() == settings.VEHICLE_SYSTEM:
 
-            if veh_msg_type == 'GLOBAL_POSITION_INT':
-                vehicle['position'] = {
-                    'lat': veh_msg.lat,
-                    'lon': veh_msg.lon,
-                    'alt': veh_msg.alt,
-                }
-                logging.debug("VEHICLE: {}".format(vehicle))
+                if veh_msg_type == 'HEARTBEAT':
+                    vehicle['armed'] = bool(veh_msg.base_mode // 128)
+                    logging.debug("(HEARTBEAT) {}".format(vehicle))
+
+                if veh_msg_type == 'GLOBAL_POSITION_INT':
+                    vehicle['position'] = {
+                        'lat': float(veh_msg.lat) / 10**7,
+                        'lon': float(veh_msg.lon) / 10**7,
+                        'alt': float(veh_msg.alt) / 10**3,
+                    }
+                    logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
@@ -71,13 +81,26 @@ while True:
                     last_tss['data_collect'] = now
                     logging.info("Data collected")
 
+        if elapsed_times['data_send'] > settings.MAVLINK_SAMPLES_TIMESPAN:
+            package = prepare_data()
+            if package:
+                pack_len = len(package)
+                logging.info("Sending data ({}): {}".format(pack_len, package))
+                if pack_len > 254:
+                    logging.warning("MESSAGE TOO LONG TO SEND")
+                else:
+                    drone.mav.tukano_data_send(package)
+                    logging.info("Data sent to ground")
+
+            last_tss['data_send'] = now
+
         if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
             if vehicle['armed']:
                 if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={
-                        'lat': float(vehicle['position']['lat']) / 10**7,
-                        'lon': float(vehicle['position']['lon']) / 10**7,
-                        'alt': float(vehicle['position']['alt']) / 10**3
+                        'lat': vehicle['position']['lat'],
+                        'lon': vehicle['position']['lon'],
+                        'alt': vehicle['position']['alt']
                     })
                 else:
                     pic_name = cam.take_pic()
@@ -90,7 +113,7 @@ while True:
             logging.info("Recording video '{}'".format(vid_name))
 
         if not vehicle['armed'] and cam.is_recording:
-            cam.stop_recording()
+            vid_name = cam.stop_recording()
             logging.info("Video recordered '{}'".format(vid_name))
 
     except Exception as e:
