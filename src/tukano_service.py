@@ -1,75 +1,122 @@
 import time
-import json
-import redis
 import settings
+import logging
 
-from datetime import datetime
 from pymavlink import mavutil
 
-from tasks import collect_data
-from util.leds import error
-
-redis_queue = redis.Redis(**settings.REDIS_CONF)
-
-def wakeup():
-    """
-    Wake up and connect to mavlink
-    """
-    print("Yawning...")
-    print(settings.MAVLINK_TUKANO['device'])
-
-    while True:
-        try:
-            dragone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
-            break
-        except Exception as e:
-            print(e)
-            print("Retrying MAVLink vehicle connection...")
-
-    dragone.wait_heartbeat()
-    print("Hearbeat received!")
-
-    return dragone
-
-def fly_away(drone):
-    """
-    Call and perform neccesary tasks here
-    """
-    flight_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    print("Running flight {}".format(flight_name))
-
-    # Clean redis queue
-    redis_queue.flushdb()
-
-    last_sample_ts = time.time()
-
-    while True:
-        try:
-            position = drone.recv_match(
-                type="GLOBAL_POSITION_INT",
-                blocking=True
-            )
-
-            enough_altitude = position.alt > settings.ALT_THRESHOLD
-            elapsed_time = time.time() - last_sample_ts
-            enough_timespan = elapsed_time > settings.DATA_COLLECT_TIMESPAN
-
-            if enough_altitude and enough_timespan:
-                last_sample_ts = time.time()
-                new_data = collect_data(position)
-                if settings.VERBOSE:
-                    print(new_data)
-                redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
-
-        except Exception as e:
-            # TODO: log errors
-            error()
-            print(e)
+from tasks import collect_data, prepare_data
+from camera import Camera
+from util.leds import error, info, success
 
 
-if __name__ == "__main__":
+info()
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
+logging.info("Initialising...")
+logging.info(settings.MAVLINK_TUKANO['device'])
+
+
+while True:
     try:
-        dragone = wakeup()
-        fly_away(dragone)
-    except:
-        raise
+        drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
+        break
+    except Exception as e:
+        logging.warning(e)
+        logging.warning("Retrying MAVLink vehicle connection...")
+
+
+drone.wait_heartbeat()
+logging.info("Hearbeat received!")
+
+drone.mav.request_data_stream_send(
+    drone.target_system,
+    drone.target_component,
+    mavutil.mavlink.MAV_DATA_STREAM_POSITION,  # req_stream_id
+    1,  # Rate in Hertz
+    1  # Start/Stop
+)
+
+cam = Camera()
+
+now = time.time()
+timer_names = ['data_collect', 'data_send', 'take_pic']
+last_tss = {tn: now for tn in timer_names}
+
+vehicle = {
+    'armed': False,
+    'position': None
+}
+
+success()
+
+while True:
+    try:
+        veh_msg = drone.recv_msg()
+        veh_msg_type = veh_msg and veh_msg.get_type()
+        if veh_msg_type and veh_msg_type != 'BAD_DATA':
+            if veh_msg.get_srcComponent() == settings.VEHICLE_COMPONENT \
+                    and veh_msg.get_srcSystem() == settings.VEHICLE_SYSTEM:
+
+                if veh_msg_type == 'HEARTBEAT':
+                    vehicle['armed'] = bool(veh_msg.base_mode // 128)
+                    logging.debug("(HEARTBEAT) {}".format(vehicle))
+
+                if veh_msg_type == 'GLOBAL_POSITION_INT':
+                    vehicle['position'] = {
+                        'lat': float(veh_msg.lat) / 10**7,
+                        'lon': float(veh_msg.lon) / 10**7,
+                        'alt': float(veh_msg.alt) / 10**3,
+                    }
+                    logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
+
+        now = time.time()
+        elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
+
+        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
+            if vehicle['armed'] and vehicle['position']:
+                if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
+                    collect_data(vehicle['position'])
+                    last_tss['data_collect'] = now
+                    logging.info("Data collected")
+
+        if elapsed_times['data_send'] > settings.MAVLINK_SAMPLES_TIMESPAN:
+            package = prepare_data()
+            if package:
+                pack_len = len(package)
+                logging.info("Sending data ({}): {}".format(pack_len, package))
+                if pack_len > 254:
+                    logging.warning("MESSAGE TOO LONG TO SEND")
+                else:
+                    drone.mav.tukano_data_send(package)
+                    logging.info("Data sent to ground")
+
+            last_tss['data_send'] = now
+
+        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
+            if vehicle['armed']:
+                if vehicle['position']:
+                    pic_name = cam.take_pic(gps_data={
+                        'lat': vehicle['position']['lat'],
+                        'lon': vehicle['position']['lon'],
+                        'alt': vehicle['position']['alt']
+                    })
+                else:
+                    pic_name = cam.take_pic()
+
+                last_tss['take_pic'] = now
+                logging.info("Pic taken '{}'".format(pic_name))
+
+        if vehicle['armed'] and not cam.is_recording:
+            vid_name = cam.start_recording()
+            logging.info("Recording video '{}'".format(vid_name))
+
+        if not vehicle['armed'] and cam.is_recording:
+            vid_name = cam.stop_recording()
+            logging.info("Video recordered '{}'".format(vid_name))
+
+    except Exception as e:
+        # TODO: log errors
+        error()
+        logging.error(e)

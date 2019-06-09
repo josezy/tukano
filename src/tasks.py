@@ -1,5 +1,20 @@
 import time
+import json
+import redis
+import logging
 import settings
+
+from datetime import datetime
+
+
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
+
+
+redis_queue = redis.Redis(**settings.REDIS_CONF)
+redis_queue.flushdb()
 
 
 def am2302_measure():
@@ -19,23 +34,38 @@ def am2302_measure():
 
 
 def collect_data(position):
-    from datetime import datetime
 
     # this is a syncronous job that blocks normal flow
     # TODO: run sensor mesasures async, then get the last sensed value here
-    am2302_data = am2302_measure()
+    # am2302_data = am2302_measure()
 
     new_data = {
         'dt': str(datetime.now()),
         'pos': {
-            'lat': float(position.lat) / 10**7,
-            'lon': float(position.lon) / 10**7,
-            'alt': float(position.alt) / 10**3,
+            'lat': position['lat'],
+            'lon': position['lon'],
+            'alt': position['alt'],
         },
-        'am2302': am2302_data,
+        'am2302': "am2302_data",
+        'bmp183': "bmp183_data"
     }
-    return new_data
 
+    logging.debug(new_data)
+    redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+
+
+def prepare_data():
+    samples = 0
+    data = []
+    while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
+        sample = redis_queue.rpop('TUKANO_DATA')
+        if not sample:
+            break
+
+        data.append(json.loads(sample))
+        samples += 1
+
+    return data and json.dumps(data)
 
 
 def extract_faces(pic_path):
@@ -58,45 +88,3 @@ def extract_faces(pic_path):
             face_path = "{}/face_{}.jpg".format(settings.FACES_DIR, index)
 
         pil_image.save(face_path)
-
-
-class camera(object):
-    """PiCamera class abstraction with custom methods"""
-
-    cam = None
-
-    _pic_dir = settings.PICS_DIR
-    _vid_dir = settings.VIDEOS_DIR
-
-    def __init__(self):
-        from picamera import PiCamera
-        self.cam = PiCamera()
-        self.cam.rotation = 180
-
-    def __del__(self):
-        self.cam.close()
-        self.cam = None
-
-    def _ts_name(self):
-        return time.strftime("%Y%m%d_%H%M%S")
-
-    def take_pic(self, filename=None):
-        pic_path = "{}/{}.jpg".format(
-            self._pic_dir,
-            filename or self._ts_name()
-        )
-        self.cam.capture(pic_path, use_video_port=True)
-
-        return pic_path.split('/')[-1]
-
-    def start_recording(self, filename=None):
-        self.vid_path = "{}/{}.h264".format(
-            self._vid_dir,
-            filename or self._ts_name()
-        )
-        self.cam.start_recording(self.vid_path)
-        
-    def stop_recording(self):
-        self.cam.stop_recording()
-        return self.vid_path.split('/')[-1]
-

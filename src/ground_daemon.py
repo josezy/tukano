@@ -1,11 +1,19 @@
 import json
 import time
+import logging
 import settings
 
 from datetime import datetime
 from pymavlink import mavutil
 
 from util.util import append_json_file
+
+
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
+
 
 while True:
     try:
@@ -25,11 +33,12 @@ print("Aircraft hearbeat received!")
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
+
 def incoming_msg(msg):
     data = json.loads(msg.text)
     append_json_file("{}.json".format(session_name), data)
-    if settings.VERBOSE:
-        print(data)
+    logging.debug(data)
+
 
 while True:
     m = aircraft_link.recv()
@@ -43,7 +52,6 @@ while True:
                     incoming_msg(msg)
             except Exception as e:
                 print(e)
-
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)
