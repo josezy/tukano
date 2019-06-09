@@ -75,6 +75,7 @@ class Camera(object):
         )
         self.cam.start_recording(self.vid_path)
         self._state = 'RECORDING'
+        return self.vid_path.split('/')[-1]
 
     def stop_recording(self):
         self.cam.stop_recording()

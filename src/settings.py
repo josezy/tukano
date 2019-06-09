@@ -1,9 +1,10 @@
 import os
+import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 SLEEPING_TIME = 0.000001
-VERBOSE_LEVEL = 1   # 0: ALL 1: TUKANO DATA 2: OFF
+LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
 
 ###############################################################################
 # Directory contants
@@ -23,10 +24,10 @@ VIDEOS_DIR = "{}/videos".format(DATA_DIR)
 # Aircraft connections
 MAVLINK_VEHICLE = {
     # 'device': "tcp:localhost:5760",  # SITL on local PC
-    'device': "tcp:192.168.1.79:5760",  # SITL on remote PC
-    # 'device': "/dev/ttyAMA0",  # UART on ARM architectures
-    # 'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures
-    # 'baud': 57600,
+    # 'device': "tcp:192.168.1.79:5760",  # SITL on remote PC
+    # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
+    'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+    'baud': 57600,
 }
 MAVLINK_TUKANO = {
     'device': "udp:127.0.0.1:14551",
@@ -47,6 +48,8 @@ MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
 }
 
+VEHICLE_COMPONENT = 1
+VEHICLE_SYSTEM = 1
 
 ###############################################################################
 # External hardware pins
@@ -78,7 +81,7 @@ BMP183_PINS = {
 # Flight tasks parameters
 ###############################################################################
 
-DATA_COLLECT_MIN_ALT = 10000            # Collect data above N milimeters
+DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
 DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
 
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
@@ -86,8 +89,8 @@ TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
-RECORD_START_ALT = 12000                # Start recording video above N mm
-RECORD_STOP_ALT = 8000                  # Spot recording video below N mm
+RECORD_START_ALT = 12                   # Start recording video above N meters
+RECORD_STOP_ALT = 8                     # Spot recording video below N meters
 
 ###############################################################################
 # Redis config

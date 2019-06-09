@@ -1,9 +1,16 @@
 import time
 import json
 import redis
+import logging
 import settings
 
 from datetime import datetime
+
+
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
 
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
@@ -27,8 +34,6 @@ def am2302_measure():
 
 
 def collect_data(position):
-    if position.alt < settings.DATA_COLLECT_MIN_ALT:
-        return
 
     # this is a syncronous job that blocks normal flow
     # TODO: run sensor mesasures async, then get the last sensed value here
@@ -37,14 +42,27 @@ def collect_data(position):
     new_data = {
         'dt': str(datetime.now()),
         'pos': {
-            'lat': float(position.lat) / 10**7,
-            'lon': float(position.lon) / 10**7,
-            'alt': float(position.alt) / 10**3,
+            'lat': position['lat'],
+            'lon': position['lon'],
+            'alt': position['alt'],
         },
         'am2302': "am2302_data",
         'bmp183': "bmp183_data"
     }
 
-    if settings.VERBOSE_LEVEL <= 1:
-        print(new_data)
+    logging.debug(new_data)
     redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+
+
+def prepare_data():
+    samples = 0
+    data = []
+    while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
+        sample = redis_queue.rpop('TUKANO_DATA')
+        if not sample:
+            break
+
+        data.append(json.loads(sample))
+        samples += 1
+
+    return data and json.dumps(data)
