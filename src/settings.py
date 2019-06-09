@@ -48,6 +48,8 @@ MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
 }
 
+VEHICLE_COMPONENT = 1
+VEHICLE_SYSTEM = 1
 
 ###############################################################################
 # External hardware pins
@@ -79,7 +81,7 @@ BMP183_PINS = {
 # Flight tasks parameters
 ###############################################################################
 
-DATA_COLLECT_MIN_ALT = 10000            # Collect data above N milimeters
+DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
 DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
 
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
@@ -87,8 +89,8 @@ TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
-RECORD_START_ALT = 12000                # Start recording video above N mm
-RECORD_STOP_ALT = 8000                  # Spot recording video below N mm
+RECORD_START_ALT = 12                   # Start recording video above N meters
+RECORD_STOP_ALT = 8                     # Spot recording video below N meters
 
 ###############################################################################
 # Redis config

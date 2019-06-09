@@ -52,3 +52,17 @@ def collect_data(position):
 
     logging.debug(new_data)
     redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+
+
+def prepare_data():
+    samples = 0
+    data = []
+    while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
+        sample = redis_queue.rpop('TUKANO_DATA')
+        if not sample:
+            break
+
+        data.append(json.loads(sample))
+        samples += 1
+
+    return data and json.dumps(data)
