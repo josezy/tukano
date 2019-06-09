@@ -5,8 +5,6 @@
 """
 
 import time
-import json
-import redis
 import serial
 import logging
 
@@ -16,7 +14,7 @@ from pymavlink import mavutil
 
 
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format='%(asctime)s %(levelname)s %(message)s',
     level=settings.LOGGING_LEVEL
 )
 
@@ -53,14 +51,6 @@ vehicle_link.wait_heartbeat()
 logging.info("Vehicle hearbeat received!")
 
 
-try:
-    redis_queue = redis.Redis(**settings.REDIS_CONF)
-except Exception as e:
-    raise e
-
-last_t = time.time()
-
-
 while True:
 
     # From vehicle to ground/tukano
@@ -75,43 +65,27 @@ while True:
             if tukano_link:
                 tukano_link.write(vehicle_msg.get_msgbuf())
 
-    # From ground to vehicle
+    # From ground to vehicle/tukano
     if ground_link:
         ground_m = ground_link.recv()
         ground_msgs = ground_link.mav.parse_buffer(ground_m)
         if ground_msgs:
             for ground_msg in ground_msgs:
-                vehicle_link.write(ground_msg.get_msgbuf())
                 logging.debug("(GROUND_MSG) {}".format(ground_msg))
+                vehicle_link.write(ground_msg.get_msgbuf())
 
-    # From tukano to vehicle
+                if tukano_link:
+                    tukano_link.write(ground_msg.get_msgbuf())
+
+    # From tukano to vehicle/ground
     tukano_m = tukano_link.recv()
     tukano_msgs = tukano_link.mav.parse_buffer(tukano_m)
     if tukano_msgs:
         for tukano_msg in tukano_msgs:
-            vehicle_link.write(tukano_msg.get_msgbuf())
             logging.debug("(TUKANO_MSG) {}".format(tukano_msg))
+            vehicle_link.write(tukano_msg.get_msgbuf())
 
-    if time.time() - last_t > settings.MAVLINK_SAMPLES_TIMESPAN:
-        samples = 0
-        data = []
-        while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
-            sample = redis_queue.rpop('TUKANO_DATA')
-            if not sample:
-                break
-
-            data.append(json.loads(sample))
-            samples += 1
-
-        if data and ground_link:
-            data_text = json.dumps(data)
-            data_len = len(data_text)
-            logging.info("Sending data ({}): {}".format(data_len, data_text))
-            if data_len > 254:
-                logging.warning("MESSAGE TOO LONG TO SEND")
-            else:
-                ground_link.mav.tukano_data_send(data_text)
-
-        last_t = time.time()
+            if ground_link:
+                ground_link.write(tukano_msg.get_msgbuf())
 
     time.sleep(settings.SLEEPING_TIME)
