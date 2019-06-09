@@ -1,9 +1,16 @@
 import time
 import json
 import redis
+import logging
 import settings
 
 from datetime import datetime
+
+
+logging.basicConfig(
+    format='%(asctime)s %(message)s',
+    level=settings.LOGGING_LEVEL
+)
 
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
@@ -43,6 +50,5 @@ def collect_data(position):
         'bmp183': "bmp183_data"
     }
 
-    if settings.VERBOSE_LEVEL <= 1:
-        print(new_data)
+    logging.debug(new_data)
     redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
