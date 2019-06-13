@@ -11,7 +11,7 @@ from util.leds import error, info, success
 
 info()
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format='%(asctime)s %(levelname)s %(message)s',
     level=settings.LOGGING_LEVEL
 )
 logging.info("Initialising...")
@@ -33,7 +33,7 @@ logging.info("Hearbeat received!")
 drone.mav.request_data_stream_send(
     drone.target_system,
     drone.target_component,
-    mavutil.mavlink.MAV_DATA_STREAM_POSITION,  # req_stream_id
+    mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
     1,  # Rate in Hertz
     1  # Start/Stop
 )
@@ -51,25 +51,44 @@ vehicle = {
 
 success()
 
+
+def process_msgs(link, vehicle_state):
+    vehicle = vehicle_state
+
+    msg = link.recv_msg()
+    msg_type = msg and msg.get_type()
+    message_is_valid = msg_type and msg_type != 'BAD_DATA'
+
+    if message_is_valid:
+
+        if validateSource(msg, settings.VEHICLE_IDS):
+
+            if msg_type == 'HEARTBEAT':
+                vehicle['armed'] = bool(msg.base_mode // 128)
+                logging.debug("(HEARTBEAT) {}".format(vehicle))
+
+            if msg_type == 'GLOBAL_POSITION_INT':
+                vehicle['position'] = {
+                    'lat': float(msg.lat) / 10**7,
+                    'lon': float(msg.lon) / 10**7,
+                    'alt': float(msg.alt) / 10**3,
+                }
+                logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
+
+    return vehicle
+
+
+def validateSource(msg, ids):
+    return all([
+        msg.get_srcComponent() == ids['component'],
+        msg.get_srcSystem() == ids['system']
+    ])
+
+
 while True:
     try:
-        veh_msg = drone.recv_msg()
-        veh_msg_type = veh_msg and veh_msg.get_type()
-        if veh_msg_type and veh_msg_type != 'BAD_DATA':
-            if veh_msg.get_srcComponent() == settings.VEHICLE_COMPONENT \
-                    and veh_msg.get_srcSystem() == settings.VEHICLE_SYSTEM:
 
-                if veh_msg_type == 'HEARTBEAT':
-                    vehicle['armed'] = bool(veh_msg.base_mode // 128)
-                    logging.debug("(HEARTBEAT) {}".format(vehicle))
-
-                if veh_msg_type == 'GLOBAL_POSITION_INT':
-                    vehicle['position'] = {
-                        'lat': float(veh_msg.lat) / 10**7,
-                        'lon': float(veh_msg.lon) / 10**7,
-                        'alt': float(veh_msg.alt) / 10**3,
-                    }
-                    logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
+        vehicle = process_msgs(drone, vehicle)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}

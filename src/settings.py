@@ -48,8 +48,10 @@ MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
 }
 
-VEHICLE_COMPONENT = 1
-VEHICLE_SYSTEM = 1
+VEHICLE_IDS = {
+    'component': 1,
+    'system': 1
+}
 
 ###############################################################################
 # External hardware pins
