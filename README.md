@@ -11,4 +11,4 @@ To install packages and setup enviroment run (or follow by steps) the `bin/tukan
 
 Use `tukano reload|stop` for reload/stop `supervisor` processes
 
-Use `tukano links` to create sym links for `supervisor` conf
+Use `tukano setup` to create sym links for `supervisor` conf
