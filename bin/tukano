@@ -30,6 +30,7 @@ function stop {
 
 function setup {
     sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+    sudo ln -fs "$REPO_DIR" /opt
     source venv/bin/activate
     mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
     deactivate

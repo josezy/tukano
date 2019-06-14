@@ -64,6 +64,7 @@ info "--> Setting up supervisor configuration..."
     echo " > Creating symbolic links..."
     sudo rm -f /etc/supervisor/supervisord.conf
     sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
+    sudo ln -fs "$REPO_DIR" /opt
 
     echo " > Reloading supervisor service..."
     sudo service supervisor reload
