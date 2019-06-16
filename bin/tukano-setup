@@ -42,15 +42,13 @@ info "--> Seting up pipenv..."
     source ~/.bashrc
     PIPENV_VENV_IN_PROJECT=1
     pipenv install
-success "   √   Virtualenv is active: $(which python) ($(python --version))"
-
+success "   √   Virtual environment is ready: $(which python) ($(python --version))"
 
 
 info "--> Generating MAVLink dialect..."
     pipenv run mavgen.py \
         --output="$REPO_DIR/.venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py" \
         "$REPO_DIR/dialects/mav_tukano.xml"
-success "   √   PyPI requirements are installed: requirements.txt"
 
 
 info "--> Setting up supervisor configuration..."
