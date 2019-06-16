@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+ipython = "*"
+ipdb = "*"
+flake8 = "*"
+
+[packages]
+picamera = "*"
+Adafruit-DHT = "*"
+"RPi.GPIO" = "*"
+pymavlink = "*"
+pyserial = "*"
+redis = "*"
+
+[requires]
+python_version = "2.7"
