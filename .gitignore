@@ -1,6 +1,7 @@
 *.pyc
 __pycache__
 venv
+.venv
 data/
 logs/
 reblujo
