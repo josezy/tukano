@@ -40,7 +40,7 @@ info "--> Seting up pipenv..."
     python2 -m pip install --user pipenv
     echo "PATH=~/.local/bin:\$PATH" >> ~/.bashrc
     source ~/.bashrc
-    PIPENV_VENV_IN_PROJECT=1
+    export PIPENV_VENV_IN_PROJECT=1
     pipenv install
 success "   √   Virtual environment is ready: $(which python) ($(python --version))"
 
