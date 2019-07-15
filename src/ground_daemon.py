@@ -53,7 +53,7 @@ while True:
                 if msg.get_type() == "TUKANO_DATA":
                     incoming_msg(msg)
             except Exception as e:
-                logging.warn(e)
+                logging.error(e)
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)
