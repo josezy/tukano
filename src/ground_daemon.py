@@ -18,17 +18,19 @@ logging.basicConfig(
 while True:
     try:
         aircraft_link = mavutil.mavlink_connection(**settings.MAVLINK_AIRCRAFT)
-        print("Aircraft at {}".format(settings.MAVLINK_AIRCRAFT['device']))
+        logging.info(
+            "Aircraft at {}".format(settings.MAVLINK_AIRCRAFT['device'])
+        )
         break
     except Exception as e:
-        print(e)
-        print("Retrying MAVLink aircraft connection...")
+        logging.warn(e)
+        logging.warn("Retrying MAVLink aircraft connection...")
 
 gcs_link = mavutil.mavlink_connection(input=False, **settings.MAVLINK_GCS)
-print("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
+logging.info("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
 
 aircraft_link.wait_heartbeat()
-print("Aircraft hearbeat received!")
+logging.info("Aircraft hearbeat received!")
 
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
@@ -51,7 +53,7 @@ while True:
                 if msg.get_type() == "TUKANO_DATA":
                     incoming_msg(msg)
             except Exception as e:
-                print(e)
+                logging.warn(e)
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)
