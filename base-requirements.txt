@@ -1,3 +1,4 @@
 pymavlink
 pyserial
 redis
+websocket-client

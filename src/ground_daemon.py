@@ -5,6 +5,7 @@ import settings
 
 from datetime import datetime
 from pymavlink import mavutil
+from websocket import create_connection
 
 from util.util import append_json_file
 
@@ -32,6 +33,7 @@ logging.info("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
 aircraft_link.wait_heartbeat()
 logging.info("Aircraft hearbeat received!")
 
+ws = create_connection("ws://localhost:8000/flight")
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
@@ -52,6 +54,8 @@ while True:
             try:
                 if msg.get_type() == "TUKANO_DATA":
                     incoming_msg(msg)
+                elif msg.get_type() == "GLOBAL_POSITION_INT":
+                    ws.send(msg.to_json())
             except Exception as e:
                 logging.error(e)
 
