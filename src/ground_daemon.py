@@ -33,12 +33,12 @@ logging.info("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
 aircraft_link.wait_heartbeat()
 logging.info("Aircraft hearbeat received!")
 
-ws = create_connection("ws://localhost:8000/flight")
+ws = create_connection(settings.WS_ENDPOINT)
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
 
-def incoming_msg(msg):
+def save_to_file(msg):
     data = json.loads(msg.text)
     append_json_file("{}.json".format(session_name), data)
     logging.debug(data)
@@ -53,8 +53,8 @@ while True:
 
             try:
                 if msg.get_type() == "TUKANO_DATA":
-                    incoming_msg(msg)
-                elif msg.get_type() == "GLOBAL_POSITION_INT":
+                    save_to_file(msg)
+                if msg.get_type() in settings.WS_MSG_TYPES:
                     ws.send(msg.to_json())
             except Exception as e:
                 logging.error(e)
