@@ -33,7 +33,13 @@ logging.info("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
 aircraft_link.wait_heartbeat()
 logging.info("Aircraft hearbeat received!")
 
-ws = create_connection(settings.WS_ENDPOINT)
+while True:
+    try:
+        ws = create_connection(settings.WS_ENDPOINT)
+        break
+    except Exception as e:
+        logging.error(e)
+        time.sleep(2)
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
