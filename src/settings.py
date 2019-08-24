@@ -104,3 +104,12 @@ REDIS_DB = 2
 REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
 
 # CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+###############################################################################
+# Websockets parameters
+###############################################################################
+
+WS_ENDPOINT = "ws://localhost:8000/flight"
+WS_MSG_TYPES = (
+    'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
+)
