@@ -57,26 +57,11 @@ VEHICLE_IDS = {
 # External hardware pins
 ###############################################################################
 
-# !!!!!! BE SURE TO NEVER REPEAT PINS!!!!!!
-
 # RGB Led for status indication
 LED_PINS = {
     'red': 12,
     'green': 16,
     'blue': 20,
-}
-
-# AM2302 Temperature, Humidity sensor
-AM2302_PINS = {
-    'out': 4,
-}
-
-# BMP183 Temperature, Pressure sensor
-BMP183_PINS = {
-    'sck': 5,
-    'sdo': 6,
-    'sdi': 13,
-    'cs': 26,
 }
 
 ###############################################################################
@@ -104,6 +89,15 @@ REDIS_DB = 2
 REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
 
 # CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+###############################################################################
+# Serial communication for transferring external data
+###############################################################################
+
+SERIAL_PARAMS = {
+    'port': '/dev/ttyUSB0',
+    'baudrate': 115200
+}
 
 ###############################################################################
 # Websockets parameters
