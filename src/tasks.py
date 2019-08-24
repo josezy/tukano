@@ -3,10 +3,13 @@ import json
 import redis
 import logging
 import settings
-import serial, time
 
 from datetime import datetime
-
+##ARDUINO CONF
+import serial, time
+import json
+BAUD_RATE = 9600
+DEV_URL = '/dev/ttyACM0' 
 
 logging.basicConfig(
     format='%(asctime)s %(message)s',
@@ -40,19 +43,24 @@ def collect_data(position):
     # TODO: run sensor mesasures async, then get the last sensed value here
     # am2302_data = am2302_measure()
 
-    new_data = {
-        'dt': str(datetime.now()),
-        'pos': {
-            'lat': position['lat'],
-            'lon': position['lon'],
-            'alt': position['alt'],
-        },
-        'am2302': "am2302_data",
-        'bmp183': "bmp183_data"
-    }
-
-    logging.debug(new_data)
-    redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+    try:
+		new_data = {
+			'dt': str(datetime.now()),
+            'pos': {
+                'lat': position['lat'],
+                'lon': position['lon'],
+                'alt': position['alt'],
+             }
+  	    }
+        arduino = serial.Serial(DEV_URL, BAUD_RATE)
+		JSON=arduino.readline().decode("utf-8")
+		JSON=json.loads(JSON[0:-2])
+		new_data.update(JSON)
+		arduino.close()
+        logging.debug(new_data)
+        redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+	except ValueError as e:
+		logging.debug("BAD JSON")
 
 
 def prepare_data():
