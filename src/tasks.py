@@ -1,15 +1,15 @@
 import time
 import json
 import redis
+import serial
 import logging
 import settings
 
 from datetime import datetime
-##ARDUINO CONF
-import serial, time
-import json
-BAUD_RATE = 9600
-DEV_URL = '/dev/ttyACM0' 
+
+# ARDUINO CONF
+BAUDRATE = 115200
+ARDUINO_PORT = '/dev/ttyUSB0'
 
 logging.basicConfig(
     format='%(asctime)s %(message)s',
@@ -44,23 +44,24 @@ def collect_data(position):
     # am2302_data = am2302_measure()
 
     try:
-		new_data = {
-			'dt': str(datetime.now()),
+        sensors_data = {
+            'dt': str(datetime.now()),
             'pos': {
                 'lat': position['lat'],
                 'lon': position['lon'],
                 'alt': position['alt'],
-             }
-  	    }
-        arduino = serial.Serial(DEV_URL, BAUD_RATE)
-		JSON=arduino.readline().decode("utf-8")
-		JSON=json.loads(JSON[0:-2])
-		new_data.update(JSON)
-		arduino.close()
-        logging.debug(new_data)
-        redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
-	except ValueError as e:
-		logging.debug("BAD JSON")
+            }
+        }
+        arduino = serial.Serial(ARDUINO_PORT, BAUDRATE)
+        JSON = arduino.readline().decode("utf-8")
+        logging.debug(JSON)
+        JSON = json.loads(JSON)
+        sensors_data.update(JSON)
+        arduino.close()
+        logging.debug(sensors_data)
+        redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
+    except ValueError as e:
+        logging.debug("BAD JSON", e)
 
 
 def prepare_data():
