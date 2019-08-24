@@ -3,6 +3,7 @@ import json
 import redis
 import logging
 import settings
+import serial, time
 
 from datetime import datetime
 
