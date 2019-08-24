@@ -98,3 +98,12 @@ SERIAL_PARAMS = {
     'port': '/dev/ttyUSB0',
     'baudrate': 115200
 }
+
+###############################################################################
+# Websockets parameters
+###############################################################################
+
+WS_ENDPOINT = "ws://localhost:8000/flight"
+WS_MSG_TYPES = (
+    'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
+)
