@@ -52,9 +52,7 @@ vehicle = {
 leds.success()
 
 
-def process_msgs(link, vehicle_state):
-    vehicle = vehicle_state
-
+def process_msgs(link, vehicle):
     msg = link.recv_msg()
     msg_type = msg and msg.get_type()
     message_is_valid = msg_type and msg_type != 'BAD_DATA'
