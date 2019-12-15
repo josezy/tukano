@@ -14,7 +14,10 @@ logging.basicConfig(
 
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
-redis_queue.flushdb()
+try:
+    redis_queue.flushdb()
+except redis.ConnectionError:
+    logging.warn("Redis not available!!")
 
 
 def collect_data(position):
@@ -30,9 +33,13 @@ def collect_data(position):
         serial_device = serial.Serial(**settings.SERIAL_PARAMS)
         json_data = json.loads(serial_device.readline().decode("utf-8"))
         serial_device.close()
-
         sensors_data.update(json_data)
-        redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
+
+        try:
+            redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
+        except redis.ConnectionError:
+            logging.warn("Redis not available!!")
+
         logging.debug(sensors_data)
         logging.info("Data collected")
     except ValueError as e:
@@ -45,7 +52,12 @@ def prepare_data():
     samples = 0
     data = []
     while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
-        sample = redis_queue.rpop('TUKANO_DATA')
+        try:
+            sample = redis_queue.rpop('TUKANO_DATA')
+        except redis.ConnectionError:
+            logging.warn("Redis not available!!")
+            break
+
         if not sample:
             break
 
