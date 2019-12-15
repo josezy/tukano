@@ -6,10 +6,10 @@ from pymavlink import mavutil
 
 from tasks import collect_data, prepare_data
 from camera import Camera
-from util.leds import error, info, success
+from util import leds
 
 
-info()
+leds.info()
 logging.basicConfig(
     format='%(asctime)s %(levelname)s %(message)s',
     level=settings.LOGGING_LEVEL
@@ -49,7 +49,7 @@ vehicle = {
     'position': None
 }
 
-success()
+leds.success()
 
 
 def process_msgs(link, vehicle_state):
@@ -136,6 +136,5 @@ while True:
             logging.info("Video recordered '{}'".format(vid_name))
 
     except Exception as e:
-        # TODO: log errors
-        error()
+        leds.error()
         logging.error(e)

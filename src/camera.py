@@ -1,7 +1,8 @@
 import time
 import settings
 
-from picamera import PiCamera
+if settings.PROD:
+    from picamera import PiCamera
 
 
 class Camera(object):
@@ -15,11 +16,15 @@ class Camera(object):
     _state = None
 
     def __init__(self, rotation=0):
-        self.cam = PiCamera()
-        self.cam.rotation = rotation
+        if settings.PROD:
+            self.cam = PiCamera()
+            self.cam.rotation = rotation
+        else:
+            pass
 
     def __del__(self):
-        self.cam.close()
+        if settings.PROD:
+            self.cam.close()
         self.cam = None
 
     def _ts_name(self):
@@ -61,10 +66,11 @@ class Camera(object):
             filename or self._ts_name()
         )
 
-        if gps_data:
-            self.cam.exif_tags.update(self._gps_exif(**gps_data))
+        if settings.PROD:
+            if gps_data:
+                self.cam.exif_tags.update(self._gps_exif(**gps_data))
 
-        self.cam.capture(pic_path, use_video_port=True)
+            self.cam.capture(pic_path, use_video_port=True)
 
         return pic_path.split('/')[-1]
 
@@ -73,12 +79,14 @@ class Camera(object):
             self._vid_dir,
             filename or self._ts_name()
         )
-        self.cam.start_recording(self.vid_path)
+        if settings.PROD:
+            self.cam.start_recording(self.vid_path)
         self._state = 'RECORDING'
         return self.vid_path.split('/')[-1]
 
     def stop_recording(self):
-        self.cam.stop_recording()
+        if settings.PROD:
+            self.cam.stop_recording()
         self._state = None
         return self.vid_path.split('/')[-1]
 

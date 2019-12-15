@@ -1,6 +1,6 @@
 """
     Remember to generate MAVLink library with
-    mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    mavgen.py --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
     after changing dialects/mav_tukano.xml, otherwise this code may not work
 """
 
@@ -26,6 +26,7 @@ while True:
         ))
         break
     except Exception as e:
+        logging.error(f"Vehicle connection error: {e}")
         time.sleep(3)
 
 

@@ -3,7 +3,9 @@ import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
-SLEEPING_TIME = 0.000001
+PROD = False  # Development flag
+
+SLEEPING_TIME = 0.0001
 LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
 
 ###############################################################################
@@ -22,28 +24,42 @@ VIDEOS_DIR = "{}/videos".format(DATA_DIR)
 ###############################################################################
 
 # Aircraft connections
-MAVLINK_VEHICLE = {
-    # 'device': "tcp:localhost:5760",  # SITL on local PC
-    # 'device': "tcp:192.168.1.79:5760",  # SITL on remote PC
-    # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
-    'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
-    'baud': 57600,
-}
+MAVLINK_VEHICLE = (
+    {
+        # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
+        'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+        'baud': 57600,
+    }
+    if PROD else
+    {
+        'device': "tcp:localhost:5760",  # SITL on local PC
+    }
+)
 MAVLINK_TUKANO = {
     'device': "udp:127.0.0.1:14551",
 }
-MAVLINK_GROUND = {
-    'device': "/dev/ttyUSB0",
-    # 'device': "udp:127.0.0.1:14552",
-    'baud': 115200,
-}
+MAVLINK_GROUND = (
+    {
+        'device': "/dev/ttyUSB0",  # XBee on USB port (RPi)
+        'baud': 115200,
+    }
+    if PROD else
+    {
+        'device': "udp:127.0.0.1:14552",
+    }
+)
 
 # Ground connections
-MAVLINK_AIRCRAFT = {
-    'device': "/dev/ttyUSB0",
-    # 'device': "udp:127.0.0.1:14552",
-    'baud': 115200,
-}
+MAVLINK_AIRCRAFT = (
+    {
+        'device': "/dev/ttyUSB0",
+        'baud': 115200,
+    }
+    if PROD else
+    {
+        'device': "udp:127.0.0.1:14552",  # XBee on USB port (PC)
+    }
+)
 MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
 }
@@ -95,7 +111,7 @@ REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
 ###############################################################################
 
 SERIAL_PARAMS = {
-    'port': '/dev/ttyUSB0',
+    'port': '/dev/ttyUSB0',  # This must be manually set every time
     'baudrate': 115200
 }
 

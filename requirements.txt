@@ -1,4 +1,3 @@
-Adafruit-DHT
 RPi.GPIO
 picamera
 
