@@ -32,10 +32,13 @@ def collect_data(position):
         serial_device.close()
 
         sensors_data.update(json_data)
-        logging.debug(sensors_data)
         redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
+        logging.debug(sensors_data)
+        logging.info("Data collected")
     except ValueError as e:
         logging.error("BAD JSON", e)
+    except serial.SerialException as e:
+        logging.error(f"Cannot connect to serial adquisition module: {e}")
 
 
 def prepare_data():

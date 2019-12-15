@@ -98,7 +98,6 @@ while True:
                 if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
                     collect_data(vehicle['position'])
                     last_tss['data_collect'] = now
-                    logging.info("Data collected")
 
         if elapsed_times['data_send'] > settings.MAVLINK_SAMPLES_TIMESPAN:
             package = prepare_data()
