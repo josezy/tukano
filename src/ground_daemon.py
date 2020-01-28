@@ -19,16 +19,14 @@ logging.basicConfig(
 while True:
     try:
         aircraft_link = mavutil.mavlink_connection(**settings.MAVLINK_AIRCRAFT)
-        logging.info(
-            "Aircraft at {}".format(settings.MAVLINK_AIRCRAFT['device'])
-        )
+        logging.info(f"Aircraft at {settings.MAVLINK_AIRCRAFT['device']}")
         break
     except Exception as e:
         logging.warn(e)
         logging.warn("Retrying MAVLink aircraft connection...")
 
 gcs_link = mavutil.mavlink_connection(input=False, **settings.MAVLINK_GCS)
-logging.info("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
+logging.info(f"GCS stablished at {settings.MAVLINK_GCS['device']}")
 
 aircraft_link.wait_heartbeat()
 logging.info("Aircraft hearbeat received!")
@@ -46,7 +44,7 @@ session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
 def save_to_file(msg):
     data = json.loads(msg.text)
-    append_json_file("{}.json".format(session_name), data)
+    append_json_file(f"{session_name}.json", data)
     logging.debug(data)
 
 

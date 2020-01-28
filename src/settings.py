@@ -15,9 +15,9 @@ LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(SRC_DIR)
 
-DATA_DIR = "{}/data".format(BASE_DIR)
-PICS_DIR = "{}/pics".format(DATA_DIR)
-VIDEOS_DIR = "{}/videos".format(DATA_DIR)
+DATA_DIR = f"{BASE_DIR}/data"
+PICS_DIR = f"{DATA_DIR}/pics"
+VIDEOS_DIR = f"{DATA_DIR}/videos"
 
 ###############################################################################
 # Connection parameters
@@ -103,8 +103,6 @@ REDIS_PORT = 6379
 REDIS_DB = 2
 
 REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
-
-# CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)
 
 ###############################################################################
 # Serial communication for transferring external data

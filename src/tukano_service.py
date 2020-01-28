@@ -63,7 +63,7 @@ def process_msgs(link, vehicle):
 
             if msg_type == 'HEARTBEAT':
                 vehicle['armed'] = bool(msg.base_mode // 128)
-                logging.debug("(HEARTBEAT) {}".format(vehicle))
+                logging.debug(f"(HEARTBEAT) {vehicle}")
 
             if msg_type == 'GLOBAL_POSITION_INT':
                 vehicle['position'] = {
@@ -71,7 +71,7 @@ def process_msgs(link, vehicle):
                     'lon': float(msg.lon) / 10**7,
                     'alt': float(msg.alt) / 10**3,
                 }
-                logging.debug("(GLOBAL_POSITION_INT) {}".format(vehicle))
+                logging.debug(f"(GLOBAL_POSITION_INT) {vehicle}")
 
     return vehicle
 
@@ -101,7 +101,7 @@ while True:
             package = prepare_data()
             if package:
                 pack_len = len(package)
-                logging.info("Sending data ({}): {}".format(pack_len, package))
+                logging.info(f"Sending data ({pack_len}): {package}")
                 if pack_len > 254:
                     logging.warning("MESSAGE TOO LONG TO SEND")
                 else:
@@ -122,15 +122,15 @@ while True:
                     pic_name = cam.take_pic()
 
                 last_tss['take_pic'] = now
-                logging.info("Pic taken '{}'".format(pic_name))
+                logging.info(f"Pic taken '{pic_name}'")
 
         if vehicle['armed'] and not cam.is_recording:
             vid_name = cam.start_recording()
-            logging.info("Recording video '{}'".format(vid_name))
+            logging.info(f"Recording video '{vid_name}'")
 
         if not vehicle['armed'] and cam.is_recording:
             vid_name = cam.stop_recording()
-            logging.info("Video recordered '{}'".format(vid_name))
+            logging.info(f"Video recordered '{vid_name}'")
 
     except Exception as e:
         leds.error()

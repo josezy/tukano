@@ -61,10 +61,7 @@ class Camera(object):
         }
 
     def take_pic(self, filename=None, gps_data=None):
-        pic_path = "{}/{}.jpg".format(
-            self._pic_dir,
-            filename or self._ts_name()
-        )
+        pic_path = f"{self._pic_dir}/{filename or self._ts_name()}.jpg"
 
         if settings.PROD:
             if gps_data:
@@ -75,10 +72,7 @@ class Camera(object):
         return pic_path.split('/')[-1]
 
     def start_recording(self, filename=None):
-        self.vid_path = "{}/{}.h264".format(
-            self._vid_dir,
-            filename or self._ts_name()
-        )
+        self.vid_path = f"{self._vid_dir}/{filename or self._ts_name()}.h264"
         if settings.PROD:
             self.cam.start_recording(self.vid_path)
         self._state = 'RECORDING'

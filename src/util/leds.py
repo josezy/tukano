@@ -14,7 +14,7 @@ if settings.PROD:
 
 
 def led_on(color):
-    print("{} led ON".format(color))
+    print(f"{color} led ON")
     if settings.PROD:
         for led_color, led_pin in LED_PINS.items():
             state = GPIO.HIGH if led_color == color else GPIO.LOW
