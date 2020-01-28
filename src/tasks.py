@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 

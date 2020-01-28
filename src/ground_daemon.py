@@ -11,7 +11,7 @@ from util.util import append_json_file
 
 
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 

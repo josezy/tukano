@@ -7,6 +7,7 @@ PROD = False  # Development flag
 
 SLEEPING_TIME = 0.0001
 LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+LOGGING_FORMAT = '[%(levelname)s] %(asctime)s: %(message)s'
 
 ###############################################################################
 # Directory contants

@@ -14,7 +14,7 @@ from pymavlink import mavutil
 
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 

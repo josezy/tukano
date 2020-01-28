@@ -11,11 +11,10 @@ from util import leds
 
 leds.info()
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
-logging.info("Initialising...")
-logging.info(settings.MAVLINK_TUKANO['device'])
+logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
 
 while True:
@@ -23,8 +22,8 @@ while True:
         drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
         break
     except Exception as e:
-        logging.warning(e)
-        logging.warning("Retrying MAVLink vehicle connection...")
+        logging.warning(f"MAVLink vehicle connection failed: {e}")
+        logging.warning("Retrying...")
 
 
 drone.wait_heartbeat()
@@ -134,4 +133,4 @@ while True:
 
     except Exception as e:
         leds.error()
-        logging.error(e)
+        logging.error(f"General error happened: {e}")
