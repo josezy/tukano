@@ -1,6 +1,6 @@
 """
     Remember to generate MAVLink library with
-    mavgen.py --output=venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    mavgen.py --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
     after changing dialects/mav_tukano.xml, otherwise this code may not work
 """
 
@@ -14,37 +14,42 @@ from pymavlink import mavutil
 
 
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 
-while True:
-    try:
-        vehicle_link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
-        logging.info("Vehicle connected at {}".format(
-            settings.MAVLINK_VEHICLE['device']
-        ))
-        break
-    except Exception as e:
-        time.sleep(3)
 
+def connect_vehicle():
+    while True:
+        try:
+            link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            logging.info(f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
+            break
+        except Exception as e:
+            logging.error(f"Vehicle connection error: {e}")
+            time.sleep(3)
+
+    return link
+
+
+vehicle_link = connect_vehicle()
 
 try:
     ground_link = mavutil.mavlink_connection(
         input=False,
         **settings.MAVLINK_GROUND
     )
-    logging.info("Ground at {}".format(settings.MAVLINK_GROUND['device']))
+    logging.info(f"Ground at {settings.MAVLINK_GROUND['device']}")
 except serial.SerialException:
     ground_link = None
-    logging.warning("NO GROUND LINK at {}".format(settings.MAVLINK_GROUND))
+    logging.warning(f"NO GROUND LINK at {settings.MAVLINK_GROUND}")
 
 
 tukano_link = mavutil.mavlink_connection(
     input=False,
     **settings.MAVLINK_TUKANO
 )
-logging.info("MAVLink tukano at {}".format(settings.MAVLINK_TUKANO['device']))
+logging.info(f"MAVLink tukano at {settings.MAVLINK_TUKANO['device']}")
 
 logging.info("Waiting for vehicle hearbeat")
 vehicle_link.wait_heartbeat()
@@ -54,11 +59,17 @@ logging.info("Vehicle hearbeat received!")
 while True:
 
     # From vehicle to ground/tukano
-    vehicle_m = vehicle_link.recv()
+    try:
+        vehicle_m = vehicle_link.recv()
+    except ConnectionResetError as e:
+        logging.error(f"MAVLINK VEHICLE ERROR: {e}")
+        vehicle_link = connect_vehicle()
+        continue
+
     vehicle_msgs = vehicle_link.mav.parse_buffer(vehicle_m)
     if vehicle_msgs:
         for vehicle_msg in vehicle_msgs:
-            logging.debug("(VEHICLE_MSG) {}".format(vehicle_msg))
+            logging.debug(f"(VEHICLE_MSG) {vehicle_msg}")
             if ground_link:
                 ground_link.write(vehicle_msg.get_msgbuf())
 
@@ -71,7 +82,7 @@ while True:
         ground_msgs = ground_link.mav.parse_buffer(ground_m)
         if ground_msgs:
             for ground_msg in ground_msgs:
-                logging.debug("(GROUND_MSG) {}".format(ground_msg))
+                logging.debug(f"(GROUND_MSG) {ground_msg}")
                 vehicle_link.write(ground_msg.get_msgbuf())
 
                 if tukano_link:
@@ -82,7 +93,7 @@ while True:
     tukano_msgs = tukano_link.mav.parse_buffer(tukano_m)
     if tukano_msgs:
         for tukano_msg in tukano_msgs:
-            logging.debug("(TUKANO_MSG) {}".format(tukano_msg))
+            logging.debug(f"(TUKANO_MSG) {tukano_msg}")
             vehicle_link.write(tukano_msg.get_msgbuf())
 
             if ground_link:

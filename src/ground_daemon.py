@@ -5,12 +5,13 @@ import settings
 
 from datetime import datetime
 from pymavlink import mavutil
+from websocket import create_connection
 
 from util.util import append_json_file
 
 
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 
@@ -18,25 +19,32 @@ logging.basicConfig(
 while True:
     try:
         aircraft_link = mavutil.mavlink_connection(**settings.MAVLINK_AIRCRAFT)
-        print("Aircraft at {}".format(settings.MAVLINK_AIRCRAFT['device']))
+        logging.info(f"Aircraft at {settings.MAVLINK_AIRCRAFT['device']}")
         break
     except Exception as e:
-        print(e)
-        print("Retrying MAVLink aircraft connection...")
+        logging.warn(e)
+        logging.warn("Retrying MAVLink aircraft connection...")
 
 gcs_link = mavutil.mavlink_connection(input=False, **settings.MAVLINK_GCS)
-print("GCS stablished at {}".format(settings.MAVLINK_GCS['device']))
+logging.info(f"GCS stablished at {settings.MAVLINK_GCS['device']}")
 
 aircraft_link.wait_heartbeat()
-print("Aircraft hearbeat received!")
+logging.info("Aircraft hearbeat received!")
 
+while True:
+    try:
+        ws = create_connection(settings.WS_ENDPOINT)
+        break
+    except Exception as e:
+        logging.error(e)
+        time.sleep(2)
 
 session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
 
-def incoming_msg(msg):
+def save_to_file(msg):
     data = json.loads(msg.text)
-    append_json_file("{}.json".format(session_name), data)
+    append_json_file(f"{session_name}.json", data)
     logging.debug(data)
 
 
@@ -49,9 +57,11 @@ while True:
 
             try:
                 if msg.get_type() == "TUKANO_DATA":
-                    incoming_msg(msg)
+                    save_to_file(msg)
+                if msg.get_type() in settings.WS_MSG_TYPES:
+                    ws.send(msg.to_json())
             except Exception as e:
-                print(e)
+                logging.error(e)
 
     m2 = gcs_link.recv()
     aircraft_link.write(m2)

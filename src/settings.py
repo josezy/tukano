@@ -3,8 +3,11 @@ import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
-SLEEPING_TIME = 0.000001
+PROD = False  # Development flag
+
+SLEEPING_TIME = 0.0001
 LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+LOGGING_FORMAT = '[%(levelname)s] %(asctime)s: %(message)s'
 
 ###############################################################################
 # Directory contants
@@ -13,68 +16,69 @@ LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(SRC_DIR)
 
-DATA_DIR = "{}/data".format(BASE_DIR)
-PICS_DIR = "{}/pics".format(DATA_DIR)
-VIDEOS_DIR = "{}/videos".format(DATA_DIR)
+DATA_DIR = f"{BASE_DIR}/data"
+PICS_DIR = f"{DATA_DIR}/pics"
+VIDEOS_DIR = f"{DATA_DIR}/videos"
 
 ###############################################################################
 # Connection parameters
 ###############################################################################
 
 # Aircraft connections
-MAVLINK_VEHICLE = {
-    # 'device': "tcp:localhost:5760",  # SITL on local PC
-    # 'device': "tcp:192.168.1.79:5760",  # SITL on remote PC
-    # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
-    'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
-    'baud': 57600,
-}
+MAVLINK_VEHICLE = (
+    {
+        # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
+        'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+        'baud': 57600,
+    }
+    if PROD else
+    {
+        'device': "tcp:localhost:5760",  # SITL on local PC
+    }
+)
 MAVLINK_TUKANO = {
     'device': "udp:127.0.0.1:14551",
 }
-MAVLINK_GROUND = {
-    'device': "/dev/ttyUSB0",
-    # 'device': "udp:127.0.0.1:14552",
-    'baud': 115200,
-}
+MAVLINK_GROUND = (
+    {
+        'device': "/dev/ttyUSB0",  # XBee on USB port (RPi)
+        'baud': 115200,
+    }
+    if PROD else
+    {
+        'device': "udp:127.0.0.1:14552",
+    }
+)
 
 # Ground connections
-MAVLINK_AIRCRAFT = {
-    'device': "/dev/ttyUSB0",
-    # 'device': "udp:127.0.0.1:14552",
-    'baud': 115200,
-}
+MAVLINK_AIRCRAFT = (
+    {
+        'device': "/dev/ttyUSB0",
+        'baud': 115200,
+    }
+    if PROD else
+    {
+        'device': "udp:127.0.0.1:14552",  # XBee on USB port (PC)
+    }
+)
 MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
 }
 
-VEHICLE_COMPONENT = 1
-VEHICLE_SYSTEM = 1
+VEHICLE_IDS = {
+    'component': 1,
+    'system': 1
+}
 
 ###############################################################################
 # External hardware pins
 ###############################################################################
-
-# !!!!!! BE SURE TO NEVER REPEAT PINS!!!!!!
 
 # RGB Led for status indication
 LED_PINS = {
     'red': 12,
     'green': 16,
     'blue': 20,
-}
-
-# AM2302 Temperature, Humidity sensor
-AM2302_PINS = {
-    'out': 4,
-}
-
-# BMP183 Temperature, Pressure sensor
-BMP183_PINS = {
-    'sck': 5,
-    'sdo': 6,
-    'sdi': 13,
-    'cs': 26,
 }
 
 ###############################################################################
@@ -101,4 +105,21 @@ REDIS_DB = 2
 
 REDIS_CONF = {'host': REDIS_HOST, 'port': REDIS_PORT, 'db': REDIS_DB}
 
-# CELERY_BROKER = 'redis://{}:{}/{}'.format(REDIS_HOST, REDIS_PORT, REDIS_DB)
+###############################################################################
+# Serial communication for transferring external data
+###############################################################################
+
+SERIAL_PARAMS = {
+    'port': '/dev/ttyUSB0',  # This must be manually set every time
+    'baudrate': 115200
+}
+
+###############################################################################
+# Websockets parameters
+###############################################################################
+
+WS_ENDPOINT = "ws://localhost:8000/flight"
+WS_TIMEOUT = None
+WS_MSG_TYPES = (
+    'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
+)

@@ -1,6 +1,6 @@
-import time
 import json
 import redis
+import serial
 import logging
 import settings
 
@@ -8,57 +8,56 @@ from datetime import datetime
 
 
 logging.basicConfig(
-    format='%(asctime)s %(message)s',
+    format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
 
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
-redis_queue.flushdb()
-
-
-def am2302_measure():
-    import Adafruit_DHT
-    humidity, temperature = Adafruit_DHT.read_retry(
-        Adafruit_DHT.AM2302,
-        settings.AM2302_PINS['out']
-    )
-    # from random import random
-    # humidity, temperature = 90 + 3 * random(), 17 + 3 * random()
-    data = {
-        'ts': time.time(),
-        'humidity': float("{:.2f}".format(humidity)),
-        'temperature': float("{:.2f}".format(temperature)),
-    }
-    return data
+try:
+    redis_queue.flushdb()
+except redis.ConnectionError:
+    logging.warn("Redis not available!!")
 
 
 def collect_data(position):
-
-    # this is a syncronous job that blocks normal flow
-    # TODO: run sensor mesasures async, then get the last sensed value here
-    # am2302_data = am2302_measure()
-
-    new_data = {
+    sensors_data = {
         'dt': str(datetime.now()),
         'pos': {
             'lat': position['lat'],
             'lon': position['lon'],
             'alt': position['alt'],
-        },
-        'am2302': "am2302_data",
-        'bmp183': "bmp183_data"
+        }
     }
+    try:
+        serial_device = serial.Serial(**settings.SERIAL_PARAMS)
+        json_data = json.loads(serial_device.readline().decode("utf-8"))
+        serial_device.close()
+        sensors_data.update(json_data)
 
-    logging.debug(new_data)
-    redis_queue.lpush('TUKANO_DATA', json.dumps(new_data))
+        try:
+            redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
+        except redis.ConnectionError:
+            logging.warn("Redis not available!!")
+
+        logging.debug(sensors_data)
+        logging.info("Data collected")
+    except ValueError as e:
+        logging.error("BAD JSON", e)
+    except serial.SerialException as e:
+        logging.error(f"Cannot connect to serial adquisition module: {e}")
 
 
 def prepare_data():
     samples = 0
     data = []
     while samples < settings.MAX_SAMPLES_PER_MAVLINK_MESSAGE:
-        sample = redis_queue.rpop('TUKANO_DATA')
+        try:
+            sample = redis_queue.rpop('TUKANO_DATA')
+        except redis.ConnectionError:
+            logging.warn("Redis not available!!")
+            break
+
         if not sample:
             break
 
