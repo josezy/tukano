@@ -18,15 +18,21 @@ logging.basicConfig(
     level=settings.LOGGING_LEVEL
 )
 
-while True:
-    try:
-        vehicle_link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
-        logging.info(f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
-        break
-    except Exception as e:
-        logging.error(f"Vehicle connection error: {e}")
-        time.sleep(3)
 
+def connect_vehicle():
+    while True:
+        try:
+            link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            logging.info(f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
+            break
+        except Exception as e:
+            logging.error(f"Vehicle connection error: {e}")
+            time.sleep(3)
+
+    return link
+
+
+vehicle_link = connect_vehicle()
 
 try:
     ground_link = mavutil.mavlink_connection(
@@ -53,7 +59,13 @@ logging.info("Vehicle hearbeat received!")
 while True:
 
     # From vehicle to ground/tukano
-    vehicle_m = vehicle_link.recv()
+    try:
+        vehicle_m = vehicle_link.recv()
+    except ConnectionResetError as e:
+        logging.error(f"MAVLINK VEHICLE ERROR: {e}")
+        vehicle_link = connect_vehicle()
+        continue
+
     vehicle_msgs = vehicle_link.mav.parse_buffer(vehicle_m)
     if vehicle_msgs:
         for vehicle_msg in vehicle_msgs:
