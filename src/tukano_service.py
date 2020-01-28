@@ -3,6 +3,7 @@ import settings
 import logging
 
 from pymavlink import mavutil
+from websocket import create_connection
 
 from tasks import collect_data, prepare_data
 from camera import Camera
@@ -38,6 +39,7 @@ drone.mav.request_data_stream_send(
 )
 
 cam = Camera()
+cloud_link = None
 
 now = time.time()
 timer_names = ['data_collect', 'data_send', 'take_pic']
@@ -51,41 +53,75 @@ vehicle = {
 leds.success()
 
 
-def process_msgs(link, vehicle):
-    msg = link.recv_msg()
-    msg_type = msg and msg.get_type()
-    message_is_valid = msg_type and msg_type != 'BAD_DATA'
-
-    if message_is_valid:
-
-        if validateSource(msg, settings.VEHICLE_IDS):
-
-            if msg_type == 'HEARTBEAT':
-                vehicle['armed'] = bool(msg.base_mode // 128)
-                logging.debug(f"(HEARTBEAT) {vehicle}")
-
-            if msg_type == 'GLOBAL_POSITION_INT':
-                vehicle['position'] = {
-                    'lat': float(msg.lat) / 10**7,
-                    'lon': float(msg.lon) / 10**7,
-                    'alt': float(msg.alt) / 10**3,
-                }
-                logging.debug(f"(GLOBAL_POSITION_INT) {vehicle}")
-
-    return vehicle
-
-
-def validateSource(msg, ids):
+def is_trustable(msg, ids):
     return all([
         msg.get_srcComponent() == ids['component'],
         msg.get_srcSystem() == ids['system']
     ])
 
 
+def cleanup_msg(link):
+    msg = link.recv_msg()
+    msg_type = msg and msg.get_type()
+    message_is_valid = msg_type and msg_type != 'BAD_DATA'
+    return msg if message_is_valid else None
+
+
+def update_vehicle_state(msg, vehicle):
+    if is_trustable(msg, settings.VEHICLE_IDS):
+        msg_type = msg.get_type()
+
+        if msg_type == 'HEARTBEAT':
+            vehicle['armed'] = bool(msg.base_mode // 128)
+            logging.debug(f"(HEARTBEAT) {vehicle}")
+
+        if msg_type == 'GLOBAL_POSITION_INT':
+            vehicle['position'] = {
+                'lat': float(msg.lat) / 10**7,
+                'lon': float(msg.lon) / 10**7,
+                'alt': float(msg.alt) / 10**3,
+            }
+            logging.debug(f"(GLOBAL_POSITION_INT) {vehicle}")
+
+    return vehicle
+
+
+def create_cloud_link():
+    try:
+        return create_connection(
+            settings.WS_ENDPOINT,
+            timeout=settings.WS_TIMEOUT
+        )
+    except Exception as e:
+        logging.error(f"Cloud link error: {e}")
+
+
+def send_to_cloud(link, msg):
+    if msg.get_type() not in settings.WS_MSG_TYPES:
+        return link
+
+    if link is None:
+        link = create_cloud_link()
+
+    if link is not None:
+        try:
+            link.send(msg.to_json())
+        except BrokenPipeError:
+            logging.error("Broken pipe. Cloud link error")
+            link = None
+
+    return link
+
+
 while True:
     try:
 
-        vehicle = process_msgs(drone, vehicle)
+        mav_msg = cleanup_msg(drone)
+        if mav_msg is None:
+            continue
+
+        vehicle = update_vehicle_state(mav_msg, vehicle)
+        cloud_link = send_to_cloud(cloud_link, mav_msg)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
@@ -106,6 +142,8 @@ while True:
                 else:
                     drone.mav.tukano_data_send(package)
                     logging.info("Data sent to ground")
+                    tukano_msg = drone.mav.tukano_data_encode(package)
+                    cloud_link = send_to_cloud(tukano_msg)
 
             last_tss['data_send'] = now
 
