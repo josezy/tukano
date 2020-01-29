@@ -118,7 +118,10 @@ SERIAL_PARAMS = {
 # Websockets parameters
 ###############################################################################
 
-WS_ENDPOINT = "ws://localhost:8000/flight"
+WS_ENDPOINT = (
+    "wss://tucanoar.com/flight"
+    # "ws://localhost:8000/flight"
+)
 WS_TIMEOUT = None
 WS_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'

@@ -1,3 +1,4 @@
+import ssl
 import json
 import time
 import logging
@@ -33,7 +34,11 @@ logging.info("Aircraft hearbeat received!")
 
 while True:
     try:
-        ws = create_connection(settings.WS_ENDPOINT)
+        ws = create_connection(
+            settings.WS_ENDPOINT,
+            timeout=settings.WS_TIMEOUT,
+            sslopt={"cert_reqs": ssl.CERT_NONE}
+        )
         break
     except Exception as e:
         logging.error(e)

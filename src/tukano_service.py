@@ -1,3 +1,4 @@
+import ssl
 import time
 import settings
 import logging
@@ -90,7 +91,8 @@ def create_cloud_link():
     try:
         return create_connection(
             settings.WS_ENDPOINT,
-            timeout=settings.WS_TIMEOUT
+            timeout=settings.WS_TIMEOUT,
+            sslopt={"cert_reqs": ssl.CERT_NONE}
         )
     except Exception as e:
         logging.error(f"Cloud link error: {e}")
