@@ -2,6 +2,7 @@ import ssl
 import time
 import settings
 import logging
+import traceback
 
 from pymavlink import mavutil
 from websocket import create_connection
@@ -139,13 +140,14 @@ while True:
             if package:
                 pack_len = len(package)
                 logging.info(f"Sending data ({pack_len}): {package}")
-                if pack_len > 254:
-                    logging.warning("MESSAGE TOO LONG TO SEND")
-                else:
-                    drone.mav.tukano_data_send(package)
-                    logging.info("Data sent to ground")
-                    tukano_msg = drone.mav.tukano_data_encode(package)
-                    cloud_link = send_to_cloud(tukano_msg)
+                if pack_len > 1048:
+                    logging.warning("Message too long: Truncating...")
+
+                # drone.mav.tukano_data_send(package)
+                # logging.info("Data sent to ground")
+                tukano_msg = drone.mav.tukano_data_encode(package)
+                cloud_link = send_to_cloud(cloud_link, tukano_msg)
+                logging.info("Data sent to cloud")
 
             last_tss['data_send'] = now
 
@@ -174,3 +176,4 @@ while True:
     except Exception as e:
         leds.error()
         logging.error(f"General error happened: {e}")
+        traceback.print_exc()
