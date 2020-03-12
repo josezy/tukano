@@ -74,7 +74,7 @@ def update_vehicle_state(msg, vehicle):
         msg_type = msg.get_type()
 
         if msg_type == 'HEARTBEAT':
-            vehicle['armed'] = bool(msg.base_mode // 128)
+            vehicle['armed'] = bool(msg.base_mode // 2**7)
             logging.debug(f"(HEARTBEAT) {vehicle}")
 
         if msg_type == 'GLOBAL_POSITION_INT':
