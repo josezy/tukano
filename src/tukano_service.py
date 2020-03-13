@@ -1,4 +1,5 @@
 import ssl
+import json
 import time
 import settings
 import logging
@@ -110,10 +111,42 @@ def send_to_cloud(link, msg):
         try:
             link.send(msg.to_json())
         except BrokenPipeError:
-            logging.error("Broken pipe. Cloud link error")
+            logging.error("[SEND] Broken pipe. Cloud link error")
             link = None
 
     return link
+
+
+def command_from_cloud(link):
+    command = None
+
+    if link is None:
+        link = create_cloud_link()
+
+    if link is not None:
+        try:
+            link.settimeout(0)
+            msg = json.loads(link.recv())
+            if 'command' in msg:
+                command = msg
+        except BrokenPipeError:
+            logging.error("[RECV] Broken pipe. Cloud link error")
+        except (BlockingIOError, json.JSONDecodeError):
+            pass
+
+    return command
+
+
+def command_to_drone(command):
+    mav_cmd = command.pop('command')
+    params = [command.get(f"param{i+1}", 0) for i in range(7)]
+    drone.mav.command_long_send(
+        drone.target_system,
+        drone.target_component,
+        getattr(mavutil.mavlink, mav_cmd),
+        0,  # confirmation (not used yet)
+        *params
+    )
 
 
 while True:
@@ -125,6 +158,9 @@ while True:
 
         vehicle = update_vehicle_state(mav_msg, vehicle)
         cloud_link = send_to_cloud(cloud_link, mav_msg)
+        cloud_command = command_from_cloud(cloud_link)
+        if cloud_command:
+            command_to_drone(cloud_command)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
