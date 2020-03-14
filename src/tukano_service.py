@@ -10,9 +10,11 @@ from websocket import create_connection
 
 from tasks import collect_data, prepare_data
 from camera import Camera
+from actuators import Hook
 from util import leds
 
 
+hook = Hook()
 leds.info()
 logging.basicConfig(
     format=settings.LOGGING_FORMAT,
@@ -149,6 +151,13 @@ def command_to_drone(command):
     )
 
 
+def tukano_command(command):
+    tukano_cmd = command.pop('command')
+    # params = command
+    if tukano_cmd == 'TUKANO_RELEASE_HOOK':
+        hook.release()
+
+
 while True:
     try:
 
@@ -160,7 +169,10 @@ while True:
         cloud_link = send_to_cloud(cloud_link, mav_msg)
         cloud_command = command_from_cloud(cloud_link)
         if cloud_command:
-            command_to_drone(cloud_command)
+            if cloud_command['command'].startswith('TUKANO'):
+                tukano_command(cloud_command)
+            else:
+                command_to_drone(cloud_command)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
