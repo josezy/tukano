@@ -1,5 +1,0 @@
-flake8
-ipdb
-ipython
-
--r base-requirements.txt

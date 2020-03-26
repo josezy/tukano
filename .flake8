@@ -1,3 +1,0 @@
-[flake8]
-select = F,E9
-exclude = data,etc,logs,reblujo,.venv,.git
