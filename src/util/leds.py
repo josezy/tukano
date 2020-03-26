@@ -9,7 +9,7 @@ if settings.PROD:
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
-    for _, led_pin in LED_PINS.items():
+    for led_pin in LED_PINS.values():
         GPIO.setup(led_pin, GPIO.OUT)
 
 

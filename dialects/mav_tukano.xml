@@ -6,7 +6,7 @@
     <messages>
         <message id="99" name="TUKANO_DATA">
             <description>String containing custom data for specific applications.</description>
-            <field type="char[254]" name="text">Data text message, without null termination character.</field>
+            <field type="char[1048]" name="text">Data text message, without null termination character.</field>
         </message>
     </messages>
 </mavlink>

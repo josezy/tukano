@@ -1,15 +1,20 @@
+import ssl
+import json
 import time
 import settings
 import logging
+import traceback
 
 from pymavlink import mavutil
 from websocket import create_connection
 
 from tasks import collect_data, prepare_data
 from camera import Camera
+from actuators import Hook
 from util import leds
 
 
+hook = Hook()
 leds.info()
 logging.basicConfig(
     format=settings.LOGGING_FORMAT,
@@ -72,7 +77,7 @@ def update_vehicle_state(msg, vehicle):
         msg_type = msg.get_type()
 
         if msg_type == 'HEARTBEAT':
-            vehicle['armed'] = bool(msg.base_mode // 128)
+            vehicle['armed'] = bool(msg.base_mode // 2**7)
             logging.debug(f"(HEARTBEAT) {vehicle}")
 
         if msg_type == 'GLOBAL_POSITION_INT':
@@ -90,7 +95,8 @@ def create_cloud_link():
     try:
         return create_connection(
             settings.WS_ENDPOINT,
-            timeout=settings.WS_TIMEOUT
+            timeout=settings.WS_TIMEOUT,
+            sslopt={"cert_reqs": ssl.CERT_NONE}
         )
     except Exception as e:
         logging.error(f"Cloud link error: {e}")
@@ -107,10 +113,49 @@ def send_to_cloud(link, msg):
         try:
             link.send(msg.to_json())
         except BrokenPipeError:
-            logging.error("Broken pipe. Cloud link error")
+            logging.error("[SEND] Broken pipe. Cloud link error")
             link = None
 
     return link
+
+
+def command_from_cloud(link):
+    command = None
+
+    if link is None:
+        link = create_cloud_link()
+
+    if link is not None:
+        try:
+            link.settimeout(0)
+            msg = json.loads(link.recv())
+            if 'command' in msg:
+                command = msg
+        except BrokenPipeError:
+            logging.error("[RECV] Broken pipe. Cloud link error")
+        except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
+            pass
+
+    return command
+
+
+def command_to_drone(command):
+    mav_cmd = command.pop('command')
+    params = [command.get(f"param{i+1}", 0) for i in range(7)]
+    drone.mav.command_long_send(
+        drone.target_system,
+        drone.target_component,
+        getattr(mavutil.mavlink, mav_cmd),
+        0,  # confirmation (not used yet)
+        *params
+    )
+
+
+def tukano_command(command):
+    tukano_cmd = command.pop('command')
+    # params = command
+    if tukano_cmd == 'TUKANO_RELEASE_HOOK':
+        hook.release()
 
 
 while True:
@@ -122,6 +167,12 @@ while True:
 
         vehicle = update_vehicle_state(mav_msg, vehicle)
         cloud_link = send_to_cloud(cloud_link, mav_msg)
+        cloud_command = command_from_cloud(cloud_link)
+        if cloud_command:
+            if cloud_command['command'].startswith('TUKANO'):
+                tukano_command(cloud_command)
+            else:
+                command_to_drone(cloud_command)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
@@ -137,13 +188,14 @@ while True:
             if package:
                 pack_len = len(package)
                 logging.info(f"Sending data ({pack_len}): {package}")
-                if pack_len > 254:
-                    logging.warning("MESSAGE TOO LONG TO SEND")
-                else:
-                    drone.mav.tukano_data_send(package)
-                    logging.info("Data sent to ground")
-                    tukano_msg = drone.mav.tukano_data_encode(package)
-                    cloud_link = send_to_cloud(tukano_msg)
+                if pack_len > 1048:
+                    logging.warning("Message too long: Truncating...")
+
+                # drone.mav.tukano_data_send(package)
+                # logging.info("Data sent to ground")
+                tukano_msg = drone.mav.tukano_data_encode(package)
+                cloud_link = send_to_cloud(cloud_link, tukano_msg)
+                logging.info("Data sent to cloud")
 
             last_tss['data_send'] = now
 
@@ -172,3 +224,4 @@ while True:
     except Exception as e:
         leds.error()
         logging.error(f"General error happened: {e}")
+        traceback.print_exc()
