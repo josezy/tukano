@@ -133,7 +133,7 @@ def command_from_cloud(link):
                 command = msg
         except BrokenPipeError:
             logging.error("[RECV] Broken pipe. Cloud link error")
-        except (BlockingIOError, json.JSONDecodeError):
+        except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
             pass
 
     return command
