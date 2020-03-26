@@ -124,7 +124,7 @@ SERIAL_PARAMS = {
 ###############################################################################
 
 WS_ENDPOINT = (
-    "wss://tucanoar.com/flight"
+    "wss://icaro.tucanoar.com/flight"
     # "ws://localhost:8000/flight"
 )
 WS_TIMEOUT = None
