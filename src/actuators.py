@@ -23,4 +23,4 @@ class Hook(object):
         if settings.PROD:
             GPIO.output(self.trigger_pin, GPIO.HIGH)
         self.released = True
-        print("Parachute unfolded")
+        print("Hook released")
