@@ -7,8 +7,8 @@ def append_json_file(filename, new_data):
     file_path = f"{settings.DATA_DIR}/{filename}"
     data_collected = load_json_file(file_path)
 
-    # append data to 'data_collected' dict
-    data_collected[len(data_collected)] = new_data
+    # append data to 'data_collected' list
+    data_collected += [new_data]
     save_json_file(file_path, data_collected)
 
 
