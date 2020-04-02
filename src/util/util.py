@@ -20,14 +20,14 @@ def save_json_file(file_path, json_data):
 def load_json_file(file_path):
     if not os.path.isfile(file_path):
         with open(file_path, 'w+') as fp:
-            json.dump({}, fp)
-        return {}
+            json.dump([], fp)
+        return []
 
     with open(file_path, 'r+') as fp:
         try:
             data = json.load(fp)
         except Exception:
             fp.truncate(0)
-            json.dump({}, fp)
-            data = {}
+            json.dump([], fp)
+            data = []
     return data
