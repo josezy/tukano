@@ -19,6 +19,7 @@ BASE_DIR = os.path.dirname(SRC_DIR)
 DATA_DIR = f"{BASE_DIR}/data"
 PICS_DIR = f"{DATA_DIR}/pics"
 VIDEOS_DIR = f"{DATA_DIR}/videos"
+LOGS_DIR = f"{DATA_DIR}/logs"
 
 ###############################################################################
 # Connection parameters
