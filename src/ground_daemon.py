@@ -49,7 +49,7 @@ session_name = datetime.now().strftime("%Y_%m_%d_%H_%M")
 
 def save_to_file(msg):
     data = json.loads(msg.text)
-    append_json_file(f"{session_name}.json", data, settings.SESSION_KEY)
+    append_json_file(f"{session_name}.json", data)
     logging.debug(data)
 
 

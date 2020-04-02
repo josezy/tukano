@@ -2,11 +2,12 @@ import os
 import json
 import settings
 
-def append_json_file(filename, new_data, data_key):
-    file_path = f"{settings.LOGS_DIR}/{filename}"
-    data_collected = load_json_file(file_path, data_key)
 
-    data_collected[data_key].append( new_data )
+def append_json_file(filename, new_data):
+    file_path = f"{settings.LOGS_DIR}/{filename}"
+    data_collected = load_json_file(file_path)
+
+    data_collected += [new_data]
     save_json_file(file_path, data_collected)
 
 
@@ -15,20 +16,18 @@ def save_json_file(file_path, json_data):
         json.dump(json_data, file)
 
 
-def load_json_file(file_path, data_key):
+def load_json_file(file_path):
     if not os.path.isfile(file_path):
-        with open(file_path, 'w+') as fp:
-            data = {}
-            data[data_key] = []
-            json.dump(data, fp)
+        with open(file_path, 'w+') as file:
+            data = []
+            json.dump(data, file)
         return data
 
-    with open(file_path, 'r+') as fp:
+    with open(file_path, 'r+') as file:
         try:
-            data = json.load(fp)
+            data = json.load(file)
         except Exception:
-            fp.truncate(0)
-            data = {}
-            data[data_key] = []
-            json.dump(data, fp)           
+            file.truncate(0)
+            data = []
+            json.dump(data, file)
     return data

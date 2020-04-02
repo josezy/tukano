@@ -5,7 +5,7 @@ import logging
 import settings
 
 from datetime import datetime
-from util import util
+from util.util import append_json_file
 
 
 logging.basicConfig(
@@ -64,11 +64,8 @@ def collect_data(position):
         except redis.ConnectionError:
             logging.warn("Redis not available!!")
 
-        try:
-            file_name = datetime.now().strftime("%Y_%m_%d")
-            util.append_json_file(f"{file_name}.json", sensors_data, settings.SENSORS_KEY)
-        except ValueError as e:
-            logging.error("Error writing data to logger file", e)
+        file_name = f"{datetime.now().strftime('%Y_%m_%d')}.json"
+        append_json_file(file_name, sensors_data)
 
         logging.debug(sensors_data)
         logging.info("Data collected")

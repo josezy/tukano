@@ -20,6 +20,7 @@ DATA_DIR = f"{BASE_DIR}/data"
 PICS_DIR = f"{DATA_DIR}/pics"
 VIDEOS_DIR = f"{DATA_DIR}/videos"
 LOGS_DIR = f"{DATA_DIR}/logs"
+
 ###############################################################################
 # Connection parameters
 ###############################################################################
@@ -131,10 +132,3 @@ WS_TIMEOUT = None
 WS_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
 )
-
-###############################################################################
-# Keys for log data in a logger file
-###############################################################################
-
-SENSORS_KEY = 'sensors'
-SESSION_KEY = 'session'
