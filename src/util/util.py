@@ -12,22 +12,21 @@ def append_json_file(filename, new_data):
 
 
 def save_json_file(file_path, json_data):
-    with open(file_path, 'w+') as file:
-        json.dump(json_data, file)
+    with open(file_path, 'w') as fp:
+        json.dump(json_data, fp)
 
 
 def load_json_file(file_path):
     if not os.path.isfile(file_path):
-        with open(file_path, 'w+') as file:
-            data = []
-            json.dump(data, file)
-        return data
+        with open(file_path, 'w+') as fp:
+            json.dump([], fp)
+        return []
 
-    with open(file_path, 'r+') as file:
+    with open(file_path, 'r+') as fp:
         try:
-            data = json.load(file)
+            data = json.load(fp)
         except Exception:
-            file.truncate(0)
+            fp.truncate(0)
+            json.dump([], fp)
             data = []
-            json.dump(data, file)
     return data
