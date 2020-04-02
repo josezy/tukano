@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(SRC_DIR)
 DATA_DIR = f"{BASE_DIR}/data"
 PICS_DIR = f"{DATA_DIR}/pics"
 VIDEOS_DIR = f"{DATA_DIR}/videos"
-
+LOGS_DIR = f"{DATA_DIR}/logs"
 ###############################################################################
 # Connection parameters
 ###############################################################################
@@ -90,8 +90,8 @@ HOOK = {
 # Flight tasks parameters
 ###############################################################################
 
-DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
-DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
+DATA_COLLECT_MIN_ALT = 9               # Collect data above N meters
+DATA_COLLECT_TIMESPAN = 1             # Collect data every Z seconds
 
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 
@@ -131,3 +131,10 @@ WS_TIMEOUT = None
 WS_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
 )
+
+###############################################################################
+# Keys for log data in a logger file
+###############################################################################
+
+SENSORS_KEY = 'sensors'
+SESSION_KEY = 'session'

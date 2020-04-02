@@ -5,6 +5,7 @@ import logging
 import settings
 
 from datetime import datetime
+from util import util
 
 
 logging.basicConfig(
@@ -62,6 +63,12 @@ def collect_data(position):
             redis_queue.lpush('TUKANO_DATA', json.dumps(sensors_data))
         except redis.ConnectionError:
             logging.warn("Redis not available!!")
+
+        try:
+            file_name = datetime.now().strftime("%Y_%m_%d")
+            util.append_json_file(f"{file_name}.json", sensors_data, settings.SENSORS_KEY)
+        except ValueError as e:
+            logging.error("Error writing data to logger file", e)
 
         logging.debug(sensors_data)
         logging.info("Data collected")
