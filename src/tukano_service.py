@@ -119,8 +119,8 @@ def send_to_cloud(link, msg):
     return link
 
 
-def command_from_cloud(link):
-    command = None
+def data_from_cloud(link):
+    mavmsg = None
 
     if link is None:
         link = create_cloud_link()
@@ -129,14 +129,17 @@ def command_from_cloud(link):
         try:
             link.settimeout(0)
             msg = json.loads(link.recv())
-            if 'command' in msg:
-                command = msg
+            if any([
+                'command' in msg,
+                'message' in msg,
+            ]):
+                mavmsg = msg
         except BrokenPipeError:
             logging.error("[RECV] Broken pipe. Cloud link error")
         except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
             pass
 
-    return command
+    return mavmsg
 
 
 def command_to_drone(command):
@@ -149,6 +152,13 @@ def command_to_drone(command):
         0,  # confirmation (not used yet)
         *params
     )
+
+
+def process_message(message):
+    mavmsg = message.pop('message')
+    args = message.values()
+    mavmsg_send = getattr(drone.mav, f"{mavmsg.lower()}_send")
+    mavmsg_send(*args)
 
 
 def tukano_command(command):
@@ -167,12 +177,16 @@ while True:
 
         vehicle = update_vehicle_state(mav_msg, vehicle)
         cloud_link = send_to_cloud(cloud_link, mav_msg)
-        cloud_command = command_from_cloud(cloud_link)
-        if cloud_command:
-            if cloud_command['command'].startswith('TUKANO'):
-                tukano_command(cloud_command)
+
+        cloud_data = data_from_cloud(cloud_link)
+        if cloud_data and 'command' in cloud_data:
+            if cloud_data['command'].startswith('TUKANO'):
+                tukano_command(cloud_data)
             else:
-                command_to_drone(cloud_command)
+                command_to_drone(cloud_data)
+
+        if cloud_data and 'message' in cloud_data:
+            process_message(cloud_data)
 
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
