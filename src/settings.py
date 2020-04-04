@@ -1,4 +1,5 @@
 import os
+import ssl
 import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
@@ -6,7 +7,7 @@ os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 PROD = False  # Development flag
 
 SLEEPING_TIME = 0.0001
-LOGGING_LEVEL = logging.DEBUG  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+LOGGING_LEVEL = logging.INFO  # DEBUG-INFO-WARNING-ERROR-CRITICAL
 LOGGING_FORMAT = '[%(levelname)s] %(asctime)s: %(message)s'
 
 ###############################################################################
@@ -126,9 +127,14 @@ SERIAL_PARAMS = {
 
 WS_ENDPOINT = (
     "wss://icaro.tucanoar.com/flight"
-    # "ws://localhost:8000/flight"
+    if PROD else
+    "ws://localhost:8000/flight"
 )
-WS_TIMEOUT = None
+
+WS_CONNECTION_PARAMS = (
+    {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
+)
+
 WS_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT'
 )
