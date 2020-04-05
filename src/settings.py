@@ -35,7 +35,8 @@ MAVLINK_VEHICLE = (
     }
     if PROD else
     {
-        'device': "tcp:localhost:5760",  # SITL on local PC
+        # 'device': "tcp:localhost:5760",  # dronekit-sitlL on local PC
+        'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
     }
 )
 MAVLINK_TUKANO = {
@@ -93,7 +94,7 @@ HOOK = {
 ###############################################################################
 
 DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
-DATA_COLLECT_TIMESPAN = 0.4             # Collect data every Z seconds
+DATA_COLLECT_TIMESPAN = 2               # Collect data every Z seconds
 
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 

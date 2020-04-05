@@ -168,6 +168,8 @@ def tukano_command(command):
 
 
 while True:
+    time.sleep(settings.SLEEPING_TIME)
+
     try:
 
         mav_msg = cleanup_msg(drone)
@@ -200,7 +202,7 @@ while True:
             package = prepare_data()
             if package:
                 pack_len = len(package)
-                logging.info(f"Sending data ({pack_len}): {package}")
+                logging.debug(f"Sending data ({pack_len}): {package}")
                 if pack_len > 1048:
                     logging.warning("Message too long: Truncating...")
 

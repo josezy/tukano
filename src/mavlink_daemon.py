@@ -1,6 +1,8 @@
 """
     Remember to generate MAVLink library with
-    mavgen.py --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml
+    mavgen.py --wire-protocol=2.0 \
+        --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v20/mav_tukano.py \
+        dialects/mav_tukano.xml
     after changing dialects/mav_tukano.xml, otherwise this code may not work
 """
 
