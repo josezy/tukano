@@ -15,6 +15,18 @@ from util import leds
 
 
 hook = Hook()
+cam = Camera()
+cloud_link = None
+
+now = time.time()
+timer_names = ['data_collect', 'data_send', 'take_pic']
+last_tss = {tn: now for tn in timer_names}
+
+vehicle = {
+    'armed': False,
+    'position': None
+}
+
 leds.info()
 logging.basicConfig(
     format=settings.LOGGING_FORMAT,
@@ -32,36 +44,26 @@ while True:
         logging.warning("Retrying...")
 
 
-drone.wait_heartbeat()
+heartbeat = drone.wait_heartbeat()
 logging.info("Hearbeat received!")
 
+system_id = heartbeat.get_srcSystem()
+component_id = heartbeat.get_srcComponent()
 drone.mav.request_data_stream_send(
-    drone.target_system,
-    drone.target_component,
-    mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
+    system_id,
+    component_id,
+    mavutil.mavlink.MAV_DATA_STREAM_ALL,
     1,  # Rate in Hertz
     1  # Start/Stop
 )
 
-cam = Camera()
-cloud_link = None
-
-now = time.time()
-timer_names = ['data_collect', 'data_send', 'take_pic']
-last_tss = {tn: now for tn in timer_names}
-
-vehicle = {
-    'armed': False,
-    'position': None
-}
-
 leds.success()
 
 
-def is_trustable(msg, ids):
+def is_trustable(msg):
     return all([
-        msg.get_srcComponent() == ids['component'],
-        msg.get_srcSystem() == ids['system']
+        msg.get_srcSystem() == system_id,
+        msg.get_srcComponent() == component_id
     ])
 
 
@@ -73,7 +75,7 @@ def cleanup_msg(link):
 
 
 def update_vehicle_state(msg, vehicle):
-    if is_trustable(msg, settings.VEHICLE_IDS):
+    if is_trustable(msg):
         msg_type = msg.get_type()
 
         if msg_type == 'HEARTBEAT':
@@ -110,7 +112,11 @@ def send_to_cloud(link, msg):
 
     if link is not None:
         try:
-            link.send(msg.to_json())
+            link.send(json.dumps({
+                'srcSystem': msg.get_srcSystem(),
+                'srcComponent': msg.get_srcComponent(),
+                **msg.to_dict()
+            }))
         except BrokenPipeError:
             logging.error("[SEND] Broken pipe. Cloud link error")
             link = None
@@ -143,10 +149,12 @@ def data_from_cloud(link):
 
 def command_to_drone(command):
     mav_cmd = command.pop('command')
+    target_system = command.pop('target_system')
+    target_component = command.pop('target_component')
     params = [command.get(f"param{i+1}", 0) for i in range(7)]
     drone.mav.command_long_send(
-        drone.target_system,
-        drone.target_component,
+        target_system,
+        target_component,
         getattr(mavutil.mavlink, mav_cmd),
         0,  # confirmation (not used yet)
         *params

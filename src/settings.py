@@ -35,8 +35,8 @@ MAVLINK_VEHICLE = (
     }
     if PROD else
     {
-        # 'device': "tcp:localhost:5760",  # dronekit-sitlL on local PC
-        'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
+        'device': "tcp:localhost:5760",  # dronekit-sitl on local PC
+        # 'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
     }
 )
 MAVLINK_TUKANO = {
@@ -66,11 +66,6 @@ MAVLINK_AIRCRAFT = (
 )
 MAVLINK_GCS = {
     'device': "udp:127.0.0.1:14550",
-}
-
-VEHICLE_IDS = {
-    'component': 1,
-    'system': 1
 }
 
 ###############################################################################
