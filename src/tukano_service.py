@@ -105,44 +105,33 @@ def create_cloud_link():
 
 def send_to_cloud(link, msg):
     if msg.get_type() not in settings.WS_MSG_TYPES:
-        return link
+        return
 
-    if link is None:
-        link = create_cloud_link()
-
-    if link is not None:
-        try:
-            link.send(json.dumps({
-                'srcSystem': msg.get_srcSystem(),
-                'srcComponent': msg.get_srcComponent(),
-                **msg.to_dict()
-            }))
-        except BrokenPipeError:
-            logging.error("[SEND] Broken pipe. Cloud link error")
-            link = None
-
-    return link
+    try:
+        link.send(json.dumps({
+            'srcSystem': msg.get_srcSystem(),
+            'srcComponent': msg.get_srcComponent(),
+            **msg.to_dict()
+        }))
+    except BrokenPipeError:
+        logging.error("[SEND] Broken pipe. Cloud link error")
 
 
 def data_from_cloud(link):
     mavmsg = None
 
-    if link is None:
-        link = create_cloud_link()
-
-    if link is not None:
-        try:
-            link.settimeout(0)
-            msg = json.loads(link.recv())
-            if any([
-                'command' in msg,
-                'message' in msg,
-            ]):
-                mavmsg = msg
-        except BrokenPipeError:
-            logging.error("[RECV] Broken pipe. Cloud link error")
-        except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
-            pass
+    try:
+        link.settimeout(0)
+        msg = json.loads(link.recv())
+        if any([
+            'command' in msg,
+            'message' in msg,
+        ]):
+            mavmsg = msg
+    except BrokenPipeError:
+        logging.error("[RECV] Broken pipe. Cloud link error")
+    except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
+        pass
 
     return mavmsg
 
@@ -185,18 +174,24 @@ while True:
             continue
 
         vehicle = update_vehicle_state(mav_msg, vehicle)
-        cloud_link = send_to_cloud(cloud_link, mav_msg)
 
-        cloud_data = data_from_cloud(cloud_link)
-        if cloud_data and 'command' in cloud_data:
-            if cloud_data['command'].startswith('TUKANO'):
-                tukano_command(cloud_data)
-            else:
-                command_to_drone(cloud_data)
+        if cloud_link is None:
+            cloud_link = create_cloud_link()
 
-        if cloud_data and 'message' in cloud_data:
-            process_message(cloud_data)
+        if cloud_link is not None:
+            send_to_cloud(cloud_link, mav_msg)
 
+            cloud_data = data_from_cloud(cloud_link)
+            if cloud_data and 'command' in cloud_data:
+                if cloud_data['command'].startswith('TUKANO'):
+                    tukano_command(cloud_data)
+                else:
+                    command_to_drone(cloud_data)
+
+            if cloud_data and 'message' in cloud_data:
+                process_message(cloud_data)
+
+        # Tasks
         now = time.time()
         elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
 
@@ -217,7 +212,7 @@ while True:
                 # drone.mav.tukano_data_send(package)
                 # logging.info("Data sent to ground")
                 tukano_msg = drone.mav.tukano_data_encode(package)
-                cloud_link = send_to_cloud(cloud_link, tukano_msg)
+                send_to_cloud(cloud_link, tukano_msg)
                 logging.info("Data sent to cloud")
 
             last_tss['data_send'] = now
