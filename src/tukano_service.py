@@ -4,6 +4,7 @@ import time
 import settings
 import logging
 import traceback
+import websocket
 
 from pymavlink import mavutil
 from websocket import create_connection
@@ -113,7 +114,7 @@ def send_to_cloud(link, msg):
             'srcComponent': msg.get_srcComponent(),
             **msg.to_dict()
         }))
-    except BrokenPipeError:
+    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
         logging.error("[SEND] Broken pipe. Cloud link error")
 
 
@@ -128,7 +129,7 @@ def data_from_cloud(link):
             'message' in msg,
         ]):
             mavmsg = msg
-    except BrokenPipeError:
+    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
         logging.error("[RECV] Broken pipe. Cloud link error")
     except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
         pass
@@ -175,10 +176,10 @@ while True:
 
         vehicle = update_vehicle_state(mav_msg, vehicle)
 
-        if cloud_link is None:
+        if cloud_link is None or not cloud_link.connected:
             cloud_link = create_cloud_link()
 
-        if cloud_link is not None:
+        if cloud_link is not None and cloud_link.connected:
             send_to_cloud(cloud_link, mav_msg)
 
             cloud_data = data_from_cloud(cloud_link)
