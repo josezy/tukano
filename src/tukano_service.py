@@ -5,6 +5,8 @@ import settings
 import logging
 import traceback
 
+import timer as Timer
+
 from pymavlink import mavutil
 from websocket import create_connection
 
@@ -14,49 +16,43 @@ from actuators import Hook
 from util import leds
 
 
-hook = Hook()
-leds.info()
-logging.basicConfig(
-    format=settings.LOGGING_FORMAT,
-    level=settings.LOGGING_LEVEL
-)
-logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
+def logging_config():
+    logging.basicConfig(
+        format=settings.LOGGING_FORMAT,
+        level=settings.LOGGING_LEVEL
+    )
+    logging.info(f"Initialising vehicle at {settings.MAVLINK_VEHICLE['device']}")
 
 
-while True:
-    try:
-        drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
-        break
-    except Exception as e:
-        logging.warning(f"MAVLink vehicle connection failed: {e}")
-        logging.warning("Retrying...")
+def get_drone():
+    while True:
+        try:
+            drone =  mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            break
+        except Exception as e:
+            logging.warning(f"MAVLink vehicle connection failed: {e}")
+            logging.warning("Retrying...")
+
+    drone.wait_heartbeat()
+    logging.info("Hearbeat received!")
+
+    drone.mav.request_data_stream_send(
+        drone.target_system,
+        drone.target_component,
+        mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
+        1,  # Rate in Hertz
+        1  # Start/Stop
+    )
+
+    return drone
 
 
-drone.wait_heartbeat()
-logging.info("Hearbeat received!")
-
-drone.mav.request_data_stream_send(
-    drone.target_system,
-    drone.target_component,
-    mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
-    1,  # Rate in Hertz
-    1  # Start/Stop
-)
-
-cam = Camera()
-cloud_link = None
-
-now = time.time()
-timer_names = ['data_collect', 'data_send', 'take_pic']
-last_tss = {tn: now for tn in timer_names}
-
-vehicle = {
-    'armed': False,
-    'position': None
-}
-
-leds.success()
-
+def get_vehicle():
+    return {
+        'armed': False,
+        'position': None,
+        'battery' : None
+    }
 
 def is_trustable(msg, ids):
     return all([
@@ -88,6 +84,8 @@ def update_vehicle_state(msg, vehicle):
             }
             logging.debug(f"(GLOBAL_POSITION_INT) {vehicle}")
 
+        if msg_type == "SYS_STATUS":
+            vehicle['battery'] = msg.battery_remaining
     return vehicle
 
 
@@ -164,8 +162,19 @@ def tukano_command(command):
     tukano_cmd = command.pop('command')
     # params = command
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
+        hook = Hook()
         hook.release()
 
+leds.info()
+logging_config()
+
+drone = get_drone()
+vehicle = get_vehicle()
+
+timer = Timer.Timer()
+cam = Camera()
+cloud_link = None
+leds.success()
 
 while True:
     try:
@@ -188,13 +197,13 @@ while True:
             process_message(cloud_data)
 
         now = time.time()
-        elapsed_times = {tn: now - last_tss[tn] for tn in timer_names}
+        elapsed_times = {tn: now - timer.last_tss[tn] for tn in timer.timer_names}
 
         if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
             if vehicle['armed'] and vehicle['position']:
                 if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
                     collect_data(vehicle['position'])
-                    last_tss['data_collect'] = now
+                    timer.last_tss['data_collect'] = now
 
         if elapsed_times['data_send'] > settings.MAVLINK_SAMPLES_TIMESPAN:
             package = prepare_data()
@@ -210,7 +219,7 @@ while True:
                 cloud_link = send_to_cloud(cloud_link, tukano_msg)
                 logging.info("Data sent to cloud")
 
-            last_tss['data_send'] = now
+            timer.last_tss['data_send'] = now
 
         if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
             if vehicle['armed']:
@@ -223,7 +232,7 @@ while True:
                 else:
                     pic_name = cam.take_pic()
 
-                last_tss['take_pic'] = now
+                timer.last_tss['take_pic'] = now
                 logging.info(f"Pic taken '{pic_name}'")
 
         if vehicle['armed'] and not cam.is_recording:
