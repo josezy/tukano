@@ -34,12 +34,15 @@ def get_drone():
             logging.warning(f"MAVLink vehicle connection failed: {e}")
             logging.warning("Retrying...")
 
-    drone.wait_heartbeat()
+    heartbeat = drone.wait_heartbeat()
     logging.info("Hearbeat received!")
 
+    system_id = heartbeat.get_srcSystem()
+    component_id = heartbeat.get_srcComponent()
+
     drone.mav.request_data_stream_send(
-        drone.target_system,
-        drone.target_component,
+        system_id,
+        component_id,
         mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
         1,  # Rate in Hertz
         1  # Start/Stop
@@ -56,7 +59,10 @@ def get_vehicle():
     }
 
 
-def is_trustable(msg):
+def is_trustable(msg, heartbeat):
+    system_id = heartbeat.get_srcSystem()
+    component_id = heartbeat.get_srcComponent()
+
     return all([
         msg.get_srcSystem() == system_id,
         msg.get_srcComponent() == component_id
@@ -70,8 +76,8 @@ def cleanup_msg(link):
     return msg if message_is_valid else None
 
 
-def update_vehicle_state(msg, vehicle):
-    if is_trustable(msg):
+def update_vehicle_state(msg, vehicle, heartbeat):
+    if is_trustable(msg, heartbeat):
         msg_type = msg.get_type()
 
         if msg_type == 'HEARTBEAT':
@@ -159,18 +165,19 @@ def tukano_command(command):
     tukano_cmd = command.pop('command')
     # params = command
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
-        hook = Hook()
         hook.release()
 
 leds.info()
 logging_config()
 
 drone = get_drone()
+heartbeat = drone.wait_heartbeat()
 vehicle = get_vehicle()
 
-timer = Timer.Timer()
+timer = Timer.Timer(['collect_data', 'send_data', 'take_pic'])
+hook = Hook()
 cam = Camera()
-cloud_link = None
+cloud_link = create_cloud_link()
 leds.success()
 
 while True:
@@ -182,7 +189,7 @@ while True:
         if mav_msg is None:
             continue
 
-        vehicle = update_vehicle_state(mav_msg, vehicle)
+        vehicle = update_vehicle_state(mav_msg, vehicle, heartbeat)
 
         if cloud_link is None or not cloud_link.connected:
             cloud_link = create_cloud_link()
@@ -204,13 +211,12 @@ while True:
         now = time.time()
         elapsed_times = {tn: now - timer.last_tss[tn] for tn in timer.timer_names}
 
-        if elapsed_times['data_collect'] > settings.DATA_COLLECT_TIMESPAN:
+        if timer.can_collect_data():  
             if vehicle['armed'] and vehicle['position']:
                 if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
                     collect_data(vehicle['position'])
-                    timer.last_tss['data_collect'] = now
 
-        if elapsed_times['data_send'] > settings.MAVLINK_SAMPLES_TIMESPAN:
+        if timer.can_send_data():
             package = prepare_data()
             if package:
                 pack_len = len(package)
@@ -224,10 +230,8 @@ while True:
                 send_to_cloud(cloud_link, tukano_msg)
                 logging.info("Data sent to cloud")
 
-            timer.last_tss['data_send'] = now
-
-        if elapsed_times['take_pic'] > settings.TAKE_PIC_TIMESPAN:
-            if vehicle['armed']:
+        if timer.can_take_pic():
+            if vehicle['armed'] and vehicle['battery'] > 30:
                 if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={
                         'lat': vehicle['position']['lat'],
@@ -237,7 +241,6 @@ while True:
                 else:
                     pic_name = cam.take_pic()
 
-                timer.last_tss['take_pic'] = now
                 logging.info(f"Pic taken '{pic_name}'")
 
         if vehicle['armed'] and not cam.is_recording:
