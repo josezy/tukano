@@ -16,10 +16,8 @@ class Hook():
         self.released = False
 
     def release(self):
-        trigger_pin_on()
-        self.released = True
-        print("Hook released")
-
-    def trigger_pin_on(self):
         if settings.PROD:
             GPIO.output(self.trigger_pin, GPIO.HIGH)
+
+        self.released = True
+        print("Hook released")

@@ -6,8 +6,6 @@ import logging
 import traceback
 import websocket
 
-import timer as Timer
-
 from pymavlink import mavutil
 from websocket import create_connection
 
@@ -15,57 +13,32 @@ from tasks import collect_data, prepare_data
 from camera import Camera
 from actuators import Hook
 from util import leds
+from timer import Timer
 
 
-def logging_config():
-    logging.basicConfig(
-        format=settings.LOGGING_FORMAT,
-        level=settings.LOGGING_LEVEL
-    )
-    logging.info(f"Initialising vehicle at {settings.MAVLINK_VEHICLE['device']}")
+logging.basicConfig(
+    format=settings.LOGGING_FORMAT,
+    level=settings.LOGGING_LEVEL
+)
+logging.info(f"Initialising vehicle at {settings.MAVLINK_VEHICLE['device']}")
 
 
-def get_drone():
+def init_drone():
     while True:
         try:
-            drone =  mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            drone = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
             break
         except Exception as e:
             logging.warning(f"MAVLink vehicle connection failed: {e}")
             logging.warning("Retrying...")
 
-    heartbeat = drone.wait_heartbeat()
-    logging.info("Hearbeat received!")
-
-    system_id = heartbeat.get_srcSystem()
-    component_id = heartbeat.get_srcComponent()
-
-    drone.mav.request_data_stream_send(
-        system_id,
-        component_id,
-        mavutil.mavlink.MAV_DATA_STREAM_ALL,  # req_stream_id
-        1,  # Rate in Hertz
-        1  # Start/Stop
-    )
-
     return drone
 
 
-def get_vehicle():
-    return {
-        'armed': False,
-        'position': None,
-        'battery' : None
-    }
-
-
-def is_trustable(msg, heartbeat):
-    system_id = heartbeat.get_srcSystem()
-    component_id = heartbeat.get_srcComponent()
-
+def is_trustable(msg, vehicle):
     return all([
-        msg.get_srcSystem() == system_id,
-        msg.get_srcComponent() == component_id
+        msg.get_srcSystem() == vehicle['system_id'],
+        msg.get_srcComponent() == vehicle['component_id']
     ])
 
 
@@ -76,13 +49,14 @@ def cleanup_msg(link):
     return msg if message_is_valid else None
 
 
-def update_vehicle_state(msg, vehicle, heartbeat):
-    if is_trustable(msg, heartbeat):
+def update_vehicle_state(msg, vehicle):
+    if is_trustable(msg, vehicle):
         msg_type = msg.get_type()
 
         if msg_type == 'HEARTBEAT':
-            vehicle['armed'] = bool(msg.base_mode // 2**7)
-            logging.debug(f"(HEARTBEAT) {vehicle}")
+            vehicle['armed'] = bool(msg.base_mode & 2**7)
+            vehicle['system_id'] = msg.get_srcSystem()
+            vehicle['component_id'] = msg.get_srcComponent()
 
         if msg_type == 'GLOBAL_POSITION_INT':
             vehicle['position'] = {
@@ -90,10 +64,11 @@ def update_vehicle_state(msg, vehicle, heartbeat):
                 'lon': float(msg.lon) / 10**7,
                 'alt': float(msg.alt) / 10**3,
             }
-            logging.debug(f"(GLOBAL_POSITION_INT) {vehicle}")
 
         if msg_type == "SYS_STATUS":
             vehicle['battery'] = msg.battery_remaining
+
+        logging.debug(f"({msg_type}) {vehicle}")
     return vehicle
 
 
@@ -167,14 +142,31 @@ def tukano_command(command):
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
         hook.release()
 
+
 leds.info()
-logging_config()
 
-drone = get_drone()
+drone = init_drone()
 heartbeat = drone.wait_heartbeat()
-vehicle = get_vehicle()
 
-timer = Timer.Timer(['collect_data', 'send_data', 'take_pic'])
+logging.info("Hearbeat received!")
+
+vehicle = {
+    'system_id': heartbeat.get_srcSystem(),
+    'component_id': heartbeat.get_srcComponent(),
+    'armed': False,
+    'position': None,
+    'battery': None
+}
+
+drone.mav.request_data_stream_send(
+    vehicle['system_id'],
+    vehicle['component_id'],
+    mavutil.mavlink.MAV_DATA_STREAM_ALL,
+    1,  # Rate in Hertz
+    1  # Start/Stop
+)
+
+timer = Timer(['collect_data', 'send_data', 'take_pic'])
 hook = Hook()
 cam = Camera()
 cloud_link = create_cloud_link()
@@ -189,7 +181,7 @@ while True:
         if mav_msg is None:
             continue
 
-        vehicle = update_vehicle_state(mav_msg, vehicle, heartbeat)
+        vehicle = update_vehicle_state(mav_msg, vehicle)
 
         if cloud_link is None or not cloud_link.connected:
             cloud_link = create_cloud_link()
@@ -211,7 +203,7 @@ while True:
         now = time.time()
         elapsed_times = {tn: now - timer.last_tss[tn] for tn in timer.timer_names}
 
-        if timer.can_collect_data():  
+        if timer.can_collect_data():
             if vehicle['armed'] and vehicle['position']:
                 if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
                     collect_data(vehicle['position'])
