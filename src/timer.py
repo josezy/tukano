@@ -1,34 +1,20 @@
 import time
-import settings
 
 
 class Timer:
-    timer_names = None
-    last_tss = None
-
-    def __init__(self, names):
-        self.timer_names = names
+    def __init__(self, timers={}):
         now = time.time()
-        self.last_tss = {tn: now for tn in self.timer_names}
+        self.timers = timers
+        self.last_tss = {tn: now for tn in timers.keys()}
 
     def update_elapsed_times(self):
         now = time.time()
-        self.last_tss = {tn: now for tn in self.timer_names}
+        self.elapsed_times = {
+            tn: now - self.last_tss[tn] for tn in self.timers.keys()
+        }
 
-    def can(self, data, timespan):
-        now = time.time()
-        elapsed_time = now - self.last_tss[data]
-
-        can_collect_data = elapsed_time > timespan
-        if can_collect_data:
-            self.last_tss[data] = now
-        return can_collect_data
-
-    def can_collect_data(self):
-        return self.can('collect_data', settings.DATA_COLLECT_TIMESPAN)
-
-    def can_send_data(self):
-        return self.can('send_data', settings.MAVLINK_SAMPLES_TIMESPAN)
-
-    def can_take_pic(self):
-        return self.can('take_pic', settings.TAKE_PIC_TIMESPAN)
+    def time_to(self, timer_name):
+        if self.elapsed_times[timer_name] > self.timers[timer_name]:
+            self.last_tss[timer_name] = time.time()
+            return True
+        return False

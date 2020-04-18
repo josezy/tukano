@@ -166,7 +166,11 @@ drone.mav.request_data_stream_send(
     1  # Start/Stop
 )
 
-timer = Timer(['collect_data', 'send_data', 'take_pic'])
+timer = Timer({
+    'collect_data': settings.DATA_COLLECT_TIMESPAN,
+    'send_data': settings.MAVLINK_SAMPLES_TIMESPAN,
+    'take_pic': settings.TAKE_PIC_TIMESPAN,
+})
 hook = Hook()
 cam = Camera()
 cloud_link = create_cloud_link()
@@ -200,15 +204,14 @@ while True:
                 process_message(cloud_data)
 
         # Tasks
-        now = time.time()
-        elapsed_times = {tn: now - timer.last_tss[tn] for tn in timer.timer_names}
+        timer.update_elapsed_times()
 
-        if timer.can_collect_data():
+        if timer.time_to('collect_data'):
             if vehicle['armed'] and vehicle['position']:
                 if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
                     collect_data(vehicle['position'])
 
-        if timer.can_send_data():
+        if timer.time_to('send_data'):
             package = prepare_data()
             if package:
                 pack_len = len(package)
@@ -222,7 +225,7 @@ while True:
                 send_to_cloud(cloud_link, tukano_msg)
                 logging.info("Data sent to cloud")
 
-        if timer.can_take_pic():
+        if timer.time_to('take_pic'):
             if vehicle['armed'] and vehicle['battery'] > 30:
                 if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={
