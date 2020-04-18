@@ -20,13 +20,13 @@ logging.basicConfig(
     format=settings.LOGGING_FORMAT,
     level=settings.LOGGING_LEVEL
 )
-logging.info(f"Initialising vehicle at {settings.MAVLINK_VEHICLE['device']}")
+logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
 
 def init_drone():
     while True:
         try:
-            drone = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
             break
         except Exception as e:
             logging.warning(f"MAVLink vehicle connection failed: {e}")
