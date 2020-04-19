@@ -144,7 +144,6 @@ def tukano_command(command):
 
 
 leds.info()
-
 drone = init_drone()
 heartbeat = drone.wait_heartbeat()
 
@@ -226,8 +225,8 @@ while True:
                 logging.info("Data sent to cloud")
 
         if timer.time_to('take_pic'):
-            if vehicle['armed'] and vehicle['battery'] > 30:
-                if vehicle['position']:
+            if vehicle['armed']:
+                if vehicle['position'] and vehicle['battery'] > 30:
                     pic_name = cam.take_pic(gps_data={
                         'lat': vehicle['position']['lat'],
                         'lon': vehicle['position']['lon'],
