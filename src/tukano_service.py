@@ -16,10 +16,7 @@ from util import leds
 from timer import Timer
 
 
-logging.basicConfig(
-    format=settings.LOGGING_FORMAT,
-    level=settings.LOGGING_LEVEL
-)
+logging.basicConfig(**settings.LOGGING_KWARGS)
 logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
 

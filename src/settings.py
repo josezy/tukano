@@ -7,8 +7,10 @@ os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 PROD = False  # Development flag
 
 SLEEPING_TIME = 0.0001
-LOGGING_LEVEL = logging.INFO  # DEBUG-INFO-WARNING-ERROR-CRITICAL
-LOGGING_FORMAT = '[%(levelname)s] %(asctime)s: %(message)s'
+LOGGING_KWARGS = {
+    'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+    'format': '[%(levelname)s] %(asctime)s: %(message)s'
+}
 
 ###############################################################################
 # Directory contants
@@ -56,12 +58,12 @@ MAVLINK_GROUND = (
 # Ground connections
 MAVLINK_AIRCRAFT = (
     {
-        'device': "/dev/ttyUSB0",
+        'device': "/dev/ttyUSB0",  # XBee on USB port (PC)
         'baud': 115200,
     }
     if PROD else
     {
-        'device': "udp:127.0.0.1:14552",  # XBee on USB port (PC)
+        'device': "udp:127.0.0.1:14552",
     }
 )
 MAVLINK_GCS = {

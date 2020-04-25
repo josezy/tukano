@@ -8,11 +8,7 @@ from datetime import datetime
 from util.util import append_json_file
 
 
-logging.basicConfig(
-    format=settings.LOGGING_FORMAT,
-    level=settings.LOGGING_LEVEL
-)
-
+logging.basicConfig(**settings.LOGGING_KWARGS)
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 try:
