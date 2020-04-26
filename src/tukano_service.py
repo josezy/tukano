@@ -216,7 +216,7 @@ while True:
         # Tasks
         timer.update_elapsed_times()
 
-        if settings.COLLECT_DATA:
+        if settings.DATA_COLLECT:
             if timer.time_to('collect_data'):
                 if vehicle['armed'] and vehicle['position']:
                     if (
