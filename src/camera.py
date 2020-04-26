@@ -76,6 +76,14 @@ class Camera(object):
 
         return pic_path.split('/')[-1]
 
+    def grab_frame(self):
+        if settings.PROD:
+            frame = None  # TODO: grab frame from Pi Camera
+        else:
+            frame = self.cam.read()[1]
+
+        return frame
+
     def start_recording(self, filename=None):
         self.vid_path = f"{self._vid_dir}/{filename or self._ts_name()}.h264"
         if settings.PROD:

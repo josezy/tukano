@@ -90,16 +90,22 @@ HOOK = {
 # Flight tasks parameters
 ###############################################################################
 
+DATA_COLLECT = False                    # Whether to collect and send data
 DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
 DATA_COLLECT_TIMESPAN = 2               # Collect data every Z seconds
 
+TAKE_PIC = False                        # Whether to take pics
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
+RECORD = False                          # Whether to record
 RECORD_START_ALT = 12                   # Start recording video above N meters
 RECORD_STOP_ALT = 8                     # Spot recording video below N meters
+
+STREAM_VIDEO = True                     # Whether to stream
+STREAM_VIDEO_FPS = 20                   # Stream video FPS
 
 ###############################################################################
 # Redis config

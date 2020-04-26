@@ -1,6 +1,7 @@
 import ssl
 import json
 import time
+import asyncio
 import settings
 import logging
 import traceback
@@ -9,7 +10,7 @@ import websocket
 from pymavlink import mavutil
 from websocket import create_connection
 
-from tasks import collect_data, prepare_data, grab_frame
+from tasks import collect_data, prepare_data, pack_frame
 from camera import Camera
 from actuators import Hook
 from util import leds
@@ -90,6 +91,13 @@ def mavmsg_to_cloud(link, msg):
         logging.error("[SEND] Broken pipe. Cloud link error")
 
 
+async def frame_to_cloud(link, packed_frame):
+    try:
+        link.send(packed_frame)
+    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
+        logging.error("[FRAME SEND] Broken pipe. Cloud link error")
+
+
 def mav_data_from_cloud(link):
     mavmsg = None
 
@@ -167,6 +175,7 @@ timer = Timer({
     'collect_data': settings.DATA_COLLECT_TIMESPAN,
     'send_data': settings.MAVLINK_SAMPLES_TIMESPAN,
     'take_pic': settings.TAKE_PIC_TIMESPAN,
+    'send_frame': 1 / settings.STREAM_VIDEO_FPS,
 })
 hook = Hook()
 cam = Camera()
@@ -207,28 +216,32 @@ while True:
         # Tasks
         timer.update_elapsed_times()
 
-        if timer.time_to('collect_data'):
-            if vehicle['armed'] and vehicle['position']:
-                if vehicle['position']['alt'] > settings.DATA_COLLECT_MIN_ALT:
-                    collect_data(vehicle['position'])
+        if settings.COLLECT_DATA:
+            if timer.time_to('collect_data'):
+                if vehicle['armed'] and vehicle['position']:
+                    if (
+                        vehicle['position']['alt'] >
+                        settings.DATA_COLLECT_MIN_ALT
+                    ):
+                        collect_data(vehicle['position'])
 
-        if timer.time_to('send_data'):
-            package = prepare_data()
-            if package:
-                pack_len = len(package)
-                logging.debug(f"Sending data ({pack_len}): {package}")
-                if pack_len > 1048:
-                    logging.warning("Message too long: Truncating...")
+            if timer.time_to('send_data'):
+                package = prepare_data()
+                if package:
+                    pack_len = len(package)
+                    logging.debug(f"Sending data ({pack_len}): {package}")
+                    if pack_len > 1048:
+                        logging.warning("Message too long: Truncating...")
 
-                # drone.mav.tukano_data_send(package)
-                # logging.info("Data sent to ground")
-                tukano_msg = drone.mav.tukano_data_encode(package)
-                mavmsg_to_cloud(cloud_mav_link, tukano_msg)
-                logging.info("Data sent to cloud")
+                    # drone.mav.tukano_data_send(package)
+                    # logging.info("Data sent to ground")
+                    tukano_msg = drone.mav.tukano_data_encode(package)
+                    mavmsg_to_cloud(cloud_mav_link, tukano_msg)
+                    logging.info("Data sent to cloud")
 
-        if timer.time_to('take_pic'):
-            if vehicle['armed']:
-                if vehicle['position'] and vehicle['battery'] > 30:
+        if timer.time_to('take_pic') and settings.TAKE_PIC:
+            if vehicle['armed'] and vehicle['battery'] > 30:
+                if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={
                         'lat': vehicle['position']['lat'],
                         'lon': vehicle['position']['lon'],
@@ -237,20 +250,23 @@ while True:
                 else:
                     pic_name = cam.take_pic()
 
-                if cloud_video_link is not None and cloud_video_link.connected:
-                    frame = grab_frame(pic_name)
-                    print("Sending frame. Size:", len(frame))
-                    cloud_video_link.send(frame)
-
                 logging.info(f"Pic taken '{pic_name}'")
 
-        if vehicle['armed'] and not cam.is_recording:
-            vid_name = cam.start_recording()
-            logging.info(f"Recording video '{vid_name}'")
+        if timer.time_to('send_frame') and settings.STREAM_VIDEO:
+            if cloud_video_link is not None and cloud_video_link.connected:
+                frame = cam.grab_frame()
+                packed_frame = pack_frame(frame)
+                print("Sending frame. Size:", len(packed_frame))
+                asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
 
-        if not vehicle['armed'] and cam.is_recording:
-            vid_name = cam.stop_recording()
-            logging.info(f"Video recordered '{vid_name}'")
+        if settings.RECORD:
+            if vehicle['armed'] and not cam.is_recording:
+                vid_name = cam.start_recording()
+                logging.info(f"Recording video '{vid_name}'")
+
+            if not vehicle['armed'] and cam.is_recording:
+                vid_name = cam.stop_recording()
+                logging.info(f"Video recordered '{vid_name}'")
 
     except Exception as e:
         leds.error()

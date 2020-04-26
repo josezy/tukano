@@ -92,11 +92,11 @@ def prepare_data():
     return data and json.dumps(data)
 
 
-def grab_frame(pic_name):
-    frame = cv2.imread(f"{settings.PICS_DIR}/{pic_name}")
-    params = [cv2.IMWRITE_JPEG_QUALITY, 50]
-    png_frame = cv2.imencode(".jpg", frame, params)[1]
-    ret_frame = base64.b64encode(png_frame)
-    # ret_frame = str(png_frame.tostring())
+def pack_frame(frame):
+    width = 640
+    height = int(frame.shape[0] * width / frame.shape[1])
+    frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
 
-    return ret_frame
+    params = [cv2.IMWRITE_JPEG_QUALITY, 10]
+    encoded_frame = cv2.imencode(".jpg", frame, params)[1]
+    return base64.b64encode(encoded_frame)
