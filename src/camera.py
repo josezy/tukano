@@ -3,6 +3,8 @@ import settings
 
 if settings.PROD:
     from picamera import PiCamera
+else:
+    import cv2
 
 
 class Camera(object):
@@ -20,7 +22,7 @@ class Camera(object):
             self.cam = PiCamera()
             self.cam.rotation = rotation
         else:
-            pass
+            self.cam = cv2.VideoCapture(0)
 
     def __del__(self):
         if settings.PROD:
@@ -68,6 +70,9 @@ class Camera(object):
                 self.cam.exif_tags.update(self._gps_exif(**gps_data))
 
             self.cam.capture(pic_path, use_video_port=True)
+        else:
+            _, frame = self.cam.read()
+            cv2.imwrite(pic_path, frame)
 
         return pic_path.split('/')[-1]
 

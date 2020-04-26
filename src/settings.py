@@ -123,17 +123,27 @@ SERIAL_PARAMS = {
 # Websockets parameters
 ###############################################################################
 
-WS_ENDPOINT = (
-    "wss://icaro.tucanoar.com/flight"
-    if PROD else
-    "ws://localhost:8000/flight"
-)
-
 WS_CONNECTION_PARAMS = (
     {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
 )
 
-WS_MSG_TYPES = (
+# WebSocket for mavlink
+
+WS_MAV_ENDPOINT = (
+    "wss://icaro.tucanoar.com/mavlink"
+    if PROD else
+    "ws://localhost:8000/mavlink"
+)
+
+WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
     'NAV_CONTROLLER_OUTPUT', 'GPS_RAW_INT'
+)
+
+# WebSocket for video
+
+WS_VIDEO_ENDPOINT = (
+    "wss://icaro.tucanoar.com/video"
+    if PROD else
+    "ws://localhost:8000/video"
 )
