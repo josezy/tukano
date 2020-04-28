@@ -1,5 +1,7 @@
+import cv2
 import json
 import redis
+import base64
 import serial
 import logging
 import settings
@@ -8,11 +10,7 @@ from datetime import datetime
 from util.util import append_json_file
 
 
-logging.basicConfig(
-    format=settings.LOGGING_FORMAT,
-    level=settings.LOGGING_LEVEL
-)
-
+logging.basicConfig(**settings.LOGGING_KWARGS)
 
 redis_queue = redis.Redis(**settings.REDIS_CONF)
 try:
@@ -92,3 +90,13 @@ def prepare_data():
         samples += 1
 
     return data and json.dumps(data)
+
+
+def pack_frame(frame):
+    width = 640
+    height = int(frame.shape[0] * width / frame.shape[1])
+    frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+
+    params = [cv2.IMWRITE_JPEG_QUALITY, settings.STREAM_VIDEO_JPEG_QUALITY]
+    encoded_frame = cv2.imencode(".jpg", frame, params)[1]
+    return base64.b64encode(encoded_frame)

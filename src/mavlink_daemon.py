@@ -15,17 +15,15 @@ import settings
 from pymavlink import mavutil
 
 
-logging.basicConfig(
-    format=settings.LOGGING_FORMAT,
-    level=settings.LOGGING_LEVEL
-)
+logging.basicConfig(**settings.LOGGING_KWARGS)
 
 
 def connect_vehicle():
     while True:
         try:
             link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
-            logging.info(f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
+            logging.info(
+                f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
             break
         except Exception as e:
             logging.error(f"Vehicle connection error: {e}")

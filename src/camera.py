@@ -3,6 +3,8 @@ import settings
 
 if settings.PROD:
     from picamera import PiCamera
+else:
+    import cv2
 
 
 class Camera(object):
@@ -20,11 +22,14 @@ class Camera(object):
             self.cam = PiCamera()
             self.cam.rotation = rotation
         else:
-            pass
+            self.cam = cv2.VideoCapture(0)
 
     def __del__(self):
         if settings.PROD:
             self.cam.close()
+        else:
+            self.cam.relase()
+
         self.cam = None
 
     def _ts_name(self):
@@ -68,8 +73,19 @@ class Camera(object):
                 self.cam.exif_tags.update(self._gps_exif(**gps_data))
 
             self.cam.capture(pic_path, use_video_port=True)
+        else:
+            _, frame = self.cam.read()
+            cv2.imwrite(pic_path, frame)
 
         return pic_path.split('/')[-1]
+
+    def grab_frame(self):
+        if settings.PROD:
+            frame = None  # TODO: grab frame from Pi Camera
+        else:
+            frame = self.cam.read()[1]
+
+        return frame
 
     def start_recording(self, filename=None):
         self.vid_path = f"{self._vid_dir}/{filename or self._ts_name()}.h264"

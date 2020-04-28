@@ -7,8 +7,10 @@ os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 PROD = False  # Development flag
 
 SLEEPING_TIME = 0.0001
-LOGGING_LEVEL = logging.INFO  # DEBUG-INFO-WARNING-ERROR-CRITICAL
-LOGGING_FORMAT = '[%(levelname)s] %(asctime)s: %(message)s'
+LOGGING_KWARGS = {
+    'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+    'format': '[%(levelname)s] %(asctime)s: %(message)s'
+}
 
 ###############################################################################
 # Directory contants
@@ -56,12 +58,12 @@ MAVLINK_GROUND = (
 # Ground connections
 MAVLINK_AIRCRAFT = (
     {
-        'device': "/dev/ttyUSB0",
+        'device': "/dev/ttyUSB0",  # XBee on USB port (PC)
         'baud': 115200,
     }
     if PROD else
     {
-        'device': "udp:127.0.0.1:14552",  # XBee on USB port (PC)
+        'device': "udp:127.0.0.1:14552",
     }
 )
 MAVLINK_GCS = {
@@ -88,16 +90,23 @@ HOOK = {
 # Flight tasks parameters
 ###############################################################################
 
+DATA_COLLECT = False                    # Whether to collect and send data
 DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
 DATA_COLLECT_TIMESPAN = 2               # Collect data every Z seconds
 
+TAKE_PIC = False                        # Whether to take pics
 TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
+RECORD = False                          # Whether to record
 RECORD_START_ALT = 12                   # Start recording video above N meters
 RECORD_STOP_ALT = 8                     # Spot recording video below N meters
+
+STREAM_VIDEO = True                     # Whether to stream
+STREAM_VIDEO_FPS = 24                   # Stream video FPS
+STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
 ###############################################################################
 # Redis config
@@ -121,17 +130,27 @@ SERIAL_PARAMS = {
 # Websockets parameters
 ###############################################################################
 
-WS_ENDPOINT = (
-    "wss://icaro.tucanoar.com/flight"
-    if PROD else
-    "ws://localhost:8000/flight"
-)
-
 WS_CONNECTION_PARAMS = (
     {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
 )
 
-WS_MSG_TYPES = (
+# WebSocket for mavlink
+
+WS_MAV_ENDPOINT = (
+    "wss://icaro.tucanoar.com/mavlink"
+    if PROD else
+    "ws://localhost:8000/mavlink"
+)
+
+WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
     'NAV_CONTROLLER_OUTPUT', 'GPS_RAW_INT'
+)
+
+# WebSocket for video
+
+WS_VIDEO_ENDPOINT = (
+    "wss://icaro.tucanoar.com/video"
+    if PROD else
+    "ws://localhost:8000/video"
 )
