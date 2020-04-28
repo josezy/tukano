@@ -27,6 +27,9 @@ class Camera(object):
     def __del__(self):
         if settings.PROD:
             self.cam.close()
+        else:
+            self.cam.relase()
+
         self.cam = None
 
     def _ts_name(self):

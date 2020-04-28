@@ -97,6 +97,6 @@ def pack_frame(frame):
     height = int(frame.shape[0] * width / frame.shape[1])
     frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
 
-    params = [cv2.IMWRITE_JPEG_QUALITY, 10]
+    params = [cv2.IMWRITE_JPEG_QUALITY, settings.STREAM_VIDEO_JPEG_QUALITY]
     encoded_frame = cv2.imencode(".jpg", frame, params)[1]
     return base64.b64encode(encoded_frame)

@@ -105,7 +105,8 @@ RECORD_START_ALT = 12                   # Start recording video above N meters
 RECORD_STOP_ALT = 8                     # Spot recording video below N meters
 
 STREAM_VIDEO = True                     # Whether to stream
-STREAM_VIDEO_FPS = 20                   # Stream video FPS
+STREAM_VIDEO_FPS = 24                   # Stream video FPS
+STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
 ###############################################################################
 # Redis config

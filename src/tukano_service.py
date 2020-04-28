@@ -252,9 +252,9 @@ while True:
 
                 logging.info(f"Pic taken '{pic_name}'")
 
+        frame = cam.grab_frame()
         if timer.time_to('send_frame') and settings.STREAM_VIDEO:
             if cloud_video_link is not None and cloud_video_link.connected:
-                frame = cam.grab_frame()
                 packed_frame = pack_frame(frame)
                 print("Sending frame. Size:", len(packed_frame))
                 asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
