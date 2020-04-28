@@ -42,7 +42,7 @@ MAVLINK_VEHICLE = (
     }
 )
 MAVLINK_TUKANO = {
-    'device': "udp:127.0.0.1:14551",
+    'device': "tcp:localhost:5760",
 }
 MAVLINK_GROUND = (
     {
