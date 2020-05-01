@@ -25,7 +25,7 @@ echo "       Installing from $REPO_DIR..."
 
 info "--> Installing system packages..."
     sudo apt update
-    sudo apt install -y python3.6 python3-pip python3.6-dev python-dev \
+    sudo apt install -y python3.7 python3-pip python3.7-dev python-dev \
                    virtualenv redis-server supervisor libxml2-dev libxslt-dev
 
     sudo systemctl stop redis-server
@@ -38,26 +38,28 @@ echo "           Python, redis, supervisor and some others..."
 
 info "--> Setting up pip + virtualenv..."
     sudo pip3 install --upgrade pip setuptools virtualenv
-    virtualenv -p "$(which python3.6)" .venv
+    virtualenv -p "$(which python3.7)" .venv
     source .venv/bin/activate
 success "   √   Virtualenv is active: $(which python) ($(python --version))"
 
 
 
-info "--> Installing python dependencies + generate MAVLink dialect..."
+info "--> Creating data directory and subfolders..."
+    echo " > Creating data/logs dir..."
+    mkdir -p "$REPO_DIR/data/logs"
+    mkdir -p "$REPO_DIR/data/pics"
+    mkdir -p "$REPO_DIR/data/videos"
+    mkdir -p "$REPO_DIR/data/videos"
+    mkdir -p "$REPO_DIR/.venv/lib/python3.7/site-packages/message_definitions/v1.0/"
+success "   √   Done"
+
+
+
+info "--> Installing python dependencies + copying MAVLink dialect..."
     pip install -r requirements.txt
-    mavgen.py \
-        --output="$REPO_DIR/.venv/lib/python2.7/site-packages/pymavlink/dialects/v10/mav_tukano.py" \
-        "$REPO_DIR/dialects/mav_tukano.xml"
+    cp "$REPO_DIR/dialects/*" "$REPO_DIR/.venv/lib/python3.7/site-packages/message_definitions/v1.0/"
 success "   √   PyPI requirements are installed: requirements.txt"
 
-
-info "--> Setting up supervisor configuration..."
-    echo " > Creating data/logs dir..."
-    sudo mkdir "$REPO_DIR/data"
-    sudo mkdir "$REPO_DIR/data/logs"
-    sudo mkdir "$REPO_DIR/data/pics"
-    sudo mkdir "$REPO_DIR/data/videos"
 
 
 info "--> Setting up supervisor configuration..."
