@@ -256,7 +256,6 @@ while True:
         if timer.time_to('send_frame') and settings.STREAM_VIDEO:
             if cloud_video_link is not None and cloud_video_link.connected:
                 packed_frame = pack_frame(frame)
-                print("Sending frame. Size:", len(packed_frame))
                 asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
 
         if settings.RECORD:

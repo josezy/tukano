@@ -49,7 +49,6 @@ info "--> Creating data directory and subfolders..."
     mkdir -p "$REPO_DIR/data/logs"
     mkdir -p "$REPO_DIR/data/pics"
     mkdir -p "$REPO_DIR/data/videos"
-    mkdir -p "$REPO_DIR/data/videos"
     mkdir -p "$REPO_DIR/.venv/lib/python3.7/site-packages/message_definitions/v1.0/"
 success "   √   Done"
 

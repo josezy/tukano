@@ -3,3 +3,4 @@ pymavlink
 pyserial
 redis
 websocket-client
+opencv-python
