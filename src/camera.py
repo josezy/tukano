@@ -3,6 +3,7 @@ import settings
 
 if settings.PROD:
     from picamera import PiCamera
+    from picamera.array import PiRGBArray
 else:
     import cv2
 
@@ -21,6 +22,7 @@ class Camera(object):
         if settings.PROD:
             self.cam = PiCamera()
             self.cam.rotation = rotation
+            self.rawCapture = PiRGBArray(self.cam)
         else:
             self.cam = cv2.VideoCapture(0)
 
@@ -81,7 +83,8 @@ class Camera(object):
 
     def grab_frame(self):
         if settings.PROD:
-            frame = None  # TODO: grab frame from Pi Camera
+            self.cam.capture(self.rawCapture, format="bgr")
+            frame = self.rawCapture.array
         else:
             frame = self.cam.read()[1]
 
