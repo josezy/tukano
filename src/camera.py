@@ -21,6 +21,7 @@ class Camera(object):
     def __init__(self, rotation=0):
         if settings.PROD:
             self.cam = PiCamera()
+            self.cam.resolution = (640, 480)
             self.cam.rotation = rotation
             self.rawCapture = PiRGBArray(self.cam)
         else:
@@ -83,7 +84,7 @@ class Camera(object):
 
     def grab_frame(self):
         if settings.PROD:
-            self.cam.capture(self.rawCapture, format="bgr")
+            self.cam.capture(self.rawCapture, format="jpeg")
             frame = self.rawCapture.array
         else:
             frame = self.cam.read()[1]

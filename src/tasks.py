@@ -1,4 +1,3 @@
-import cv2
 import json
 import redis
 import base64
@@ -93,10 +92,14 @@ def prepare_data():
 
 
 def pack_frame(frame):
-    width = 640
-    height = int(frame.shape[0] * width / frame.shape[1])
-    frame = cv2.resize(frame, (width, height), interpolation=cv2.INTER_AREA)
+    if not settings.PROD:
+        import cv2
+        width = 640
+        height = int(frame.shape[0] * width / frame.shape[1])
+        frame = cv2.resize(
+            frame, (width, height), interpolation=cv2.INTER_AREA)
 
-    params = [cv2.IMWRITE_JPEG_QUALITY, settings.STREAM_VIDEO_JPEG_QUALITY]
-    encoded_frame = cv2.imencode(".jpg", frame, params)[1]
-    return base64.b64encode(encoded_frame)
+        params = [cv2.IMWRITE_JPEG_QUALITY, settings.STREAM_VIDEO_JPEG_QUALITY]
+        frame = cv2.imencode(".jpg", frame, params)[1]
+
+    return base64.b64encode(frame)
