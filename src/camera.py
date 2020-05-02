@@ -84,7 +84,12 @@ class Camera(object):
 
     def grab_frame(self):
         if settings.PROD:
-            self.cam.capture(self.rawCapture, format="jpeg")
+            self.rawCapture.truncate()
+            self.cam.capture(
+                self.rawCapture,
+                format="jpeg",
+                quality=settings.STREAM_VIDEO_JPEG_QUALITY
+            )
             frame = self.rawCapture.array
             self.rawCapture.truncate()
         else:
