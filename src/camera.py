@@ -2,8 +2,9 @@ import time
 import settings
 
 if settings.PROD:
+    import io
+    import numpy as np
     from picamera import PiCamera
-    from picamera.array import PiRGBArray
 else:
     import cv2
 
@@ -23,7 +24,6 @@ class Camera(object):
             self.cam = PiCamera()
             self.cam.resolution = (640, 480)
             self.cam.rotation = rotation
-            self.rawCapture = PiRGBArray(self.cam, size=(640, 480))
         else:
             self.cam = cv2.VideoCapture(0)
 
@@ -84,14 +84,13 @@ class Camera(object):
 
     def grab_frame(self):
         if settings.PROD:
-            self.rawCapture.truncate()
+            stream = io.BytesIO()
             self.cam.capture(
-                self.rawCapture,
+                stream,
                 format="jpeg",
                 quality=settings.STREAM_VIDEO_JPEG_QUALITY
             )
-            frame = self.rawCapture.array
-            self.rawCapture.truncate()
+            frame = np.fromstring(stream.getvalue(), dtype=np.uint8)
         else:
             frame = self.cam.read()[1]
 
