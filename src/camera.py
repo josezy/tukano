@@ -23,7 +23,7 @@ class Camera(object):
             self.cam = PiCamera()
             self.cam.resolution = (640, 480)
             self.cam.rotation = rotation
-            self.rawCapture = PiRGBArray(self.cam)
+            self.rawCapture = PiRGBArray(self.cam, size=(640, 480))
         else:
             self.cam = cv2.VideoCapture(0)
 
