@@ -86,6 +86,7 @@ class Camera(object):
         if settings.PROD:
             self.cam.capture(self.rawCapture, format="jpeg")
             frame = self.rawCapture.array
+            self.rawCapture.truncate(0)
         else:
             frame = self.cam.read()[1]
 
