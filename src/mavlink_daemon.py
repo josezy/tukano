@@ -76,7 +76,7 @@ while True:
             if tukano_link:
                 tukano_link.write(vehicle_msg.get_msgbuf())
 
-    # From ground to vehicle/tukano
+    # From ground to vehicle
     if ground_link:
         ground_m = ground_link.recv()
         ground_msgs = ground_link.mav.parse_buffer(ground_m)
@@ -85,18 +85,12 @@ while True:
                 logging.info(f"(GROUND_MSG) {ground_msg}")
                 vehicle_link.write(ground_msg.get_msgbuf())
 
-                # if tukano_link:
-                #     tukano_link.write(ground_msg.get_msgbuf())
-
-    # From tukano to vehicle/ground
+    # From tukano to vehicle
     tukano_m = tukano_link.recv()
     tukano_msgs = tukano_link.mav.parse_buffer(tukano_m)
     if tukano_msgs:
         for tukano_msg in tukano_msgs:
             logging.info(f"(TUKANO_MSG) {tukano_msg}")
             vehicle_link.write(tukano_msg.get_msgbuf())
-
-            # if ground_link:
-            #     ground_link.write(tukano_msg.get_msgbuf())
 
     time.sleep(settings.SLEEPING_TIME)
