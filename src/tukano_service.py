@@ -219,10 +219,8 @@ while True:
         if settings.DATA_COLLECT:
             if timer.time_to('collect_data'):
                 if vehicle['armed'] and vehicle['position']:
-                    if (
-                        vehicle['position']['alt'] >
-                        settings.DATA_COLLECT_MIN_ALT
-                    ):
+                    veh_alt = vehicle['position']['alt']
+                    if veh_alt > settings.DATA_COLLECT_MIN_ALT:
                         collect_data(vehicle['position'])
 
             if timer.time_to('send_data'):
@@ -252,11 +250,12 @@ while True:
 
                 logging.info(f"Pic taken '{pic_name}'")
 
-        frame = cam.grab_frame()
-        if timer.time_to('send_frame') and settings.STREAM_VIDEO:
-            if cloud_video_link is not None and cloud_video_link.connected:
-                packed_frame = pack_frame(frame)
-                asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
+        if settings.STREAM_VIDEO:
+            frame = cam.grab_frame()
+            if timer.time_to('send_frame'):
+                if cloud_video_link is not None and cloud_video_link.connected:
+                    packed_frame = pack_frame(frame)
+                    asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
 
         if settings.RECORD:
             if vehicle['armed'] and not cam.is_recording:
