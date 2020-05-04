@@ -31,7 +31,7 @@ class Camera(object):
         if settings.PROD:
             self.cam.close()
         else:
-            self.cam.relase()
+            self.cam.release()
 
         self.cam = None
 
