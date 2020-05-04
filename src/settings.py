@@ -104,7 +104,7 @@ RECORD = False                          # Whether to record
 RECORD_START_ALT = 12                   # Start recording video above N meters
 RECORD_STOP_ALT = 8                     # Spot recording video below N meters
 
-STREAM_VIDEO = True                     # Whether to stream
+STREAM_VIDEO = False                    # Whether to stream
 STREAM_VIDEO_FPS = 24                   # Stream video FPS
 STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
@@ -144,7 +144,7 @@ WS_MAV_ENDPOINT = (
 
 WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
-    'NAV_CONTROLLER_OUTPUT', 'GPS_RAW_INT', 'COMMAND_ACK'
+    'GPS_RAW_INT', 'COMMAND_ACK', 'ATTITUDE'
 )
 
 # WebSocket for video
