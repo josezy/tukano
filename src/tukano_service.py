@@ -122,10 +122,10 @@ def mav_data_from_cloud(link):
 
 
 def command_to_drone(command):
-    mav_cmd = command.pop('command')
-    target_system = command.pop('target_system')
-    target_component = command.pop('target_component')
-    params = command.pop('params')
+    mav_cmd = command.get('command')
+    target_system = command.get('target_system')
+    target_component = command.get('target_component')
+    params = command.get('params')
     params = [params.get(f"param{i+1}", 0) for i in range(7)]
     drone.mav.command_long_send(
         target_system,
@@ -137,16 +137,16 @@ def command_to_drone(command):
 
 
 def process_message(message):
-    mavmsg = message.pop('message')
-    params = message.pop('params')
+    mavmsg = message.get('message')
+    params = message.get('params')
     args = params.values()
     mavmsg_send = getattr(drone.mav, f"{mavmsg.lower()}_send")
     mavmsg_send(*args)
 
 
 def tukano_command(command):
-    tukano_cmd = command.pop('command')
-    # params = command.pop('params')
+    tukano_cmd = command.get('command')
+    # params = command.get('params')
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
         hook.release()
 
