@@ -27,7 +27,7 @@ def connect_vehicle():
             break
         except Exception as e:
             logging.error(f"Vehicle connection error: {e}")
-            time.sleep(3)
+            time.sleep(1)
 
     return link
 
