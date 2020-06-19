@@ -1,9 +1,6 @@
 """
-    Remember to generate MAVLink library with
-    mavgen.py --wire-protocol=2.0 \
-        --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v20/mav_tukano.py \
-        dialects/mav_tukano.xml
-    after changing dialects/mav_tukano.xml, otherwise this code may not work
+    Remember to update MAVLink dialect with:
+    cp dialects/* .venv/lib/python3.7/site-packages/message_definitions/v1.0/
 """
 
 import time

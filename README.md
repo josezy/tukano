@@ -8,13 +8,9 @@ Software running on a Raspberry connected to a Pixhawk for multiple aerial purpo
 To install packages and setup enviroment run (or follow by steps) the `bin/tukano-setup` file
 
 ###### Summary / Notes
-* install dependencies (pymavlink, redis, websocket-client, etc)
+* install requirements (pymavlink, redis, websocket-client, etc)
 * if developing, run SITL
 * be sure redis-server is running
-* generate dialect library `mavgen.py --output=.venv/lib/python3.7/site-packages/pymavlink/dialects/v10/mav_tukano.py dialects/mav_tukano.xml`
+* copy dialects `cp dialects/* .venv/lib/python3.7/site-packages/message_definitions/v1.0/` (make sure dir exists)
+* run `python src/tukano_service.py`
 
----
-
-Use `tukano reload|stop` for reload/stop `supervisor` processes
-
-Use `tukano setup` to create sym links for `supervisor` conf
