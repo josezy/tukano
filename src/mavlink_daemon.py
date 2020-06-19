@@ -21,9 +21,9 @@ logging.basicConfig(**settings.LOGGING_KWARGS)
 def connect_vehicle():
     while True:
         try:
-            link = mavutil.mavlink_connection(**settings.MAVLINK_VEHICLE)
+            link = mavutil.mavlink_connection(**settings.MAVLINK_DAEMON)
             logging.info(
-                f"Vehicle connected at {settings.MAVLINK_VEHICLE['device']}")
+                f"Vehicle connected at {settings.MAVLINK_DAEMON['device']}")
             break
         except Exception as e:
             logging.error(f"Vehicle connection error: {e}")

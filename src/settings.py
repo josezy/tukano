@@ -29,7 +29,7 @@ LOGS_DIR = f"{DATA_DIR}/logs"
 ###############################################################################
 
 # Aircraft connections
-MAVLINK_VEHICLE = (
+MAVLINK_DAEMON = (
     {
         # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
         'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
