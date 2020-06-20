@@ -41,9 +41,16 @@ MAVLINK_DAEMON = (
         # 'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
     }
 )
-MAVLINK_TUKANO = {
-    'device': "tcp:localhost:5760",
-}
+MAVLINK_TUKANO = (
+    {
+        'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+        'baud': 57600,
+    }
+    if PROD else
+    {
+        'device': "tcp:localhost:5760",
+    }
+)
 MAVLINK_GROUND = (
     {
         'device': "/dev/ttyUSB0",  # XBee on USB port (RPi)
