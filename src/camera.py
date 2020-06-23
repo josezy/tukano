@@ -24,6 +24,12 @@ class Camera(object):
             self.cam = PiCamera()
             self.cam.resolution = (640, 480)
             self.cam.rotation = rotation
+            self.stream = io.BytesIO()
+            self.cam.capture(
+                self.stream,
+                format="jpeg",
+                quality=settings.STREAM_VIDEO_JPEG_QUALITY
+            )
         else:
             self.cam = cv2.VideoCapture(0)
 
@@ -84,13 +90,7 @@ class Camera(object):
 
     def grab_frame(self):
         if settings.PROD:
-            stream = io.BytesIO()
-            self.cam.capture(
-                stream,
-                format="jpeg",
-                quality=settings.STREAM_VIDEO_JPEG_QUALITY
-            )
-            frame = np.fromstring(stream.getvalue(), dtype=np.uint8)
+            frame = np.fromstring(self.stream.getvalue(), dtype=np.uint8)
         else:
             frame = self.cam.read()[1]
 
