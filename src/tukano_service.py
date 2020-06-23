@@ -112,11 +112,13 @@ def mav_data_from_cloud(link):
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
-        ConnectionResetError
-    ):
-        logging.error("[RECV] Broken pipe. Cloud link error")
-    except (BlockingIOError, json.JSONDecodeError, ssl.SSLWantReadError):
-        pass
+        ConnectionResetError,
+        BlockingIOError,
+        json.JSONDecodeError,
+        ssl.SSLWantReadError,
+        OSError
+    ) as e:
+        logging.error(f"[MAV DATA RECV] Broken pipe. Cloud link error: {e}")
 
     return mavmsg
 
