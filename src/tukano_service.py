@@ -90,9 +90,11 @@ def mavmsg_to_cloud(link, msg):
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
-        OSError
     ) as e:
         logging.error(f"[MAV DATA SEND] Broken pipe. Cloud link error: {e}")
+
+    except OSError:
+        pass
 
 
 async def frame_to_cloud(link, packed_frame):
@@ -117,12 +119,16 @@ def mav_data_from_cloud(link):
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
         ConnectionResetError,
+    ) as e:
+        logging.error(f"[MAV DATA RECV] Broken pipe. Cloud link error: {e}")
+
+    except (
         BlockingIOError,
         json.JSONDecodeError,
         ssl.SSLWantReadError,
-        OSError
-    ) as e:
-        logging.error(f"[MAV DATA RECV] Broken pipe. Cloud link error: {e}")
+        OSError,
+    ):
+        pass
 
     return mavmsg
 
