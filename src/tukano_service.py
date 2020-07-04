@@ -72,6 +72,7 @@ def update_vehicle_state(msg, vehicle):
 
 def create_cloud_link(endpoint):
     try:
+        print(f"Creating cloud link at {endpoint}", flush=True)
         return create_connection(endpoint, **settings.WS_CONNECTION_PARAMS)
     except Exception as e:
         logging.error(f"Cloud link error: {e}")
@@ -211,9 +212,11 @@ while True:
         vehicle = update_vehicle_state(mav_msg, vehicle)
 
         if cloud_mav_link is None or not cloud_mav_link.connected:
+            print("no cloud_mav_link", flush=True)
             cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
 
         if cloud_video_link is None or not cloud_video_link.connected:
+            print("no cloud_video_link", flush=True)
             cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
 
         if cloud_mav_link is not None and cloud_mav_link.connected:
@@ -228,6 +231,9 @@ while True:
 
             if cloud_data and 'message' in cloud_data:
                 process_message(cloud_data)
+        else:
+            time.sleep(1)
+            raise Exception('No cloud_mav_link')
 
         # Tasks
         timer.update_elapsed_times()
@@ -268,6 +274,7 @@ while True:
 
         if settings.STREAM_VIDEO:
             if timer.time_to('send_frame'):
+                print("sending frame...", flush=True)
                 if cloud_video_link is not None and cloud_video_link.connected:
                     asyncio.run(frame_to_cloud(cloud_video_link, cam))
 
@@ -282,5 +289,5 @@ while True:
 
     except Exception as e:
         leds.error()
-        logging.error(f"General error happened: {e}")
+        logging.error(f"Main loop error: {e}")
         traceback.print_exc()
