@@ -129,6 +129,7 @@ def mav_data_from_cloud(link):
 
 async def frame_to_cloud(link, cam):
     try:
+        logging.info("sending frame...")
         frame = cam.grab_frame()
         packed_frame = pack_frame(frame)
         link.send(packed_frame)
@@ -275,9 +276,10 @@ while True:
 
         if settings.STREAM_VIDEO:
             if timer.time_to('send_frame'):
-                logging.info("sending frame...")
                 if cloud_video_link is not None and cloud_video_link.connected:
-                    frame_to_cloud(cloud_video_link, cam)
+                    logging.info("start")
+                    asyncio.run(frame_to_cloud(cloud_video_link, cam))
+                    logging.info("end")
 
         if settings.RECORD:
             if vehicle['armed'] and not cam.is_recording:
