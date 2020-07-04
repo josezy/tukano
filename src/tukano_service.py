@@ -275,7 +275,7 @@ while True:
 
         if settings.STREAM_VIDEO:
             if timer.time_to('send_frame'):
-                print("sending frame...", flush=True)
+                logging.info("sending frame...")
                 if cloud_video_link is not None and cloud_video_link.connected:
                     frame_to_cloud(cloud_video_link, cam)
 
