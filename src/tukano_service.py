@@ -97,13 +97,6 @@ def mavmsg_to_cloud(link, msg):
         pass
 
 
-async def frame_to_cloud(link, packed_frame):
-    try:
-        link.send(packed_frame)
-    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
-        logging.error("[FRAME SEND] Broken pipe. Cloud link error")
-
-
 def mav_data_from_cloud(link):
     mavmsg = None
 
@@ -131,6 +124,15 @@ def mav_data_from_cloud(link):
         pass
 
     return mavmsg
+
+
+async def frame_to_cloud(link, cam):
+    try:
+        frame = cam.grab_frame()
+        packed_frame = pack_frame(frame)
+        link.send(packed_frame)
+    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
+        logging.error("[FRAME SEND] Broken pipe. Cloud link error")
 
 
 def command_to_drone(command):
@@ -265,11 +267,9 @@ while True:
                 logging.info(f"Pic taken '{pic_name}'")
 
         if settings.STREAM_VIDEO:
-            frame = cam.grab_frame()
             if timer.time_to('send_frame'):
                 if cloud_video_link is not None and cloud_video_link.connected:
-                    packed_frame = pack_frame(frame)
-                    asyncio.run(frame_to_cloud(cloud_video_link, packed_frame))
+                    asyncio.run(frame_to_cloud(cloud_video_link, cam))
 
         if settings.RECORD:
             if vehicle['armed'] and not cam.is_recording:
