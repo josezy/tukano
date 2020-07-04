@@ -134,6 +134,7 @@ async def frame_to_cloud(link, cam):
         link.send(packed_frame)
     except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
         logging.error("[FRAME SEND] Broken pipe. Cloud link error")
+        import ipdb; ipdb.set_trace()
 
 
 def command_to_drone(command):
@@ -276,7 +277,7 @@ while True:
             if timer.time_to('send_frame'):
                 print("sending frame...", flush=True)
                 if cloud_video_link is not None and cloud_video_link.connected:
-                    asyncio.run(frame_to_cloud(cloud_video_link, cam))
+                    frame_to_cloud(cloud_video_link, cam)
 
         if settings.RECORD:
             if vehicle['armed'] and not cam.is_recording:
