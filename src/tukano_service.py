@@ -129,10 +129,11 @@ def mav_data_from_cloud(link):
 
 async def frame_to_cloud(link, cam):
     try:
-        logging.info("sending frame...")
+        start = time.time()
         frame = cam.grab_frame()
         packed_frame = pack_frame(frame)
         link.send(packed_frame)
+        logging.info(f"Frame delivery took {time.time() - start}")
     except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
         logging.error("[FRAME SEND] Broken pipe. Cloud link error")
         import ipdb; ipdb.set_trace()
@@ -197,7 +198,8 @@ timer = Timer({
     'send_frame': 1 / settings.STREAM_VIDEO_FPS,
 })
 hook = Hook()
-cam = Camera()
+if any((settings.TAKE_PIC, settings.STREAM_VIDEO, settings.RECORD)):
+    cam = Camera()
 cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
 cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
 leds.success()
@@ -237,7 +239,7 @@ while True:
             time.sleep(1)
             raise Exception('No cloud_mav_link')
 
-        # Tasks
+        # =================[ Tasks ]=================
         timer.update_elapsed_times()
 
         if settings.DATA_COLLECT:
