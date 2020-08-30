@@ -14,6 +14,8 @@ class Timer:
         }
 
     def time_to(self, timer_name):
+        assert timer_name in self.timers, \
+            f"Timer {timer_name} does not exists: {self.timers}"
         if self.elapsed_times[timer_name] > self.timers[timer_name]:
             self.last_tss[timer_name] = time.time()
             return True
