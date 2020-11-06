@@ -7,3 +7,4 @@ logs/
 reblujo
 mav.*
 *.rdb
+.vscode/
