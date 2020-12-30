@@ -8,3 +8,4 @@ reblujo
 mav.*
 *.rdb
 .vscode/
+.DS_Store

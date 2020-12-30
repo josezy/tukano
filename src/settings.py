@@ -4,7 +4,9 @@ import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
-PROD = False  # Development flag
+PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
+print(f"Working on {'production' if PROD else 'development'}")
+
 PLATE = "_BADASS_"  # Unique plate to identify drone on ikaro
 
 SLEEPING_TIME = 0.0001
@@ -145,7 +147,7 @@ WS_CONNECTION_PARAMS = (
 # WebSocket for mavlink
 
 WS_MAV_ENDPOINT = (
-    "wss://icaro.tucanoar.com/mavlink"
+    f"wss://icaro.tucanoar.com/mavlink?plate={PLATE}"
     if PROD else
     f"ws://localhost:8000/mavlink?plate={PLATE}"
 )

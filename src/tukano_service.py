@@ -17,11 +17,7 @@ from util import leds
 from timer import Timer
 
 
-logging.basicConfig(**settings.LOGGING_KWARGS)
-logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
-
-
-def init_drone():
+def connect_drone():
     while True:
         try:
             drone = mavutil.mavlink_connection(**settings.MAVLINK_TUKANO)
@@ -169,8 +165,13 @@ def tukano_command(command):
         hook.release()
 
 
+# =============[From here to down hell]================
+
+logging.basicConfig(**settings.LOGGING_KWARGS)
+logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
+
 leds.info()
-drone = init_drone()
+drone = connect_drone()
 heartbeat = drone.wait_heartbeat()
 
 logging.info("Hearbeat received!")
