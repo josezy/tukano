@@ -20,4 +20,4 @@ class Hook():
             GPIO.output(self.trigger_pin, GPIO.HIGH)
 
         self.released = True
-        print("Hook released")
+        print("Hook released", flush=True)
