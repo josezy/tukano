@@ -1,3 +1,4 @@
+import logging
 import settings
 
 from settings import HOOK
@@ -20,4 +21,4 @@ class Hook():
             GPIO.output(self.trigger_pin, GPIO.HIGH)
 
         self.released = True
-        print("Hook released", flush=True)
+        logging.info("Hook released")

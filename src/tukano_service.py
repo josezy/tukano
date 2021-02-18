@@ -1,3 +1,8 @@
+"""
+    Remember to include custom MAVLink dialect:
+    cp dialects/* .venv/lib/python3.7/site-packages/message_definitions/v1.0/
+"""
+
 import ssl
 import json
 import time
@@ -66,15 +71,17 @@ def update_vehicle_state(msg, vehicle):
     return vehicle
 
 
-def create_cloud_link(endpoint):
+def create_cloud_link(endpoint) -> None:
     try:
-        print(f"Creating cloud link at {endpoint}", flush=True)
-        return create_connection(endpoint, **settings.WS_CONNECTION_PARAMS)
+        logging.info(f"Creating cloud link at {endpoint}")
+        link = create_connection(endpoint, **settings.WS_CONNECTION_PARAMS)
+        link.settimeout(0)
+        return link
     except Exception as e:
         logging.error(f"Cloud link error: {e}")
 
 
-def mavmsg_to_cloud(link, msg):
+def mavmsg_to_cloud(link, msg) -> None:
     if msg.get_type() not in settings.WS_MAV_MSG_TYPES:
         return
 
@@ -90,15 +97,14 @@ def mavmsg_to_cloud(link, msg):
     ) as e:
         logging.error(f"[MAV DATA SEND] Broken pipe. Cloud link error: {e}")
 
-    except OSError:
-        pass
+    except OSError as e:
+        logging.warning(f"[MAV DATA SEND] OSError: {e}")
 
 
 def mav_data_from_cloud(link):
     mavmsg = None
 
     try:
-        link.settimeout(0)
         msg = json.loads(link.recv())
         if any([
             'command' in msg,
@@ -132,10 +138,9 @@ async def frame_to_cloud(link, cam):
         logging.info(f"Frame delivery took {time.time() - start}")
     except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
         logging.error("[FRAME SEND] Broken pipe. Cloud link error")
-        import ipdb; ipdb.set_trace()
 
 
-def command_to_drone(command):
+def command_to_drone(drone, command):
     mav_cmd = command.get('command')
     target_system = command.get('target_system')
     target_component = command.get('target_component')
@@ -150,7 +155,7 @@ def command_to_drone(command):
     )
 
 
-def process_message(message):
+def process_message(drone, message):
     mavmsg = message.get('message')
     params = message.get('params')
     args = params.values()
@@ -188,57 +193,58 @@ drone.mav.request_data_stream_send(
     vehicle['system_id'],
     vehicle['component_id'],
     mavutil.mavlink.MAV_DATA_STREAM_ALL,
-    1,  # Rate in Hertz
+    5,  # Rate in Hertz
     1  # Start/Stop
 )
 
+hook = Hook()
 timer = Timer({
     'collect_data': settings.DATA_COLLECT_TIMESPAN,
     'send_data': settings.MAVLINK_SAMPLES_TIMESPAN,
     'take_pic': settings.TAKE_PIC_TIMESPAN,
     'send_frame': 1 / settings.STREAM_VIDEO_FPS,
 })
-hook = Hook()
+
 if any((settings.TAKE_PIC, settings.STREAM_VIDEO, settings.RECORD)):
     cam = Camera()
-cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
-cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
-leds.success()
 
+cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
+if settings.STREAM_VIDEO:
+    cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
+
+leds.success()
 while True:
     time.sleep(settings.SLEEPING_TIME)
 
     try:
 
         mav_msg = cleanup_msg(drone)
-        if mav_msg is None:
-            continue
-
-        vehicle = update_vehicle_state(mav_msg, vehicle)
-
-        if cloud_mav_link is None or not cloud_mav_link.connected:
-            print("no cloud_mav_link", flush=True)
-            cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
-
-        if cloud_video_link is None or not cloud_video_link.connected:
-            print("no cloud_video_link", flush=True)
-            cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
+        if mav_msg is not None:
+            vehicle = update_vehicle_state(mav_msg, vehicle)
 
         if cloud_mav_link is not None and cloud_mav_link.connected:
-            mavmsg_to_cloud(cloud_mav_link, mav_msg)
+            if mav_msg is not None:
+                mavmsg_to_cloud(cloud_mav_link, mav_msg)
 
             cloud_data = mav_data_from_cloud(cloud_mav_link)
             if cloud_data and 'command' in cloud_data:
                 if cloud_data['command'].startswith('TUKANO'):
                     tukano_command(cloud_data)
                 else:
-                    command_to_drone(cloud_data)
+                    command_to_drone(drone, cloud_data)
 
             if cloud_data and 'message' in cloud_data:
-                process_message(cloud_data)
+                process_message(drone, cloud_data)
         else:
+            logging.error("No cloud_mav_link, recreating...")
+            cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
             time.sleep(1)
-            raise Exception('No cloud_mav_link')
+
+        if settings.STREAM_VIDEO:
+            if cloud_video_link is None or not cloud_video_link.connected:
+                logging.error("No cloud_video_link, recreating...")
+                cloud_video_link = create_cloud_link(
+                    settings.WS_VIDEO_ENDPOINT)
 
         # =================[ Tasks ]=================
         timer.update_elapsed_times()
@@ -264,7 +270,7 @@ while True:
                     mavmsg_to_cloud(cloud_mav_link, tukano_msg)
                     logging.info("Data sent to cloud")
 
-        if timer.time_to('take_pic') and settings.TAKE_PIC:
+        if settings.TAKE_PIC and timer.time_to('take_pic'):
             if vehicle['armed'] and vehicle['battery'] > 30:
                 if vehicle['position']:
                     pic_name = cam.take_pic(gps_data={

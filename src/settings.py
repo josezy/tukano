@@ -16,7 +16,7 @@ LOGGING_KWARGS = {
 }
 
 ###############################################################################
-# Directory contants
+# Paths
 ###############################################################################
 
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -32,18 +32,18 @@ LOGS_DIR = f"{DATA_DIR}/logs"
 ###############################################################################
 
 # Aircraft connections
-MAVLINK_DAEMON = (
-    {
-        # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
-        'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
-        'baud': 57600,
-    }
-    if PROD else
-    {
-        'device': "tcp:localhost:5760",  # dronekit-sitl on local PC
-        # 'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
-    }
-)
+# MAVLINK_DAEMON = (
+#     {
+#         # 'device': "/dev/ttyAMA0",  # UART on ARM architectures (RPi1)
+#         'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+#         'baud': 57600,
+#     }
+#     if PROD else
+#     {
+#         'device': "tcp:localhost:5760",  # dronekit-sitl on local PC
+#         # 'device': "udp:127.0.0.1:14540",  # px4_sitl on local PC
+#     }
+# )
 MAVLINK_TUKANO = (
     {
         'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
@@ -54,31 +54,31 @@ MAVLINK_TUKANO = (
         'device': "tcp:localhost:5760",
     }
 )
-MAVLINK_GROUND = (
-    {
-        'device': "/dev/ttyUSB0",  # XBee on USB port (RPi)
-        'baud': 115200,
-    }
-    if PROD else
-    {
-        'device': "udp:127.0.0.1:14552",
-    }
-)
+# MAVLINK_GROUND = (
+#     {
+#         'device': "/dev/ttyUSB0",  # XBee on USB port (RPi)
+#         'baud': 115200,
+#     }
+#     if PROD else
+#     {
+#         'device': "udp:127.0.0.1:14552",
+#     }
+# )
 
 # Ground connections
-MAVLINK_AIRCRAFT = (
-    {
-        'device': "/dev/ttyUSB0",  # XBee on USB port (PC)
-        'baud': 115200,
-    }
-    if PROD else
-    {
-        'device': "udp:127.0.0.1:14552",
-    }
-)
-MAVLINK_GCS = {
-    'device': "udp:127.0.0.1:14550",
-}
+# MAVLINK_AIRCRAFT = (
+#     {
+#         'device': "/dev/ttyUSB0",  # XBee on USB port (PC)
+#         'baud': 115200,
+#     }
+#     if PROD else
+#     {
+#         'device': "udp:127.0.0.1:14552",
+#     }
+# )
+# MAVLINK_GCS = {
+#     'device': "udp:127.0.0.1:14550",
+# }
 
 ###############################################################################
 # External hardware pins
