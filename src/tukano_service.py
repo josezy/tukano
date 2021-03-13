@@ -66,7 +66,6 @@ def update_vehicle_state(msg, vehicle):
         if msg_type == "SYS_STATUS":
             vehicle['battery'] = msg.battery_remaining
 
-        logging.debug(f"({msg_type}) {vehicle}")
     return vehicle
 
 
@@ -90,6 +89,7 @@ def mavmsg_to_cloud(link, msg) -> None:
             'srcComponent': msg.get_srcComponent(),
             **msg.to_dict()
         }))
+        logging.debug(f"[MAV TO CLOUD] {msg.to_json()}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
