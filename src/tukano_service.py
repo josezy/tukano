@@ -6,7 +6,6 @@
 import ssl
 import json
 import time
-import asyncio
 import settings
 import logging
 import traceback
@@ -129,17 +128,6 @@ def mav_data_from_cloud(link):
     return mavmsg
 
 
-async def frame_to_cloud(link, cam):
-    try:
-        start = time.time()
-        frame = cam.grab_frame()
-        packed_frame = pack_frame(frame)
-        link.send(packed_frame)
-        logging.info(f"Frame delivery took {time.time() - start}")
-    except (BrokenPipeError, websocket.WebSocketConnectionClosedException):
-        logging.error("[FRAME SEND] Broken pipe. Cloud link error")
-
-
 def command_to_drone(drone, command):
     mav_cmd = command.get('command')
     target_system = command.get('target_system')
@@ -202,15 +190,12 @@ timer = Timer({
     'collect_data': settings.DATA_COLLECT_TIMESPAN,
     'send_data': settings.MAVLINK_SAMPLES_TIMESPAN,
     'take_pic': settings.TAKE_PIC_TIMESPAN,
-    'send_frame': 1 / settings.STREAM_VIDEO_FPS,
 })
 
-if any((settings.TAKE_PIC, settings.STREAM_VIDEO, settings.RECORD)):
+if any((settings.TAKE_PIC, settings.RECORD)):
     cam = Camera()
 
 cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
-if settings.STREAM_VIDEO:
-    cloud_video_link = create_cloud_link(settings.WS_VIDEO_ENDPOINT)
 
 leds.success()
 while True:
@@ -239,12 +224,6 @@ while True:
             logging.error("No cloud_mav_link, recreating...")
             cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
             time.sleep(1)
-
-        if settings.STREAM_VIDEO:
-            if cloud_video_link is None or not cloud_video_link.connected:
-                logging.error("No cloud_video_link, recreating...")
-                cloud_video_link = create_cloud_link(
-                    settings.WS_VIDEO_ENDPOINT)
 
         # =================[ Tasks ]=================
         timer.update_elapsed_times()
@@ -282,13 +261,6 @@ while True:
                     pic_name = cam.take_pic()
 
                 logging.info(f"Pic taken '{pic_name}'")
-
-        if settings.STREAM_VIDEO:
-            if timer.time_to('send_frame'):
-                if cloud_video_link is not None and cloud_video_link.connected:
-                    logging.info("start")
-                    asyncio.run(frame_to_cloud(cloud_video_link, cam))
-                    logging.info("end")
 
         if settings.RECORD:
             if vehicle['armed'] and not cam.is_recording:
