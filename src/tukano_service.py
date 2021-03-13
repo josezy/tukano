@@ -14,7 +14,7 @@ import websocket
 from pymavlink import mavutil
 from websocket import create_connection
 
-from tasks import collect_data, prepare_data, pack_frame
+from tasks import collect_data, prepare_data
 from camera import Camera
 from actuators import Hook
 from util import leds

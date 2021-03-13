@@ -1,6 +1,5 @@
 import json
 import redis
-import base64
 import serial
 import logging
 import settings
