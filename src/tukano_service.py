@@ -96,9 +96,11 @@ def mavmsg_to_cloud(link, msg) -> None:
         websocket.WebSocketConnectionClosedException,
     ) as e:
         logging.error(f"[MAV DATA SEND] Broken pipe. Cloud link error: {e}")
+        link.close()
 
     except OSError as e:
         logging.warning(f"[MAV DATA SEND] OSError: {e}")
+        link.close()
 
 
 def mav_data_from_cloud(link):
