@@ -11,7 +11,7 @@ LOGGING_KWARGS = {
     'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
     'format': '[%(levelname)s] %(asctime)s: %(message)s'
 }
-logging.basicConfig(LOGGING_KWARGS)
+logging.basicConfig(**LOGGING_KWARGS)
 
 PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
 logging.info(f"Working on {'production' if PROD else 'development'}")
