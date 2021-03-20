@@ -5,7 +5,7 @@ import logging
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
-print(f"Working on {'production' if PROD else 'development'}")
+logging.info(f"Working on {'production' if PROD else 'development'}")
 
 PLATE = "00000000"  # Unique 8 digit HEX plate to identify drone on ikaro
 

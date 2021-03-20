@@ -74,7 +74,7 @@ def create_cloud_link(endpoint) -> None:
         logging.info(f"Creating cloud link at {endpoint}")
         link = create_connection(endpoint, **settings.WS_CONNECTION_PARAMS)
         link.settimeout(0)
-        logging.info(f"Connected!")
+        logging.info("Connected!")
         return link
     except Exception as e:
         logging.error(f"Cloud link error: {e}")
