@@ -4,9 +4,6 @@ import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
-PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
-logging.info(f"Working on {'production' if PROD else 'development'}")
-
 PLATE = "00000000"  # Unique 8 digit HEX plate to identify drone on ikaro
 
 SLEEPING_TIME = 0.0001
@@ -14,6 +11,10 @@ LOGGING_KWARGS = {
     'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
     'format': '[%(levelname)s] %(asctime)s: %(message)s'
 }
+logging.basicConfig(LOGGING_KWARGS)
+
+PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
+logging.info(f"Working on {'production' if PROD else 'development'}")
 
 ###############################################################################
 # Paths
