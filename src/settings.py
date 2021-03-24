@@ -39,7 +39,7 @@ MAVLINK_TUKANO = (
     }
     if PROD else
     {
-        'device': "udp:localhost:14550",
+        'device': "tcp:localhost:5760",
     }
 )
 
