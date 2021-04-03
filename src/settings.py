@@ -73,9 +73,9 @@ TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
-RECORD = False                          # Whether to record
-RECORD_START_ALT = 12                   # Start recording video above N meters
-RECORD_STOP_ALT = 8                     # Spot recording video below N meters
+RECORD = True                           # Whether to record
+RECORD_START_ALT = 8                    # Start recording video above N meters
+RECORD_STOP_ALT = 6                     # Spot recording video below N meters
 
 STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
