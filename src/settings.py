@@ -108,9 +108,9 @@ WS_CONNECTION_PARAMS = (
 # WebSocket for mavlink
 
 WS_MAV_ENDPOINT = (
-    f"wss://icaro.tucanorobotics.co/mavlink?plate={PLATE}"
+    f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
     if PROD else
-    f"ws://localhost:8000/mavlink?plate={PLATE}"
+    f"ws://localhost:8000/mavlink/plate/{PLATE}"
 )
 
 WS_MAV_MSG_TYPES = (
