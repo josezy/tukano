@@ -149,7 +149,11 @@ def command_to_drone(drone, command):
 def process_message(drone, message):
     mavmsg = message.get('message')
     params = message.get('params')
-    args = params.values()
+    args = [
+        val.encode()
+        if type(val) == str else val
+        for val in params.values()
+    ]
     mavmsg_send = getattr(drone.mav, f"{mavmsg.lower()}_send")
     mavmsg_send(*args)
 
