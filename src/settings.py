@@ -4,8 +4,6 @@ import logging
 
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
-PLATE = "00000000"  # Unique 8 digit HEX plate to identify drone on ikaro
-
 SLEEPING_TIME = 0.0001
 LOGGING_KWARGS = {
     'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
@@ -106,12 +104,7 @@ WS_CONNECTION_PARAMS = (
 )
 
 # WebSocket for mavlink
-
-WS_MAV_ENDPOINT = (
-    f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
-    if PROD else
-    f"ws://localhost:8000/mavlink/plate/{PLATE}"
-)
+WS_MAV_ENDPOINT = "ws://localhost:8080"
 
 WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
