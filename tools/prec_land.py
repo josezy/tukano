@@ -3,11 +3,20 @@ import math
 
 from pymavlink import mavutil
 
-hertz = 30 #betwwen 10 and 50 Hz
+hertz = 30  # betwwen 10 and 50 Hz
 
 drone = mavutil.mavlink_connection("udp:localhost:14551")
 ht = drone.wait_heartbeat()
 print(ht.to_json())
+
+# drone.param_set_send("PLND_ENABLED", 1)
+# drone.param_set_send("PLND_TYPE", 1)
+# drone.param_set_send("RNGFND1_TYPE", 1)
+# drone.param_set_send("RNGFND1_MIN_CM", 0)
+# drone.param_set_send("RNGFND1_MAX_CM", 4000)
+# drone.param_set_send("RNGFND1_SCALING", 12.12)
+# drone.param_set_send("RNGFND1_PIN", 0)
+# drone.param_set_send("SIM_SONAR_SCALE", 12)
 
 horizontal_fov = math.radians(54)
 vertical_fov = math.radians(41)
@@ -25,12 +34,12 @@ while True:
     globalPosInt = drone.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
 
     drone.mav.landing_target_send(
-        globalPosInt.time_boot_ms*1000, #time in us since system boot
+        globalPosInt.time_boot_ms * 1000,  # time in us since system boot
         0,
         0,  # mavutil.mavlink.MAV_FRAME_BODY_NED
         angle_x,
         angle_y,
-        drone.location().alt - initialLocation.alt,  # Distance between drone and target
+        drone.location().alt - initialLocation.alt,  # distance drone-target
         # 0, 0  # Size of target in radians
         horizontal_fov, vertical_fov
     )
