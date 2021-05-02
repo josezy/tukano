@@ -104,7 +104,13 @@ WS_CONNECTION_PARAMS = (
 )
 
 # WebSocket for mavlink
-WS_MAV_ENDPOINT = "ws://localhost:8080"
+# WS_MAV_ENDPOINT = "ws://localhost:8080" # Nodejs websockets proxy
+PLATE = os.environ.get('PLATE', '00000000')
+WS_MAV_ENDPOINT = (
+    f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
+    if PROD else
+    f"ws://localhost:8000/mavlink/plate/{PLATE}"
+)
 
 WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
