@@ -1,0 +1,4 @@
+dronkit-sitl
+opencv-python
+
+-r base-requirements.txt
