@@ -80,7 +80,7 @@ def create_cloud_link(endpoint) -> None:
         logging.error(f"Cloud link error: {e}")
 
 
-def mavmsg_to_cloud(link, msg) -> None:
+def mav_data_to_cloud(link, msg) -> None:
     if msg.get_type() not in settings.WS_MAV_MSG_TYPES:
         return
 
@@ -90,16 +90,13 @@ def mavmsg_to_cloud(link, msg) -> None:
             'srcComponent': msg.get_srcComponent(),
             **msg.to_dict()
         }))
-        logging.debug(f"[MAV TO CLOUD] {msg.to_json()}")
+        logging.debug(f"[MAV DATA TO CLOUD] {msg.to_json()}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
+        OSError,
     ) as e:
-        logging.error(f"[MAV DATA SEND] Broken pipe. Cloud link error: {e}")
-        link.close()
-
-    except OSError as e:
-        logging.warning(f"[MAV DATA SEND] OSError: {e}")
+        logging.error(f"[MAV DATA SEND] Cloud link error: {e}")
         link.close()
 
 
@@ -188,7 +185,7 @@ drone.mav.request_data_stream_send(
     vehicle['system_id'],
     vehicle['component_id'],
     mavutil.mavlink.MAV_DATA_STREAM_ALL,
-    5,  # Rate in Hertz
+    10,  # Rate in Hertz
     1  # Start/Stop
 )
 
@@ -215,9 +212,6 @@ while True:
             vehicle = update_vehicle_state(mav_msg, vehicle)
 
         if cloud_mav_link is not None and cloud_mav_link.connected:
-            if mav_msg is not None:
-                mavmsg_to_cloud(cloud_mav_link, mav_msg)
-
             cloud_data = mav_data_from_cloud(cloud_mav_link)
             if cloud_data and 'command' in cloud_data:
                 if cloud_data['command'].startswith('TUKANO'):
@@ -227,6 +221,9 @@ while True:
 
             if cloud_data and 'message' in cloud_data:
                 process_message(drone, cloud_data)
+
+            if mav_msg is not None:
+                mav_data_to_cloud(cloud_mav_link, mav_msg)
         else:
             logging.error("No cloud_mav_link, recreating...")
             cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
@@ -253,7 +250,7 @@ while True:
                     # drone.mav.tukano_data_send(package)
                     # logging.info("Data sent to ground")
                     tukano_msg = drone.mav.tukano_data_encode(package)
-                    mavmsg_to_cloud(cloud_mav_link, tukano_msg)
+                    mav_data_to_cloud(cloud_mav_link, tukano_msg)
                     logging.info("Data sent to cloud")
 
         if settings.TAKE_PIC and timer.time_to('take_pic'):
