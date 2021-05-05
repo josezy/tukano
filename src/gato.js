@@ -1,3 +1,6 @@
+require('dotenv').config({ path: './env/defaults.env' })
+if (process.env.GATO_ENABLED !== 'true') return console.warn("gato proxy not enabled")
+
 const WebSocket = require('ws')
 
 const PLATE = process.env.PLATE || "00000000"
