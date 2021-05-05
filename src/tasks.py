@@ -27,32 +27,34 @@ def collect_data(position):
         }
     }
     try:
-        # serial_device = serial.Serial(**settings.SERIAL_PARAMS)
-        # json_data = json.loads(serial_device.readline().decode("utf-8"))
-        # serial_device.close()
-        import random
-        json_data = {
-            'MQ135': {
-                'air_ppm': {
-                    'units': 'ppm',
-                    'value': random.randint(0, 1) + random.gauss(mu=0.5, sigma=0.1)
+        if settings.PROD:
+            serial_device = serial.Serial(**settings.SERIAL_PARAMS)
+            json_data = json.loads(serial_device.readline().decode("utf-8"))
+            serial_device.close()
+        else:
+            import random
+            json_data = {
+                'MQ135': {
+                    'air_ppm': {
+                        'units': 'ppm',
+                        'value': random.randint(0, 1) + random.gauss(mu=0.5, sigma=0.1)
+                    },
+                    'air_temp': {
+                        'units': 'celsius',
+                        'value': random.randint(20, 22) + random.gauss(mu=0.5, sigma=0.1)
+                    }
                 },
-                'air_temp': {
-                    'units': 'celsius',
-                    'value': random.randint(20, 22) + random.gauss(mu=0.5, sigma=0.1)
-                }
-            },
-            'BMP183': {
-                'altitude': {
-                    'units': 'meters',
-                    'value': random.randint(10, 11) + random.gauss(mu=0.5, sigma=0.1)
-                },
-                'temperature': {
-                    'units': 'celsius',
-                    'value': random.randint(20, 22) + random.gauss(mu=0.5, sigma=0.1)
+                'BMP183': {
+                    'altitude': {
+                        'units': 'meters',
+                        'value': random.randint(10, 11) + random.gauss(mu=0.5, sigma=0.1)
+                    },
+                    'temperature': {
+                        'units': 'celsius',
+                        'value': random.randint(20, 22) + random.gauss(mu=0.5, sigma=0.1)
+                    }
                 }
             }
-        }
         sensors_data.update(json_data)
 
         try:

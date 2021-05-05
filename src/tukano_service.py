@@ -234,7 +234,7 @@ while True:
 
         if settings.DATA_COLLECT:
             if timer.time_to('collect_data'):
-                if vehicle['armed'] and vehicle['position']:
+                if vehicle['position']:
                     veh_alt = vehicle['position']['alt']
                     if veh_alt > settings.DATA_COLLECT_MIN_ALT:
                         collect_data(vehicle['position'])
