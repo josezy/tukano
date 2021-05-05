@@ -2,6 +2,8 @@ import os
 import ssl
 import logging
 
+from util.system import load_env_settings
+
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 SLEEPING_TIME = 0.0001
@@ -32,6 +34,17 @@ ENV_DIR = f"{BASE_DIR}/env"
 
 ENV_DEFAULTS_FILE = f"{ENV_DIR}/defaults.env"
 
+###############################################################################
+# Load variables from .env file and os.environ
+###############################################################################
+
+# settings set via env/defaults.env
+ENV_DEFAULTS = load_env_settings(dotenv_path=ENV_DEFAULTS_FILE, defaults=globals())
+globals().update(ENV_DEFAULTS)
+
+# settings set via environment variables
+ENV_OVERRIDES = load_env_settings(env=dict(os.environ), defaults=globals())
+globals().update(ENV_OVERRIDES)
 
 ###############################################################################
 # Connection parameters
