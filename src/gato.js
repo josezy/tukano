@@ -33,11 +33,13 @@ ws_tukano.on('error', function (e) {
 function connect_ikaro() {
     ws_ikaro = new WebSocket(WS_IKARO)
 
+    ws_ikaro.on('open', function (e) {
+        console.log('IKARO ws connected')
+    })
     ws_ikaro.on('close', function (e) {
         console.log('IKARO ws is closed. Reconnecting in 1 second:', e)
         setTimeout(function () { connect_ikaro() }, 1000)
     })
-
     ws_ikaro.on('error', function (e) {
         console.error('IKARO ws error: ', e)
         ws_ikaro.close()
