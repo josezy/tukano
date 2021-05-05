@@ -11,11 +11,14 @@ LOGGING_KWARGS = {
 }
 logging.basicConfig(**LOGGING_KWARGS)
 
-PROD = os.environ.get('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
+PROD = os.getenv('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
 logging.info(f"Working on {'production' if PROD else 'development'}")
 
+PLATE = "00000000"
+GATO_ENABLED = True
+
 ###############################################################################
-# Paths
+# Paths and files
 ###############################################################################
 
 SRC_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -25,6 +28,10 @@ DATA_DIR = f"{BASE_DIR}/data"
 PICS_DIR = f"{DATA_DIR}/pics"
 VIDEOS_DIR = f"{DATA_DIR}/videos"
 LOGS_DIR = f"{DATA_DIR}/logs"
+ENV_DIR = f"{BASE_DIR}/env"
+
+ENV_DEFAULTS_FILE = f"{ENV_DIR}/defaults.env"
+
 
 ###############################################################################
 # Connection parameters
@@ -71,9 +78,9 @@ TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
 MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
 MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
 
-RECORD = False                          # Whether to record
-RECORD_START_ALT = 8                    # Start recording video above N meters
-RECORD_STOP_ALT = 6                     # Spot recording video below N meters
+RECORD = True                           # Whether to record
+RECORD_START_ALT = 9                    # Start recording video above N meters
+RECORD_STOP_ALT = 1                     # Stop recording video below N meters
 
 STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
@@ -99,18 +106,18 @@ SERIAL_PARAMS = {
 # Websockets parameters
 ###############################################################################
 
-WS_CONNECTION_PARAMS = (
-    {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
-)
+WS_CONNECTION_PARAMS = {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
 
 # WebSocket for mavlink
-# WS_MAV_ENDPOINT = "ws://localhost:8080" # Nodejs websockets proxy
-PLATE = os.environ.get('PLATE', '00000000')
-WS_MAV_ENDPOINT = (
-    f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
-    if PROD else
-    f"ws://localhost:8000/mavlink/plate/{PLATE}"
-)
+if GATO_ENABLED:
+    WS_MAV_ENDPOINT = "ws://localhost:8080" # Nodejs websockets proxy
+else:
+    assert type(PLATE) == str and len(PLATE) == 8, "No PLATE set"
+    WS_MAV_ENDPOINT = (
+        f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
+        if PROD else
+        f"ws://localhost:8000/mavlink/plate/{PLATE}"
+    )
 
 WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',
