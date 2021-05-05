@@ -212,6 +212,9 @@ while True:
             vehicle = update_vehicle_state(mav_msg, vehicle)
 
         if cloud_mav_link is not None and cloud_mav_link.connected:
+            if mav_msg is not None:
+                mav_data_to_cloud(cloud_mav_link, mav_msg)
+
             cloud_data = mav_data_from_cloud(cloud_mav_link)
             if cloud_data and 'command' in cloud_data:
                 if cloud_data['command'].startswith('TUKANO'):
@@ -222,8 +225,6 @@ while True:
             if cloud_data and 'message' in cloud_data:
                 process_message(drone, cloud_data)
 
-            if mav_msg is not None:
-                mav_data_to_cloud(cloud_mav_link, mav_msg)
         else:
             logging.error("No cloud_mav_link, recreating...")
             cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
