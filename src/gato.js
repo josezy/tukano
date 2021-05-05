@@ -1,5 +1,5 @@
 require('dotenv').config({ path: './env/defaults.env' })
-if (process.env.GATO_ENABLED !== 'true') return console.warn(`[${new Date().toLocaleString()}]`, "gato proxy not enabled")
+if (process.env.GATO_ENABLED !== 'true') return console.warn("gato proxy not enabled")
 
 const WebSocket = require('ws')
 
@@ -22,26 +22,26 @@ ws_tukano.on('connection', function connection(ws) {
         ws.send(message)
     })
     ws.on('error', function (e) {
-        console.error(`[${new Date().toLocaleString()}]`, "WS WS ERROR:", e)
+        console.error("WS WS ERROR:", e)
     })
 })
 
 ws_tukano.on('error', function (e) {
-    console.error(`[${new Date().toLocaleString()}]`, "WS TUKANO ERROR:", e)
+    console.error("WS TUKANO ERROR:", e)
 })
 
 function connect_ikaro() {
     ws_ikaro = new WebSocket(WS_IKARO)
 
     ws_ikaro.on('open', function (e) {
-        console.log(`[${new Date().toLocaleString()}]`, 'IKARO ws connected')
+        console.log('IKARO ws connected')
     })
     ws_ikaro.on('close', function (e) {
-        console.log(`[${new Date().toLocaleString()}]`, 'IKARO ws is closed. Reconnecting in 1 second:', e)
+        console.log('IKARO ws is closed. Reconnecting in 1 second:', e)
         setTimeout(function () { connect_ikaro() }, 1000)
     })
     ws_ikaro.on('error', function (e) {
-        console.error(`[${new Date().toLocaleString()}]`, 'IKARO ws error: ', e)
+        console.error('IKARO ws error: ', e)
         ws_ikaro.close()
     })
 }
