@@ -24,6 +24,9 @@ ws_tukano.on('connection', function connection(ws) {
     ws.on('error', function (e) {
         console.error("WS WS ERROR:", e)
     })
+    ws.on('close', function (e) {
+        console.error("WS WS CLOSE:", e)
+    })
 })
 
 ws_tukano.on('error', function (e) {
