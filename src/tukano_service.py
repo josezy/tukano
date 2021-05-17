@@ -104,13 +104,14 @@ def mav_data_from_cloud(link):
     mavmsg = None
 
     try:
-        msg = json.loads(link.recv())
+        recv_str = link.recv()
+        msg = json.loads(recv_str)
         if any([
             'command' in msg,
             'message' in msg,
         ]):
             mavmsg = msg
-            logging.debug(f"[MAV DATA FROM CLOUD] {msg.to_json()}")
+            logging.debug(f"[MAV DATA FROM CLOUD] {recv_str}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
