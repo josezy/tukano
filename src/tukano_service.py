@@ -90,7 +90,7 @@ def mav_data_to_cloud(link, msg) -> None:
             'srcComponent': msg.get_srcComponent(),
             **msg.to_dict()
         }))
-        logging.debug(f"[MAV DATA TO CLOUD] {msg.to_json()}")
+        # logging.debug(f"[MAV DATA TO CLOUD] {msg.to_json()}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
@@ -110,6 +110,7 @@ def mav_data_from_cloud(link):
             'message' in msg,
         ]):
             mavmsg = msg
+            logging.debug(f"[MAV DATA FROM CLOUD] {msg.to_json()}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
