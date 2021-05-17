@@ -7,14 +7,8 @@ from util.system import load_env_settings
 os.environ['MAVLINK_DIALECT'] = "mav_tukano"
 
 SLEEPING_TIME = 0.0001
-LOGGING_KWARGS = {
-    'level': logging.INFO,  # DEBUG-INFO-WARNING-ERROR-CRITICAL
-    'format': '[%(levelname)s] %(asctime)s: %(message)s'
-}
-logging.basicConfig(**LOGGING_KWARGS)
-
 PROD = os.getenv('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
-logging.info(f"Working on {'production' if PROD else 'development'}")
+LOGGING_LEVEL = "INFO"
 
 PLATE = "00000000"
 GATO_ENABLED = True
@@ -45,6 +39,18 @@ globals().update(ENV_DEFAULTS)
 # settings set via environment variables
 ENV_OVERRIDES = load_env_settings(env=dict(os.environ), defaults=globals())
 globals().update(ENV_OVERRIDES)
+
+###############################################################################
+# Logging settings
+###############################################################################
+
+LOGGING_KWARGS = {
+    'level': getattr(logging, LOGGING_LEVEL),  # DEBUG-INFO-WARNING-ERROR-CRITICAL
+    'format': '[%(levelname)s] %(asctime)s: %(message)s'
+}
+
+logging.basicConfig(**LOGGING_KWARGS)
+logging.info(f"Working on {'production' if PROD else 'development'}")
 
 ###############################################################################
 # Connection parameters
