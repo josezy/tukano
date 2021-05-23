@@ -1,5 +1,12 @@
 require('dotenv').config({ path: './env/defaults.env' })
-if (process.env.GATO_ENABLED !== 'true') return console.warn("gato proxy not enabled")
+
+const original_log = console.log
+console.log = function(...arguments) {
+    const ts = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+    original_log.apply(console, [`[${ts}]`, ...arguments])
+}
+
+if (process.env.GATO_ENABLED !== 'true') return console.log("gato proxy not enabled")
 
 const WebSocket = require('ws')
 
@@ -13,12 +20,6 @@ const WS_IKARO = `${IKARO_ENDPOINT}/mavlink/plate/${PLATE}`
 
 let ws_ikaro
 const ws_tukano = new WebSocket.Server({ port: 8080 })
-
-const original_log = console.log
-console.log = function(...arguments) {
-    const ts = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
-    original_log.apply(console, [`[${ts}]`, ...arguments])
-};
 
 ws_tukano.on('connection', function connection(ws) {
     ws.on('message', function (message) {
