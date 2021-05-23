@@ -14,6 +14,12 @@ const WS_IKARO = `${IKARO_ENDPOINT}/mavlink/plate/${PLATE}`
 let ws_ikaro
 const ws_tukano = new WebSocket.Server({ port: 8080 })
 
+const original_log = console.log
+console.log = function(...arguments) {
+    const ts = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+    original_log.apply(console, [`[${ts}]`, ...arguments])
+};
+
 ws_tukano.on('connection', function connection(ws) {
     ws.on('message', function (message) {
         if (ws_ikaro.readyState === WebSocket.OPEN) ws_ikaro.send(message)
@@ -22,15 +28,19 @@ ws_tukano.on('connection', function connection(ws) {
         ws.send(message)
     })
     ws.on('error', function (e) {
-        console.error("WS WS ERROR:", e)
+        console.log("WS WS ERROR:", e)
     })
     ws.on('close', function (e) {
-        console.error("WS WS CLOSE:", e)
+        console.log("WS WS CLOSE:", e)
     })
 })
 
 ws_tukano.on('error', function (e) {
-    console.error("WS TUKANO ERROR:", e)
+    console.log("WS TUKANO ERROR:", e)
+})
+
+ws_tukano.on('close', function (e) {
+    console.log("WS TUKANO CLOSE:", e)
 })
 
 function connect_ikaro() {
@@ -44,7 +54,7 @@ function connect_ikaro() {
         setTimeout(function () { connect_ikaro() }, 1000)
     })
     ws_ikaro.on('error', function (e) {
-        console.error('IKARO ws error: ', e)
+        console.log('IKARO ws error: ', e.name + ': ' + e.message)
         ws_ikaro.close()
     })
 }
