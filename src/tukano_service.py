@@ -131,7 +131,7 @@ def mav_data_from_cloud(link):
     return mavmsg
 
 
-def command_to_drone(drone, command: ty.Dict[str, ty.Any]) -> None:
+def command_to_drone(drone, command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
     mavcmd = command.get('command')
     target_system = command.get('target_system')
     target_component = command.get('target_component')
@@ -147,7 +147,7 @@ def command_to_drone(drone, command: ty.Dict[str, ty.Any]) -> None:
     logging.debug(f"[COMMAND TO DRONE] Delivered command {mavcmd} with params: {params}")
 
 
-def message_to_drone(drone, message: ty.Dict[str, ty.Any]) -> None:
+def message_to_drone(drone, message: ty.Dict[str, ty.Any]) -> ty.NoReturn:
     mavmsg = message.get('message')
     params = message.get('params')
     args = [
@@ -159,7 +159,7 @@ def message_to_drone(drone, message: ty.Dict[str, ty.Any]) -> None:
     logging.debug(f"[MESSAGE TO DRONE] Delivered message {mavmsg} with args: {args}")
 
 
-def tukano_command(command: ty.Dict[str, ty.Any]) -> None:
+def tukano_command(command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
     tukano_cmd = command.get('command')
     # params = command.get('params')
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
