@@ -130,8 +130,8 @@ def mav_data_from_cloud(link):
     return mavmsg
 
 
-def command_to_drone(drone, command):
-    mav_cmd = command.get('command')
+def command_to_drone(drone, command: dict[str, any]) -> None:
+    mavcmd = command.get('command')
     target_system = command.get('target_system')
     target_component = command.get('target_component')
     params = command.get('params')
@@ -139,25 +139,26 @@ def command_to_drone(drone, command):
     drone.mav.command_long_send(
         target_system,
         target_component,
-        getattr(mavutil.mavlink, mav_cmd),
+        getattr(mavutil.mavlink, mavcmd),
         0,  # confirmation (not used yet)
         *params
     )
+    logging.debug(f"[COMMAND TO DRONE] Delivered command {mavcmd} with params: {params}")
 
 
-def process_message(drone, message):
+def message_to_drone(drone, message: dict[str, any]) -> None:
     mavmsg = message.get('message')
     params = message.get('params')
     args = [
-        val.encode()
-        if type(val) == str else val
+        val.encode() if type(val) == str else val
         for val in params.values()
     ]
     mavmsg_send = getattr(drone.mav, f"{mavmsg.lower()}_send")
     mavmsg_send(*args)
+    logging.debug(f"[MESSAGE TO DRONE] Delivered message {mavmsg} with args: {args}")
 
 
-def tukano_command(command):
+def tukano_command(command: dict[str, any]) -> None:
     tukano_cmd = command.get('command')
     # params = command.get('params')
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
@@ -225,7 +226,7 @@ while True:
                     command_to_drone(drone, cloud_data)
 
             if cloud_data and 'message' in cloud_data:
-                process_message(drone, cloud_data)
+                message_to_drone(drone, cloud_data)
 
         else:
             logging.error("No cloud_mav_link, recreating...")
