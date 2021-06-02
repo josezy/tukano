@@ -29,6 +29,26 @@ ENV_DIR = f"{BASE_DIR}/env"
 ENV_DEFAULTS_FILE = f"{ENV_DIR}/defaults.env"
 
 ###############################################################################
+# Flight tasks parameters
+###############################################################################
+
+DATA_COLLECT = False                    # Whether to collect and send data
+DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
+DATA_COLLECT_TIMESPAN = 2               # Collect data every Z seconds
+
+TAKE_PIC = False                        # Whether to take pics
+TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
+
+MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
+MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
+
+RECORD = True                           # Whether to record
+RECORD_START_ALT = 9                    # Start recording video above N meters
+RECORD_STOP_ALT = 1                     # Stop recording video below N meters
+
+STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
+
+###############################################################################
 # Load variables from .env file and os.environ
 ###############################################################################
 
@@ -82,26 +102,6 @@ LED_PINS = {
 HOOK = {
     'trigger': 26
 }
-
-###############################################################################
-# Flight tasks parameters
-###############################################################################
-
-DATA_COLLECT = False                    # Whether to collect and send data
-DATA_COLLECT_MIN_ALT = 10               # Collect data above N meters
-DATA_COLLECT_TIMESPAN = 2               # Collect data every Z seconds
-
-TAKE_PIC = False                        # Whether to take pics
-TAKE_PIC_TIMESPAN = 1                   # Take picture every Z seconds
-
-MAX_SAMPLES_PER_MAVLINK_MESSAGE = 1     # Samples to send over 1 mav msg
-MAVLINK_SAMPLES_TIMESPAN = 0.4          # Time between custom mavlink messages
-
-RECORD = True                           # Whether to record
-RECORD_START_ALT = 9                    # Start recording video above N meters
-RECORD_STOP_ALT = 1                     # Stop recording video below N meters
-
-STREAM_VIDEO_JPEG_QUALITY = 50          # Stream video quality
 
 ###############################################################################
 # Redis config
