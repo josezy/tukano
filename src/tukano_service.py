@@ -6,6 +6,7 @@
 import ssl
 import json
 import time
+import typing
 import settings
 import logging
 import traceback
@@ -130,7 +131,7 @@ def mav_data_from_cloud(link):
     return mavmsg
 
 
-def command_to_drone(drone, command: dict[str, any]) -> None:
+def command_to_drone(drone, command: dict[str, typing.Any]) -> None:
     mavcmd = command.get('command')
     target_system = command.get('target_system')
     target_component = command.get('target_component')
@@ -146,7 +147,7 @@ def command_to_drone(drone, command: dict[str, any]) -> None:
     logging.debug(f"[COMMAND TO DRONE] Delivered command {mavcmd} with params: {params}")
 
 
-def message_to_drone(drone, message: dict[str, any]) -> None:
+def message_to_drone(drone, message: dict[str, typing.Any]) -> None:
     mavmsg = message.get('message')
     params = message.get('params')
     args = [
@@ -158,7 +159,7 @@ def message_to_drone(drone, message: dict[str, any]) -> None:
     logging.debug(f"[MESSAGE TO DRONE] Delivered message {mavmsg} with args: {args}")
 
 
-def tukano_command(command: dict[str, any]) -> None:
+def tukano_command(command: dict[str, typing.Any]) -> None:
     tukano_cmd = command.get('command')
     # params = command.get('params')
     if tukano_cmd == 'TUKANO_RELEASE_HOOK':
