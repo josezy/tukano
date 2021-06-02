@@ -1,10 +1,11 @@
+import logging
 import time
 import settings
 
 if settings.PROD:
     import io
     import numpy as np
-    from picamera import PiCamera
+    import picamera
 else:
     import cv2
 
@@ -21,15 +22,18 @@ class Camera(object):
 
     def __init__(self, rotation=0):
         if settings.PROD:
-            self.cam = PiCamera()
-            self.cam.resolution = (640, 480)
-            self.cam.rotation = rotation
-            self.stream = io.BytesIO()
-            self.cam.capture(
-                self.stream,
-                format="jpeg",
-                quality=settings.STREAM_VIDEO_JPEG_QUALITY
-            )
+            try:
+                self.cam = picamera.PiCamera()
+                self.cam.resolution = (640, 480)
+                self.cam.rotation = rotation
+                self.stream = io.BytesIO()
+                self.cam.capture(
+                    self.stream,
+                    format="jpeg",
+                    quality=settings.STREAM_VIDEO_JPEG_QUALITY
+                )
+            except picamera.exc.PiCameraError as e:
+                logging.warning(f"Couldn't initialize PiCamera: {e}")
         else:
             self.cam = cv2.VideoCapture(0)
 
