@@ -22,18 +22,15 @@ class Camera(object):
 
     def __init__(self, rotation=0):
         if settings.PROD:
-            try:
-                self.cam = picamera.PiCamera()
-                self.cam.resolution = (640, 480)
-                self.cam.rotation = rotation
-                self.stream = io.BytesIO()
-                self.cam.capture(
-                    self.stream,
-                    format="jpeg",
-                    quality=settings.STREAM_VIDEO_JPEG_QUALITY
-                )
-            except picamera.exc.PiCameraError as e:
-                logging.warning(f"Couldn't initialize PiCamera: {e}")
+            self.cam = picamera.PiCamera()
+            self.cam.resolution = (640, 480)
+            self.cam.rotation = rotation
+            self.stream = io.BytesIO()
+            self.cam.capture(
+                self.stream,
+                format="jpeg",
+                quality=settings.STREAM_VIDEO_JPEG_QUALITY
+            )
         else:
             self.cam = cv2.VideoCapture(0)
 
