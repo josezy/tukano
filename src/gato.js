@@ -25,7 +25,7 @@ function tukano_connection (ws) {
     ws.on('message', function (message) {
         if (ws_ikaro.readyState === WebSocket.OPEN) {
             ws_ikaro.send(message)
-            console.log("Message TO ikaro", message)
+            if (message.includes("HEARTBEAT")) console.log("Message TO ikaro", message)
         }
     })
     console.log("tukano service connected")
