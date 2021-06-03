@@ -18,8 +18,12 @@ const PROD = TUKANO_ENV === "PROD"
 const IKARO_ENDPOINT = PROD ? `wss://icaro.tucanorobotics.co` : `ws://localhost:8000`
 const WS_IKARO = `${IKARO_ENDPOINT}/mavlink/plate/${PLATE}`
 
+const ws_tukano_options = {
+    port: 8080,
+    clientTracking: true,
+}
+
 let ws_ikaro
-const ws_tukano = new WebSocket.Server({ port: 8080 })
 
 function tukano_connection (ws) {
     ws.on('message', function (message) {
@@ -41,19 +45,19 @@ function tukano_connection (ws) {
     })
 }
 
-ws_tukano.on('error', function (e) {
-    console.log("WS TUKANO ERROR:", e)
-})
-
-ws_tukano.on('close', function (e) {
-    console.log("WS TUKANO CLOSE:", e)
-})
-
 function connect_ikaro() {
     ws_ikaro = new WebSocket(WS_IKARO)
 
     ws_ikaro.on('open', function (e) {
         console.log('IKARO ws connected')
+
+        const ws_tukano = new WebSocket.Server(ws_tukano_options)
+        ws_tukano.on('error', function (e) {
+            console.log("WS TUKANO ERROR:", e)
+        })
+        ws_tukano.on('close', function (e) {
+            console.log("WS TUKANO CLOSE:", e)
+        })
         ws_tukano.on('connection', tukano_connection)
     })
     ws_ikaro.on('close', function (e) {
