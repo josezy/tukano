@@ -24,9 +24,11 @@ const ws_tukano_options = {
 }
 
 let ws_ikaro
+let ws_tukano
 
 function aiuda() {
     console.log(">>> Executing aiuda protocol...")
+    ws_tukano.terminate()
     ws_ikaro.terminate()
     connect_ikaro()
 }
@@ -60,7 +62,7 @@ function connect_ikaro() {
         console.log('IKARO ws connected')
         ws_ikaro.watchdog = setTimeout(aiuda, 3000)
 
-        const ws_tukano = new WebSocket.Server(ws_tukano_options)
+        ws_tukano = new WebSocket.Server(ws_tukano_options)
         ws_tukano.on('error', function (e) {
             console.log("WS TUKANO ERROR:", e)
         })
