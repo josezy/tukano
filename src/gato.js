@@ -9,6 +9,7 @@ console.log = function(...arguments) {
 if (process.env.GATO_ENABLED !== 'true') return console.log("gato proxy not enabled")
 
 const WebSocket = require('ws')
+const { exec } = require("child_process")
 
 const PLATE = process.env.PLATE || "00000000"
 
@@ -25,7 +26,13 @@ const ws_tukano_options = {
 
 let ws_ikaro
 
-function tukano_connection (ws) {
+function aiuda() {
+    exec("supervisorctl restart all", (error, stdout, stderr) => {
+        console.log({stdout, stderr, error})
+    })
+}
+
+function tukano_connection(ws) {
     ws.on('message', function (message) {
         if (ws_ikaro.readyState === WebSocket.OPEN) {
             ws_ikaro.send(message)
@@ -36,6 +43,8 @@ function tukano_connection (ws) {
     ws_ikaro.on('message', function (message) {
         ws.send(message)
         console.log("Message FROM ikaro", message)
+        clearTimeout(ws_ikaro.watchdog)
+        ws_ikaro.watchdog = setTimeout(aiuda, 3000)
     })
     ws.on('error', function (e) {
         console.log("WS WS ERROR:", e)
@@ -50,6 +59,7 @@ function connect_ikaro() {
 
     ws_ikaro.on('open', function (e) {
         console.log('IKARO ws connected')
+        ws_ikaro.watchdog = setTimeout(aiuda, 3000)
 
         const ws_tukano = new WebSocket.Server(ws_tukano_options)
         ws_tukano.on('error', function (e) {
