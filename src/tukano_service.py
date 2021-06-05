@@ -6,11 +6,11 @@
 import ssl
 import json
 import time
-import typing as ty
 import settings
 import logging
 import traceback
 import websocket
+import typing as ty
 
 from pymavlink import mavutil
 from websocket import create_connection
@@ -91,7 +91,8 @@ def mav_data_to_cloud(link, msg) -> None:
             'srcComponent': msg.get_srcComponent(),
             **msg.to_dict()
         }))
-        # logging.debug(f"[MAV DATA TO CLOUD] {msg.to_json()}")
+        if msg.get_type() == "HEARTBEAT":
+            logging.debug(f"[MAV DATA TO CLOUD] {msg.to_json()}")
     except (
         BrokenPipeError,
         websocket.WebSocketConnectionClosedException,
@@ -171,7 +172,7 @@ def tukano_command(command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
 logging.basicConfig(**settings.LOGGING_KWARGS)
 logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
-leds.info()
+leds.led_on('red')
 drone = connect_drone()
 heartbeat = drone.wait_heartbeat()
 
@@ -182,7 +183,7 @@ vehicle = {
     'component_id': heartbeat.get_srcComponent(),
     'armed': False,
     'position': None,
-    'battery': None
+    'battery': None,
 }
 
 drone.mav.request_data_stream_send(
@@ -204,8 +205,10 @@ if any((settings.TAKE_PIC, settings.RECORD)):
     cam = Camera()
 
 cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
+cloud_last_heartbeat = time.time()
 
-leds.success()
+leds.led_on('blue')
+red_on = False
 while True:
     time.sleep(settings.SLEEPING_TIME)
 
@@ -227,12 +230,21 @@ while True:
                     command_to_drone(drone, cloud_data)
 
             if cloud_data and 'message' in cloud_data:
+                if cloud_data.get('message') == 'HEARTBEAT':
+                    cloud_last_heartbeat = time.time()
+                    leds.led_on('green')
+                    red_on = False
+
                 message_to_drone(drone, cloud_data)
 
         else:
             logging.error("No cloud_mav_link, recreating...")
             cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
             time.sleep(1)
+
+        if time.time() - cloud_last_heartbeat > 2 and not red_on:
+            leds.led_on('red')
+            red_on = True
 
         # =================[ Tasks ]=================
         timer.update_elapsed_times()
@@ -281,6 +293,6 @@ while True:
                 logging.info(f"Video recordered '{vid_name}'")
 
     except Exception as e:
-        leds.error()
+        leds.led_on('red')
         logging.error(f"Main loop error: {e}")
         traceback.print_exc()
