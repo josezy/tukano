@@ -28,9 +28,7 @@ let ws_ikaro
 
 function aiuda() {
     console.log(">>> Executing aiuda protocol...")
-    exec("supervisorctl restart all", (error, stdout, stderr) => {
-        console.log({stdout, stderr, error})
-    })
+    exec("supervisorctl restart all")
 }
 
 function tukano_connection(ws) {
