@@ -28,7 +28,7 @@ let ws_tukano
 
 function aiuda() {
     console.log(">>> Executing aiuda protocol...")
-    ws_tukano.terminate()
+    ws_tukano.close()
     ws_ikaro.terminate()
     connect_ikaro()
 }
