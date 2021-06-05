@@ -9,7 +9,6 @@ console.log = function(...arguments) {
 if (process.env.GATO_ENABLED !== 'true') return console.log("gato proxy not enabled")
 
 const WebSocket = require('ws')
-const { exec } = require("child_process")
 
 const PLATE = process.env.PLATE || "00000000"
 
@@ -28,7 +27,8 @@ let ws_ikaro
 
 function aiuda() {
     console.log(">>> Executing aiuda protocol...")
-    exec("supervisorctl restart all")
+    ws_ikaro.terminate()
+    connect_ikaro()
 }
 
 function tukano_connection(ws) {
