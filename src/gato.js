@@ -27,6 +27,7 @@ const ws_tukano_options = {
 let ws_ikaro
 
 function aiuda() {
+    console.log(">>> Executing aiuda protocol...")
     exec("supervisorctl restart all", (error, stdout, stderr) => {
         console.log({stdout, stderr, error})
     })
