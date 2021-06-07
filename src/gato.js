@@ -59,9 +59,16 @@ function connect_ikaro() {
 
     ws_ikaro.on('open', function (e) {
         console.log('IKARO ws connected')
+
+        if (ws_ikaro.watchdog) clearTimeout(ws_ikaro.watchdog)
         ws_ikaro.watchdog = setTimeout(aiuda, 3000)
 
-        ws_tukano = new WebSocket.Server(ws_tukano_options)
+        try {
+            ws_tukano = new WebSocket.Server(ws_tukano_options)
+        } catch {
+            ws_tukano.close()
+            ws_tukano = new WebSocket.Server(ws_tukano_options)
+        }
         ws_tukano.on('error', function (e) {
             console.log("WS TUKANO ERROR:", e)
         })
@@ -72,6 +79,7 @@ function connect_ikaro() {
     })
     ws_ikaro.on('close', function (e) {
         console.log('IKARO ws is closed. Reconnecting in 1 second:', e)
+        if (ws_tukano) ws_tukano.close()
         setTimeout(function () { connect_ikaro() }, 1000)
     })
     ws_ikaro.on('error', function (e) {
