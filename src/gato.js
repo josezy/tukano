@@ -55,6 +55,7 @@ function tukano_connection(ws) {
 }
 
 function connect_ikaro() {
+    console.log(`Attempting connection to: ${WS_IKARO}`)
     ws_ikaro = new WebSocket(WS_IKARO)
 
     ws_ikaro.on('open', function (e) {
