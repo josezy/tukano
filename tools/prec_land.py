@@ -71,6 +71,8 @@ while True:
 # RNGFND1_MIN_CM = 0 CM
 # RNGFND1_SCALING = 12.120 m/V
 # RNGFND1_TYPE = Analog
+# RNGFND1_PIN = 0
+# SIM_SONAR_SCALE = 12
 # SIM_PLD_ENABLE = 0
 # After doing this you must reboot the simulator
 
