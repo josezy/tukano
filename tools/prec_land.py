@@ -36,6 +36,7 @@ while True:
     )
     # print("sent", angle_x, angle_y, horizontal_fov, vertical_fov)
     time.sleep(1 / hertz)
+    print(time.time())
 
 
 # velocity_x = 5
