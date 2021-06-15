@@ -1,27 +1,29 @@
+[![hackmd-github-sync-badge](https://hackmd.io/VCgfbFCmQSuWggG1sR7q8Q/badge)](https://hackmd.io/VCgfbFCmQSuWggG1sR7q8Q)
+
 <center>
 
-# TUKANO-IKARO FIELD TEST #1<br><small>TucanoRobotics © 2020</small><br><small>Medellín, Colombia</small>
+# PRUEBAS DE CAMPO TUKANO-IKARO<br><small>TucanoRobotics © 2021</small><br><small>Guarne, Colombia</small>
 
 </center>
 
-This document collects the whole protocol, requirements and timeline of events that must be accomplished in order to perform and test the overall behavior of a drone launch using Tukano-Ikaro software platform
+Este documento pretende recopilar los protocolos, requerimientos y línea temporal de eventos que deben ser cumplidos con el objetivo de ejecutar y validar el funcionamiento completo de un drone lanzado usando la plataforma IKARO y el software TUKANO.
 
 :::danger
-**Disclaimer:** *Only YOU are a responsible for all the consequences resulting of the good or bad desicions made during the preparation and execution of the mission. TucanoRobotics and all its members are not responsible for any expected or unexpected failure or accident that can occur. Software is provided under [MIT License](https://github.com/josezy/ikaro/blob/master/LICENSE)*
+**Descargo de responsabilidad:** *Solo TÚ eres responsable de todas las consecuencias que resulten de las buenas o malas decisiones que se tomen durante la preparación y la ejecución de la misión. TucanoRobotics y todos sus miembros no son responsables por ninguna falla esperada o inesperada, o accidente que pueda ocurrir. El software se provee bajo la licencia [MIT License](https://github.com/josezy/ikaro/blob/master/LICENSE)*
 :::
 
 ![](https://codimd.s3.shivering-isles.com/demo/uploads/upload_64791ab191bd8f30f9cade07797c51eb.jpg)
 
-Contents:
+Contenido:
 [TOC]
 
 ---
 
-# Goal
+# Objetivo
 
-Give a grade/comment on the following:
+Calificar/comentar los siguientes aspectos:
 
-* Simplicity of setup
+* Simplicidad del montaje
     * Cloud Control Station access
     * Drone telemetry connection
     * Get drone ready (plug battery/propellers)
@@ -31,7 +33,7 @@ Give a grade/comment on the following:
 
 * Execution of commands
 
-# Before fly
+# Antes de volar
 * Software updated
     * [ ] ikaro (web)
     * [ ] tukano (RPi)
@@ -44,7 +46,7 @@ Give a grade/comment on the following:
     * [ ] Geofence breach
     * [ ] Triggered by switch
 
-# Flight day
+# Día de vuelo
 * Aircraft preparation
     * [ ] 4G dongle w/ charged SIM card
     * [ ] Connect to Cloud Control Station
@@ -56,7 +58,7 @@ Give a grade/comment on the following:
     * [ ] Magnetometer
 * [ ] Review failsafe settings
 
-# Safety checks
+# Lista de seguridad
 * [ ] Radio transmission active
 * [ ] Guided/Stabilize/RTL flight modes on TX switch
 * [ ] Failsafe properly configured
@@ -64,7 +66,7 @@ Give a grade/comment on the following:
 * [ ] Battery charged and tied
 * [ ] Lipo saver attached
 
-# Timeline
+# Línea de tiempo
 
 ```mermaid
 gantt
@@ -81,27 +83,27 @@ gantt
 
 ```
 
-# Emergency escenarios
+# Casos de emergencia
 
 Keep an eye on the drone and prepare to take control with the radio TX.
 
-## Telemetry connection lost
+## Conexión de telemetría perdida
 * Set throttle to 60% and switch to STABILIZE mode
-* Switch to RTH flight mode
+* Switch to RTL flight mode
 * Trigger failsafe
 
-## Radio link lost
+## Enlace de radio perdido
 * Check Cloud Control Station for connection
-    * Trigger RTH
+    * Trigger RTL
 * Change pilot location and point radio to aircraft
 
-## LiPo saver beeping or random/unexpected behavior
+## Alarma por baja batería de salvalipo o comportamiento extraño/inesperado
 * Click pause button on CCS
-* Trigger RTH from CCS
-* Trigger RTH from TX radio
+* Trigger RTL from CCS
+* Trigger RTL from TX radio
 * Trigger failsafe from TX radio
 * Try to land on position
 
 ---
 
-Happy flight! :airplane:
+Buenos vuelos! :airplane:
