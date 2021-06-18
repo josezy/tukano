@@ -60,7 +60,7 @@ In this version the conection are only from server to raspberry, we willn't have
 ```bash
 wget http://localhost:8080/stream/video.h264
 ```
-## Add server to ssh knewed hosts
+## Add server to ssh known hosts
 ```bash
 ssh-keygen
 ssh-copy-id -i ~/.ssh/id_rsa.pub server_username@server_ip_or_domain -p server_ssh_port
