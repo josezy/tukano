@@ -1,3 +1,4 @@
+# Setting up UV4L  
 ## Add uv4l repo key to apt
 ```bash
 curl https://www.linux-projects.org/listing/uv4l_repo/lpkey.asc | sudo apt-key add -  
@@ -68,10 +69,12 @@ server-option = --janus-reconnect=yes  # To try reconnection if some fail
 
 ```
 ### Start/Stop conectionn
-
-curl -s 'http://raspberry:8080/janus?action=Start' > /dev/null
-curl -s 'http://raspberry:8080/janus?action=Stop' > /dev/null
-
+```
+curl -s 'http://raspberry:8080/janus?action=Start' > /dev/null  
+```
+```
+curl -s 'http://raspberry:8080/janus?action=Stop' > /dev/null  
+```
 ### Test on janus.conf.meetecho domain
 You can test this without configuring a januserver instead using https://janus.conf.meetecho.com domain, and accesing to this  url: https://janus.conf.meetecho.com/videoroomtest.html
 
