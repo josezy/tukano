@@ -129,7 +129,7 @@ WS_CONNECTION_PARAMS = {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
 
 # WebSocket for mavlink
 if GATO_ENABLED:
-    WS_MAV_ENDPOINT = "ws://localhost:8080" # Nodejs websockets proxy
+    WS_MAV_ENDPOINT = "ws://localhost:5055" # Nodejs websockets proxy
 else:
     assert type(PLATE) == str and len(PLATE) == 8, "No PLATE set"
     WS_MAV_ENDPOINT = (

@@ -19,7 +19,7 @@ const IKARO_ENDPOINT = PROD ? `wss://ikaro.tucanorobotics.co` : `ws://localhost:
 const WS_IKARO = `${IKARO_ENDPOINT}/mavlink/plate/${PLATE}`
 
 const ws_tukano_options = {
-    port: 8080,
+    port: 5055,
     clientTracking: true,
 }
 
