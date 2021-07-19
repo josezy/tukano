@@ -133,7 +133,7 @@ if GATO_ENABLED:
 else:
     assert type(PLATE) == str and len(PLATE) == 8, "No PLATE set"
     WS_MAV_ENDPOINT = (
-        f"wss://icaro.tucanorobotics.co/mavlink/plate/{PLATE}"
+        f"wss://ikaro.tucanorobotics.co/mavlink/plate/{PLATE}"
         if PROD else
         f"ws://localhost:8000/mavlink/plate/{PLATE}"
     )
