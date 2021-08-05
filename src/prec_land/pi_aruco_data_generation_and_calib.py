@@ -2,6 +2,7 @@ import cv2
 from cv2 import aruco
 import numpy as np
 from aruco_utils import detect_good_board_data, calib_camera, recreate_folder_data
+import time
 
 
 from picamera.array import PiRGBArray
