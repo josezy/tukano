@@ -47,6 +47,7 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
         vertical_tag_ammount,
         data_ammount,
         path_images,
+        show_detections=False
     )  
         
     if data_ammount>=max_data_ammount:
