@@ -65,6 +65,7 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
 time.sleep(0.1)
 
+print("pass")
 
 # capture frames from the camera
 time_0 = time.time()
