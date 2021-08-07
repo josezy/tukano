@@ -15,3 +15,16 @@ To install packages and setup enviroment run (or follow by steps) the `bin/tukan
 * Run tukano service: `python src/tukano_service.py`
 * Inspect log: `mavlogdump.py --type PL logs/00000021.BIN`
 
+### UV4L janus notes
+#### Start/Stop janus stream
+```
+curl -s 'http://raspberrypi_ip:8080/janus?action=Start' > /dev/null
+curl -s 'http://raspberrypi_ip:8080/janus?action=Stop' > /dev/null
+```
+
+#### URLs to access uv4l server video stream
+```
+http://raspberrypi_ip:8080/stream/video.mjpeg
+http://raspberrypi_ip:8080/stream/video.h264
+http://raspberrypi_ip:8080/stream/video.jpeg
+```
