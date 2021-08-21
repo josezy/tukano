@@ -170,6 +170,7 @@ def tukano_command(command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
 # =============[From here to down hell]================
 
 logging.basicConfig(**settings.LOGGING_KWARGS)
+print(f"Logging level: {settings.LOGGING_KWARGS}")
 logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
 leds.led_on('red')
