@@ -4,3 +4,5 @@ pyserial
 redis
 websocket-client
 python-dotenv
+pillow
+dronekit
