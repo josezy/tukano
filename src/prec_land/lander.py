@@ -28,7 +28,7 @@ imageQueue = Queue.Queue()
 vehicleQueue = Queue.Queue()
 
 # connection_string = "udp:127.0.0.1:14551"
-connection_string = "/dev/ttyUSB0"
+connection_string = "/dev/ttyACM0"
 
 print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
