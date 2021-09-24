@@ -179,7 +179,7 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 				math.degrees(att_yaw-yaw_marker)-math.degrees(att_yaw)
 			)
 		)
-	print("targets: ",len(corner))
+	print("targets: ",len(corner), flush=True)
 
 
 

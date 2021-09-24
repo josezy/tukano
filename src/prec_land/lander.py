@@ -133,6 +133,8 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     img = imageQueue.get()
 
                     location, attitude = vehicleQueue.get()
+                    
+                    print("targets: ",priorized_tag_counter, flush=True)
                     control.land(vehicle, results[1], attitude, location)
                     time.sleep(0.1)
 
