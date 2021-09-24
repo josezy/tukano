@@ -121,12 +121,12 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                         orientation = 1
                         if results[5] < 0:
                             orientation = -1
-                        # condition_yaw(
-                        #     vehicle,
-                        #     abs(results[5]),
-                        #     relative=True,
-                        #     orientation=orientation,
-                        # )
+                        condition_yaw(
+                            vehicle,
+                            abs(results[5]),
+                            relative=True,
+                            orientation=orientation,
+                        )
                         print("Yaw alignment", results[5], orientation, flush=True)
 
                     img = imageQueue.get()
