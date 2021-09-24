@@ -63,7 +63,7 @@ start_land = False
 print("[INFO] initializing Picamera...")
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
-camera.framerate = 5
+camera.framerate = 10
 rawCapture = PiRGBArray(camera, size=camera.resolution)
 
 
@@ -87,7 +87,7 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 print(vehicle.mode, distance_to_home, location.alt, start_land)
                 if (
                     not start_land
-                    and distance_to_home < 0.5
+                    and distance_to_home < 1
                     and location.alt < 10
                     and vehicle.mode == VehicleMode("RTL")
                 ):
