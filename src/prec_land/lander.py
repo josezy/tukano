@@ -73,7 +73,8 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("[INFO] Loop: ", proccesing_timer, flush=True)
 
         proccesing_timer = time.time()
-        if vehicle.armed:
+        # if vehicle.armed:
+        if True:
             before_time = time.time()
             location = vehicle.location.global_relative_frame
             attitude = vehicle.attitude
@@ -90,7 +91,7 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     not start_land
                     and distance_to_home < 0.5
                     and location.alt < 10
-                    and vehicle.mode == VehicleMode("RTL")
+                    # and vehicle.mode == VehicleMode("RTL")
                 ):
                     start_land = True
 
