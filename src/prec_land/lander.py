@@ -32,9 +32,9 @@ vehicleQueue = Queue.Queue()
 # connection_string = "udp:127.0.0.1:14551"
 connection_string = "/dev/ttyACM0"
 
-print("Connecting to vehicle on: %s" % connection_string)
+print("Connecting to vehicle on: %s" % connection_string, flush=True)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
-print("[INFO] Conected!!")
+print("[INFO] Conected!!", flush=True)
 # Download the vehicle waypoints (commands). Wait until download is complete.
 cmds = vehicle.commands
 cmds.download()
