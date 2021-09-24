@@ -32,9 +32,9 @@ vehicleQueue = Queue.Queue()
 # connection_string = "udp:127.0.0.1:14551"
 connection_string = "/dev/ttyACM0"
 
-print("Connecting to vehicle on: %s" % connection_string, flush=True)
+print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
-print("[INFO] Conected!!", flush=True)
+print("[INFO] Conected!!")
 # Download the vehicle waypoints (commands). Wait until download is complete.
 cmds = vehicle.commands
 cmds.download()
@@ -60,7 +60,7 @@ start_land = False
 
 # --------------- PICAMERA INIT SECTION -------------#
 # initialize the camera and grab a reference to the raw camera capture
-print("[INFO] initializing Picamera...", flush=True)
+print("[INFO] initializing Picamera...")
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 5
@@ -70,11 +70,9 @@ rawCapture = PiRGBArray(camera, size=camera.resolution)
 for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     frame = image.array
     if time.time() > proccesing_timer + 1 / proccesing_hz:
-        print("[INFO] Loop: ", proccesing_timer, flush=True)
 
         proccesing_timer = time.time()
-        # if vehicle.armed:
-        if True:
+        if vehicle.armed:
             before_time = time.time()
             location = vehicle.location.global_relative_frame
             attitude = vehicle.attitude
@@ -86,15 +84,15 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     location.lon,
                 )
 
-                print(vehicle.mode, distance_to_home, location.alt, start_land, flush=True)
+                print(vehicle.mode, distance_to_home, location.alt, start_land)
                 if (
                     not start_land
                     and distance_to_home < 0.5
                     and location.alt < 10
-                    # and vehicle.mode == VehicleMode("RTL")
+                    and vehicle.mode == VehicleMode("RTL")
                 ):
                     start_land = True
-                start_land=True
+
                 if start_land:
                     imageQueue.put(frame)
                     vehicleQueue.put((location, attitude))
@@ -133,18 +131,16 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     img = imageQueue.get()
 
                     location, attitude = vehicleQueue.get()
-                    
-                    print("targets: ",priorized_tag_counter, flush=True)
                     control.land(vehicle, results[1], attitude, location)
                     time.sleep(0.1)
 
             except AttributeError:
-                print("no home location set", flush=True)
+                print("no home location set")
             proccesing_hz = 1 / ((time.time() - before_time) * 1.5)
-            print(f"Takes {time.time() - before_time} seconds", flush=True)
+            print("Takes", time.time() - before_time, "Seconds")
         else:
             start_land = False
     else:
-        print("not proc", flush=True)
+        print("not proc")
 
     rawCapture.truncate(0)
