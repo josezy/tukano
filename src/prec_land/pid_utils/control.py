@@ -49,6 +49,7 @@ def land(vehicle, target, attitude, location):
     if(target is not None):
         move_to_target(vehicle, target, attitude, location)
     else:
+        print("Sending velocity LAND BAJANDO", flush=True)
         send_velocity(vehicle, 0, 0, 0.25, 1)
     
 
