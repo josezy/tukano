@@ -30,7 +30,7 @@ aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_APRILTAG_16h5  )
 
 arucoParams = aruco.DetectorParameters_create()
 
-with open('aruco_utils/calibration.yaml') as f:
+with open(os.environ.get('PL_CALIBRATION_FILE', 'aruco_utils/calibration.yaml')) as f:
     print("LOADED")
     loadeddict = yaml.load(f)
 
