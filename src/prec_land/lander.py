@@ -1,4 +1,6 @@
 import cv2
+import picamera
+from picamera.array import PiRGBArray
 from PIL import Image
 import numpy as np
 
@@ -58,7 +60,7 @@ start_land = False
 # --------------- PICAMERA INIT SECTION -------------#
 # initialize the camera and grab a reference to the raw camera capture
 print("[INFO] initializing Picamera...")
-camera = PiCamera()
+camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 5
 rawCapture = PiRGBArray(camera, size=camera.resolution)
