@@ -15,7 +15,7 @@ const PLATE = process.env.PLATE || "00000000"
 const TUKANO_ENV = process.env.TUKANO_ENV || "DEV"
 const PROD = TUKANO_ENV === "PROD"
 
-const IKARO_ENDPOINT = process.env.IKARO_ENDPOINT || (PROD ? `wss://ikaro.tucanorobotics.co` : `ws://localhost:8000`)
+const IKARO_ENDPOINT = PROD ? `wss://ikaro.tucanorobotics.co` : `ws://localhost:8000`
 const WS_IKARO = `${IKARO_ENDPOINT}/mavlink/plate/${PLATE}`
 
 const ws_tukano_options = {
