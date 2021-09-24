@@ -94,7 +94,7 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     # and vehicle.mode == VehicleMode("RTL")
                 ):
                     start_land = True
-
+                start_land=True
                 if start_land:
                     imageQueue.put(frame)
                     vehicleQueue.put((location, attitude))
