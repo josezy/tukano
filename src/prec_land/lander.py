@@ -70,6 +70,7 @@ rawCapture = PiRGBArray(camera, size=camera.resolution)
 for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     frame = image.array
     if time.time() > proccesing_timer + 1 / proccesing_hz:
+        print("[INFO] Loop: ", proccesing_timer, flush=True)
 
         proccesing_timer = time.time()
         if vehicle.armed:
