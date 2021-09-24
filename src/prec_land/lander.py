@@ -60,7 +60,7 @@ start_land = False
 
 # --------------- PICAMERA INIT SECTION -------------#
 # initialize the camera and grab a reference to the raw camera capture
-print("[INFO] initializing Picamera...")
+print("[INFO] initializing Picamera...", flush=True)
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 5
@@ -84,7 +84,7 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     location.lon,
                 )
 
-                print(vehicle.mode, distance_to_home, location.alt, start_land)
+                print(vehicle.mode, distance_to_home, location.alt, start_land, flush=True)
                 if (
                     not start_land
                     and distance_to_home < 0.5
@@ -135,12 +135,12 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                     time.sleep(0.1)
 
             except AttributeError:
-                print("no home location set")
+                print("no home location set", flush=True)
             proccesing_hz = 1 / ((time.time() - before_time) * 1.5)
-            print("Takes", time.time() - before_time, "Seconds")
+            print(f"Takes {time.time() - before_time} seconds", flush=True)
         else:
             start_land = False
     else:
-        print("not proc")
+        print("not proc", flush=True)
 
     rawCapture.truncate(0)
