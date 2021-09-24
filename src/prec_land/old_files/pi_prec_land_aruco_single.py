@@ -45,7 +45,7 @@ board = aruco.GridBoard_create(horizontal_tag_ammount, vertical_tag_ammount, mar
 
 arucoParams = aruco.DetectorParameters_create()
 
-with open('calibration1280x720.yaml') as f:
+with open('calibration.yaml') as f:
     print("LOADED")
     loadeddict = yaml.load(f)
 
@@ -58,7 +58,7 @@ dist = np.array(dist)
 # initialize the camera and grab a reference to the raw camera capture
 print("[INFO] initializing Picamera...")
 camera = PiCamera()
-camera.resolution = (1280, 720)
+camera.resolution = (640, 480)
 camera.framerate = 5
 rawCapture = PiRGBArray(camera, size=camera.resolution )
 # allow the camera to warmup
