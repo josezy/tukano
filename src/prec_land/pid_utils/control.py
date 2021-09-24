@@ -39,11 +39,13 @@ def pixels_per_meter(fov, res, alt):
 def land(vehicle, target, attitude, location):
     
     if vehicle.mode ==  VehicleMode('RTL'):
-        vehicle.mode = VehicleMode('GUIDED')
+        # vehicle.mode = VehicleMode('GUIDED')
+        print("Changing mode to GUIDED", flush=True)
 
         
     if(vehicle.location.global_relative_frame.alt <= 0.3):
-        vehicle.mode = VehicleMode('LAND')
+        # vehicle.mode = VehicleMode('LAND')
+        print("Changing mode to LAND", flush=True)
     if(target is not None):
         move_to_target(vehicle, target, attitude, location)
     else:
@@ -69,4 +71,5 @@ def move_to_target(vehicle, target, attitude, location):
     vz = z_pid.get_pid(dist_error, 0.1)
     #print("alt = " + str(alt), "vz = " + str(vz), "distance:", dist_error,"alt", alt)
           
-    send_velocity(vehicle, vy, vx, vz, 1)
+    # send_velocity(vehicle, vy, vx, vz, 1)
+    print("Sending velocity: ", vx, vy, vz, flush=True)
