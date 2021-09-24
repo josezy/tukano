@@ -76,7 +76,7 @@ logging.info(f"Working on {'production' if PROD else 'development'}")
 # Connection parameters
 ###############################################################################
 
-default_mavlink_tukano = (
+MAVLINK_TUKANO = (
     {
         'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
         'baud': 57600,
@@ -86,8 +86,6 @@ default_mavlink_tukano = (
         'device': "tcp:localhost:5760",
     }
 )
-
-MAVLINK_TUKANO = os.environ.get('MAVLINK_TUKANO', default_mavlink_tukano)
 
 ###############################################################################
 # External hardware pins
