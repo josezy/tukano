@@ -127,6 +127,7 @@ for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                             relative=True,
                             orientation=orientation,
                         )
+                        print("Yaw alignment", results[5], orientation, flush=True)
 
                     img = imageQueue.get()
 

@@ -40,15 +40,17 @@ def land(vehicle, target, attitude, location):
     
     if vehicle.mode ==  VehicleMode('RTL'):
         vehicle.mode = VehicleMode('GUIDED')
+        print("Changing mode to GUIDED", flush=True)
 
         
     if(vehicle.location.global_relative_frame.alt <= 0.3):
         vehicle.mode = VehicleMode('LAND')
+        print("Changing mode to LAND", flush=True)
     if(target is not None):
         move_to_target(vehicle, target, attitude, location)
     else:
-        pass
-        #send_velocity(vehicle, 0, 0, 0.25, 1)
+        print("Sending velocity LAND BAJANDO", flush=True)
+        send_velocity(vehicle, 0, 0, 0.25, 1)
     
 
 
@@ -70,3 +72,4 @@ def move_to_target(vehicle, target, attitude, location):
     #print("alt = " + str(alt), "vz = " + str(vz), "distance:", dist_error,"alt", alt)
           
     send_velocity(vehicle, vy, vx, vz, 1)
+    print("Sending velocity: ", vx, vy, vz, flush=True)
