@@ -84,19 +84,19 @@ def procces_frame(frame,forensic_video, forensic_message, vehicle):
                     forensic_message["marker_stats"]["priorized_tag"]=priorized_tag
                     forensic_message["marker_stats"]["priorized_tag_counter"]=priorized_tag_counter
                     if yaw_correction != None :
+                        orientation = 1
+                        if yaw_correction<0:
+                            orientation = -1 
                         if abs(yaw_correction)>1:
                     
                             forensic_message["yaw_align"]["aligned"]=False
-                            orientation = 1
-                            if yaw_correction<0:
-                                orientation = -1 
                             condition_yaw(vehicle,abs(yaw_correction), relative=True, orientation=orientation)
                             
-                            forensic_message["yaw_align"]["orientation"]=orientation
                         else:
                             forensic_message["yaw_align"]["aligned"]=True
             
-                        forensic_message["yaw_align"]["value"]=yaw_correction           
+                        forensic_message["yaw_align"]["orientation"]=orientation
+                        forensic_message["yaw_align"]["value"]=yaw_correction            
                     
                     control.land(vehicle, center, attitude, location,forensic_message)
                     time.sleep(0.1)
