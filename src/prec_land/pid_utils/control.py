@@ -36,21 +36,28 @@ def pixels_per_meter(fov, res, alt):
     return ((alt * math.tan(math.radians(fov/2))) / (res/2))
 
 
-def land(vehicle, target, attitude, location):
+def land(vehicle, target, attitude, location,forensic_message):
     
     if vehicle.mode ==  VehicleMode('RTL'):
         vehicle.mode = VehicleMode('GUIDED')
-        print("Changing mode to GUIDED", flush=True)
 
         
     if(vehicle.location.global_relative_frame.alt <= 0.3):
         vehicle.mode = VehicleMode('LAND')
-        print("Changing mode to LAND", flush=True)
     if(target is not None):
-        move_to_target(vehicle, target, attitude, location)
+        vx, vy, vz = move_to_target(vehicle, target, attitude, location)
+        forensic_message["control_stats"]["vx"]=vx
+        forensic_message["control_stats"]["vy"]=vy
+        forensic_message["control_stats"]["vz"]=vz
+
     else:
-        print("Sending velocity LAND BAJANDO", flush=True)
-        send_velocity(vehicle, 0, 0, 0.25, 1)
+        vx=0
+        vy=0
+        vz=0.25
+        forensic_message["control_stats"]["vx"]=vx
+        forensic_message["control_stats"]["vy"]=vy
+        forensic_message["control_stats"]["vz"]=vz
+        send_velocity(vehicle, vy, vx, vz, 1)
     
 
 
@@ -72,4 +79,4 @@ def move_to_target(vehicle, target, attitude, location):
     #print("alt = " + str(alt), "vz = " + str(vz), "distance:", dist_error,"alt", alt)
           
     send_velocity(vehicle, vy, vx, vz, 1)
-    print("Sending velocity: ", vx, vy, vz, flush=True)
+    return vx, vy, vz

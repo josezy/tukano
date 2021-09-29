@@ -25,8 +25,8 @@ from aruco_utils import rgb2gray
 
 DETECTIONS_TO_ENGAGE = 5
 #--------------- ARUCO TAG  INIT SECTION -------------#
-# aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
-aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_APRILTAG_16h5  )
+aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
+#aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_APRILTAG_16h5  )
 
 arucoParams = aruco.DetectorParameters_create()
 
@@ -83,7 +83,11 @@ R_flip[1,1] = -1.0
 R_flip[2,2] = -1.0
 
 
-def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_tag_counter):
+def analyze_frame(img, location, attitude, priorized_tag, priorized_tag_counter,forensic_message):
+
+	center = None
+	target = None
+	yaw_correction = None
 
 	start = current_milli_time()
 	im_gray = rgb2gray(img).astype(np.uint8)
@@ -93,16 +97,15 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 	img_aruco = img.copy()
 	if len(corners)==0:
 		stop = current_milli_time()
-		child_conn.send((stop-start, None, None,priorized_tag_counter, priorized_tag, None))
-		return
+		forensic_message["marker_stats"]["some_tag_detected"]=False
+		return stop-start, center, target, priorized_tag_counter, priorized_tag, yaw_correction
+		
 	else:
 		img_aruco = aruco.drawDetectedMarkers(img, corners, ids, (0,255,0))
-		try:
-			if ids == None:
-				img_aruco = image.copy()
-				return
-		except:
-			pass
+		forensic_message["marker_stats"]["corners"]=corners
+		forensic_message["marker_stats"]["ids"]=ids
+		forensic_message["marker_stats"]["some_tag_detected"]=True
+	
 		corners_dict={}
 		for corner, id1 in zip(corners,ids):
 			markerLength = 14.6
@@ -115,7 +118,6 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 				markerLength=3.3
 			elif id1[0]==23: 
 				markerLength=1.5
-    
 			corners_dict[str(id1[0])]={
 				"corner":corner[0],
 				"markerLength":markerLength
@@ -143,18 +145,18 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 		if priorized_tag_counter[smaller_tag_id] <DETECTIONS_TO_ENGAGE:
 			priorized_tag_counter[smaller_tag_id]=priorized_tag_counter[smaller_tag_id]+1
 
-
-		min_tag_detected=min(priorized_tag_counter.keys())
-		if (priorized_tag_counter[min_tag_detected] >=DETECTIONS_TO_ENGAGE and priorized_tag >min_tag_detected) or priorized_tag==0:
+		min_tag_detected=min([int(a) for a in priorized_tag_counter.keys()])
+		if (priorized_tag_counter[str(min_tag_detected)] >=DETECTIONS_TO_ENGAGE and priorized_tag >min_tag_detected) or priorized_tag==0:
 			priorized_tag=min_tag_detected
 		
+	
 		
 
-		if smaller_tag_id != priorized_tag:
+		if smaller_tag_id != str(priorized_tag):
 			
 			stop = current_milli_time()
-			child_conn.send((stop-start, None, None, priorized_tag_counter, priorized_tag, None))
-			return
+			return stop-start, center, target, priorized_tag_counter, priorized_tag, yaw_correction
+			
 		
 		
 		target = corners_dict[smaller_tag_id]["corner"]
@@ -172,14 +174,12 @@ def analyze_frame(child_conn, img, location, attitude, priorized_tag, priorized_
 		x_true = x + w/2.0 - hres/2.0
 		y_true = -(y + h/2.0) + vres/2.0
 		center = (x_true, y_true)
+		
 		stop = current_milli_time()
-		child_conn.send(
-			(
-				stop-start, center, target, priorized_tag_counter, priorized_tag, 
-				math.degrees(att_yaw-yaw_marker)-math.degrees(att_yaw)
-			)
-		)
-	print("targets: ",len(corner), flush=True)
+		yaw_correction=math.degrees(att_yaw-yaw_marker)-math.degrees(att_yaw)
+
+	return stop-start, center, target, priorized_tag_counter, priorized_tag, yaw_correction
+
 
 
 

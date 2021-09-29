@@ -21,27 +21,31 @@ import queue as Queue
 import math
 
 
-proccesing_hz = 10.0
-proccesing_timer = time.time()
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+forensic_video = cv2.VideoWriter('output.avi', fourcc, 10.0, (640,  480))
+forensic_message = {
+    "vehicle_stats":{},
+    "yaw_align":{},
+    "marker_stats":{},
+    "control_stats":{}
+}
+forensic_message["start_land"] = False
+forensic_message["proccesing_hz"] = 10.0
+forensic_message["proccesing_timer"] = time.time()
 
 
-parent_conn_im, child_conn_im = multiprocessing.Pipe()
-imageQueue = Queue.Queue()
-vehicleQueue = Queue.Queue()
-
-# connection_string = "udp:127.0.0.1:14551"
-connection_string = "/dev/ttyACM0"
+connection_string = 'udp:127.0.0.1:14551'
 
 print("Connecting to vehicle on: %s" % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=57600)
-print("[INFO] Conected!!")
 # Download the vehicle waypoints (commands). Wait until download is complete.
 cmds = vehicle.commands
 cmds.download()
 cmds.wait_ready()
 
-priorized_tag = 0
-priorized_tag_counter = {}
+forensic_message["priorized_tag"] = 0
+forensic_message["priorized_tag_counter"] = {}
+
 
 
 def measure_distance(lat1, lon1, lat2, lon2):
@@ -54,9 +58,64 @@ def measure_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     d = R * c
     return d * 1000
+    
+def procces_frame(frame,forensic_video, forensic_message, vehicle):
 
+    if time.time()>forensic_message["proccesing_timer"]+1/forensic_message["proccesing_hz"]:
+        
+        forensic_message["vehicle_stats"]["vehicle_mode"] = vehicle.mode.name
+        forensic_message["vehicle_stats"]["vehicle_arm"] = vehicle.armed
+        forensic_message["proccesing_timer"]=time.time()
+        if vehicle.armed :
+            
+            before_time= time.time()
+            location = vehicle.location.global_relative_frame
+            attitude = vehicle.attitude
+            forensic_message["vehicle_stats"]["altitude"]=location.alt
+            forensic_message["vehicle_stats"]["yaw"]=math.degrees(attitude.yaw)
+            try:
+                forensic_message["vehicle_stats"]["distance_to_home"]=measure_distance(vehicle.home_location.lat, vehicle.home_location.lon,location.lat,location.lon)
 
-start_land = False
+                if not forensic_message["start_land"] and forensic_message["vehicle_stats"]["distance_to_home"] < 1 and location.alt<10 and vehicle.mode ==  VehicleMode('RTL'):
+                    forensic_message["start_land"] = True
+                    
+                if forensic_message["start_land"]:              
+                    time_spend, center, target, priorized_tag_counter, priorized_tag, yaw_correction =search_image_aruco.analyze_frame(frame, location, attitude,forensic_message["priorized_tag"],forensic_message["priorized_tag_counter"],forensic_message)
+                    forensic_message["marker_stats"]["priorized_tag"]=priorized_tag
+                    forensic_message["marker_stats"]["priorized_tag_counter"]=priorized_tag_counter
+                    if yaw_correction != None :
+                        if abs(yaw_correction)>1:
+                    
+                            forensic_message["yaw_align"]["aligned"]=False
+                            orientation = 1
+                            if yaw_correction<0:
+                                orientation = -1 
+                            condition_yaw(vehicle,abs(yaw_correction), relative=True, orientation=orientation)
+                            
+                            forensic_message["yaw_align"]["orientation"]=orientation
+                        else:
+                            forensic_message["yaw_align"]["aligned"]=True
+            
+                        forensic_message["yaw_align"]["value"]=yaw_correction           
+                    
+                    control.land(vehicle, center, attitude, location,forensic_message)
+                    time.sleep(0.1)
+                    
+                    system_info.draw_info(frame,forensic_video,forensic_message)
+ 
+                  
+                forensic_message["vehicle_stats"]["home_set"]=True
+            except AttributeError:
+                forensic_message["vehicle_stats"]["home_set"]=False
+            forensic_message["proccesing_hz"]=1/((time.time()-before_time)*1.5)
+
+        else:
+            forensic_message["marker_stats"] = {}
+            forensic_message["control_stats"] = {}  
+            forensic_message["start_land"]= False
+        
+    else:
+        pass
 
 # --------------- PICAMERA INIT SECTION -------------#
 # initialize the camera and grab a reference to the raw camera capture
@@ -69,79 +128,5 @@ rawCapture = PiRGBArray(camera, size=camera.resolution)
 
 for image in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     frame = image.array
-    if time.time() > proccesing_timer + 1 / proccesing_hz:
-
-        proccesing_timer = time.time()
-        if vehicle.armed:
-            before_time = time.time()
-            location = vehicle.location.global_relative_frame
-            attitude = vehicle.attitude
-            try:
-                distance_to_home = measure_distance(
-                    vehicle.home_location.lat,
-                    vehicle.home_location.lon,
-                    location.lat,
-                    location.lon,
-                )
-
-                print(vehicle.mode, distance_to_home, location.alt, start_land)
-                if (
-                    not start_land
-                    and distance_to_home < 1
-                    and location.alt < 10
-                    and vehicle.mode == VehicleMode("RTL")
-                ):
-                    start_land = True
-
-                if start_land:
-                    imageQueue.put(frame)
-                    vehicleQueue.put((location, attitude))
-
-                    img = multiprocessing.Process(
-                        name="img",
-                        target=search_image_aruco.analyze_frame,
-                        args=(
-                            child_conn_im,
-                            frame,
-                            location,
-                            attitude,
-                            priorized_tag,
-                            priorized_tag_counter,
-                        ),
-                    )
-                    img.daemon = True
-                    img.start()
-
-                    results = parent_conn_im.recv()
-
-                    priorized_tag_counter = results[3]
-                    priorized_tag = results[4]
-
-                    if results[5] != None:
-                        orientation = 1
-                        if results[5] < 0:
-                            orientation = -1
-                        condition_yaw(
-                            vehicle,
-                            abs(results[5]),
-                            relative=True,
-                            orientation=orientation,
-                        )
-                        print("Yaw alignment", results[5], orientation, flush=True)
-
-                    img = imageQueue.get()
-
-                    location, attitude = vehicleQueue.get()
-                    control.land(vehicle, results[1], attitude, location)
-                    time.sleep(0.1)
-
-            except AttributeError:
-                print("no home location set")
-            proccesing_hz = 1 / ((time.time() - before_time) * 1.5)
-            print("Takes", time.time() - before_time, "Seconds")
-        else:
-            start_land = False
-    else:
-        print("not proc")
-
+    procces_frame(frame,forensic_video, forensic_message, vehicle)
     rawCapture.truncate(0)
