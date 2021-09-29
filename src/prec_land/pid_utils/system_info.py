@@ -20,7 +20,7 @@ def draw_info(frame,forensic_video,forensic_message, show=True):
     else:
         yaw_stats = "Aligned: "+str(forensic_message["yaw_align"]["aligned"])
         yaw_stats += ", Yaw error: "+str(forensic_message["yaw_align"]["value"])[0:5]
-        yaw_stats +=  ", Orientation: "+ "clockwise" if forensic_message["yaw_align"]["orientation"]>0 else "counter clockwise"
+        yaw_stats +=  ", Orientation: "+ "clockwise" if forensic_message["yaw_align"]["orientation"]>0 else ", Orientation: "+ "counter clockwise"
 
     main_tag_text = "no tag"
     if forensic_message["marker_stats"]["some_tag_detected"]:
