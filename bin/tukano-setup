@@ -27,7 +27,7 @@ info "--> Installing system packages..."
     curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
     curl https://www.linux-projects.org/listing/uv4l_repo/lpkey.asc | sudo apt-key add -
 
-    sudo echo "deb https://www.linux-projects.org/listing/uv4l_repo/raspbian/stretch stretch main" > /etc/apt/sources.list
+    echo "deb https://www.linux-projects.org/listing/uv4l_repo/raspbian/stretch stretch main" | sudo tee /etc/apt/sources.list.d/uv4l.list
 
     sudo apt update
     sudo apt install -y python3.9 python3-pip python3.9-dev python-dev virtualenv \
