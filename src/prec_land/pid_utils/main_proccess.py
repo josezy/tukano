@@ -1,11 +1,14 @@
 import math
-import pid_utils.control as control
-from pid_utils.flight_assist import send_velocity
 from dronekit import VehicleMode
+import time 
+
+import pid_utils.control as control
+import pid_utils.search_image_aruco as search_image_aruco
+
+from pid_utils.flight_assist import send_velocity
 from pid_utils.flight_assist import condition_yaw
 from pid_utils.system_info import draw_info
-import pid_utils.search_image_aruco as search_image_aruco
-import time 
+
 
 def measure_distance(lat1, lon1, lat2, lon2):
     R = 6378.137
@@ -41,7 +44,7 @@ def procces_frame(frame,forensic_video, forensic_message, vehicle):
                     time_spend, center, target, priorized_tag_counter, priorized_tag, yaw_correction =search_image_aruco.analyze_frame(frame, location, attitude,forensic_message["priorized_tag"],forensic_message["priorized_tag_counter"],forensic_message)
                     forensic_message["marker_stats"]["priorized_tag"]=priorized_tag
                     forensic_message["marker_stats"]["priorized_tag_counter"]=priorized_tag_counter
-                    if yaw_correction != None :
+                    if yaw_correction != None  :
                         orientation = 1
                         if yaw_correction<0:
                             orientation = -1 
@@ -70,6 +73,7 @@ def procces_frame(frame,forensic_video, forensic_message, vehicle):
         else:
             forensic_message["marker_stats"] = {}
             forensic_message["control_stats"] = {}  
+            forensic_message["yaw_align"]={}
             forensic_message["start_land"]= False
         
     else:

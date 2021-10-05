@@ -12,7 +12,6 @@ from pymavlink import mavutil
 
 # Common Library Imports
 from pid_utils.flight_assist import send_velocity
-from pid_utils.position_vector import PositionVector
 import pid_utils.pid as pid
 
 # Python Imports
@@ -63,19 +62,18 @@ def land(vehicle, target, attitude, location,forensic_message):
 
 def move_to_target(vehicle, target, attitude, location):
     x, y = target
+    z = vehicle.location.global_relative_frame.alt
 
-    alt = vehicle.location.global_relative_frame.alt
-    px_meter_x = pixels_per_meter(hfov, hres, alt)
-    px_meter_y = pixels_per_meter(vfov, vres, alt)
-
+    px_meter_x = pixels_per_meter(hfov, hres, z)
+    px_meter_y = pixels_per_meter(vfov, vres, z)
     x *= px_meter_x
     y *= px_meter_y
-    z = alt
-    vx = x_pid.get_pid(x, 0.1)
-    vy = y_pid.get_pid(y, 0.1)
-
     dist_error = math.sqrt(x**2 + y**2+z**2)
-    vz = z_pid.get_pid(dist_error, 0.1)
+
+    dt = 0.1
+    vx = x_pid.get_pid(x, dt)
+    vy = y_pid.get_pid(y, dt)
+    vz = z_pid.get_pid(dist_error, dt)
     #print("alt = " + str(alt), "vz = " + str(vz), "distance:", dist_error,"alt", alt)
           
     send_velocity(vehicle, vy, vx, vz, 1)

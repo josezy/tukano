@@ -11,7 +11,7 @@ from pid_utils.main_proccess import  procces_frame
 # Python Imports
 import time
 
-
+#SYSTEM INTITIALIZED
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 forensic_video = cv2.VideoWriter('output.avi', fourcc, 10.0, (640,  480))
 forensic_message = {
@@ -23,6 +23,8 @@ forensic_message = {
 forensic_message["start_land"] = False
 forensic_message["proccesing_hz"] = 10.0
 forensic_message["proccesing_timer"] = time.time()
+forensic_message["priorized_tag"] = 0
+forensic_message["priorized_tag_counter"] = {}
 
 
 connection_string = 'udp:127.0.0.1:14551'
@@ -34,8 +36,6 @@ cmds = vehicle.commands
 cmds.download()
 cmds.wait_ready()
 
-forensic_message["priorized_tag"] = 0
-forensic_message["priorized_tag_counter"] = {}
 
 
 # --------------- PICAMERA INIT SECTION -------------#
