@@ -26,7 +26,7 @@ echo "       Installing from $REPO_DIR..."
 info "--> Installing system packages..."
     sudo apt update
     curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-    sudo apt install -y python3.9 python3-pip python3.9-dev python-dev \
+    sudo apt install -y python3.8 python3-pip python3-dev python-dev \
                    virtualenv redis-server supervisor libxml2-dev libxslt-dev \
                    libatlas-base-dev nodejs
 
