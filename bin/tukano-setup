@@ -29,7 +29,6 @@ info "--> Installing system packages..."
     sudo apt install -y python3.9 python3-pip python3.9-dev python-dev \
                    virtualenv redis-server supervisor libxml2-dev libxslt-dev \
                    libatlas-base-dev nodejs
-    sudo snap install node --classic
 
     sudo systemctl stop redis-server
     sudo systemctl disable redis-server
