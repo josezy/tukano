@@ -1,8 +1,9 @@
-import logging
 import time
 import settings
 
-if settings.PROD:
+from util.util import is_raspberrypi
+
+if settings.PROD and is_raspberrypi():
     import io
     import numpy as np
     import picamera
