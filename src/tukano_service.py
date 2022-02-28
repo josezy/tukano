@@ -16,7 +16,6 @@ from pymavlink import mavutil
 from websocket import create_connection
 
 from tasks import collect_data, prepare_data
-from camera import Camera
 from actuators import Hook
 from util import leds
 from timer import Timer
@@ -202,6 +201,7 @@ timer = Timer({
 })
 
 if any((settings.TAKE_PIC, settings.RECORD)):
+    from camera import Camera
     cam = Camera()
 
 cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
