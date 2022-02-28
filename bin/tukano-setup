@@ -40,7 +40,7 @@ echo "           Python, redis, supervisor and some others..."
 
 info "--> Setting up pip + virtualenv..."
     sudo pip3 install --upgrade pip setuptools virtualenv
-    virtualenv -p "$(which python3.9)" .venv
+    virtualenv -p "$(which python3.8)" .venv
     source .venv/bin/activate
 success "   √   Virtualenv is active: $(which python) ($(python --version))"
 
@@ -51,14 +51,14 @@ info "--> Creating data directory and subfolders..."
     mkdir -p "$REPO_DIR/data/logs"
     mkdir -p "$REPO_DIR/data/pics"
     mkdir -p "$REPO_DIR/data/videos"
-    mkdir -p "$REPO_DIR/.venv/lib/python3.9/site-packages/message_definitions/v1.0/"
+    mkdir -p "$REPO_DIR/.venv/lib/python3.8/site-packages/message_definitions/v1.0/"
 success "   √   Done"
 
 
 
 info "--> Installing python dependencies + copying MAVLink dialect..."
     pip install -r requirements.txt
-    cp "$REPO_DIR/dialects/*" "$REPO_DIR/.venv/lib/python3.9/site-packages/message_definitions/v1.0/"
+    cp "$REPO_DIR/dialects/*" "$REPO_DIR/.venv/lib/python3.8/site-packages/message_definitions/v1.0/"
     npm install
 success "   √   PyPI requirements are installed: requirements.txt"
 
