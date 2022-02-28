@@ -29,6 +29,7 @@ info "--> Installing system packages..."
     sudo apt install -y python3.9 python3-pip python3.9-dev python-dev \
                    virtualenv redis-server supervisor libxml2-dev libxslt-dev \
                    libatlas-base-dev nodejs
+    sudo snap install node --classic
 
     sudo systemctl stop redis-server
     sudo systemctl disable redis-server
@@ -77,18 +78,14 @@ info "--> Setting up supervisor configuration..."
 
 success "   √   Supervisor is up a running"
 
-if [[ $PATH == *"/opt/tukano/bin"* ]]; then
-    echo " > 'tukano' command is in \$PATH"
-else
-    echo " > Adding 'tukano' to PATH..."
-    echo "PATH=/opt/tukano/bin:\$PATH" >> ~/.bashrc
-fi
+# if [[ $PATH == *"/opt/tukano/bin"* ]]; then
+#     echo " > 'tukano' command is in \$PATH"
+# else
+#     echo " > Adding 'tukano' to PATH..."
+#     echo "PATH=/opt/tukano/bin:\$PATH" >> ~/.bashrc
+# fi
 
 success " ✅ Done."
-    echo "       - Commands can be run using 'tukano' command:"
-    echo "           e.g. tukano reload"
-    echo "                tukano stop"
     echo "       - Data is stored in tukano/data/"
-
 
 exit 0
