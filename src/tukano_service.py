@@ -138,7 +138,7 @@ def command_to_drone(drone, command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
     target_system = command.get('target_system')
     target_component = command.get('target_component')
     params = command.get('params')
-    params = [ params.get(f"param{i+1}",math.nan) for i in range(7)]
+    params = [params.get(f"param{i+1}", math.nan) for i in range(7)]
         
     drone.mav.command_long_send(
         target_system,
