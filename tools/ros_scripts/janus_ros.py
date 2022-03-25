@@ -136,12 +136,12 @@ async def publish(plugin):
         )
     )
 
-def callback(data):
+async def callback(data):
     # bridge = CvBridge()
     # cv_image = bridge.imgmsg_to_cv2(data, 'bgr16')
 
     np_img = ros_numpy.numpify(data)
-    vst.setFrame(np_img)
+    await vst.setFrame(np_img)
     # (rows, cols, channels) = cv_image.shape
 
     # rospy.loginfo(

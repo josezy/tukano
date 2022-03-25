@@ -54,4 +54,5 @@ class VideoStreamTrack(MediaStreamTrack):
         return frame
 
     async def setFrame(self, frame):
+        print('setting frame')
         self._frame = frame
