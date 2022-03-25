@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
+import time
 import rospy
-import asyncio
 import random
 import string
-import time
+import asyncio
 import aiohttp
+import ros_numpy
 
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
 
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from aiortc.contrib.media import MediaPlayer, MediaRecorder
@@ -137,10 +137,11 @@ async def publish(plugin):
     )
 
 def callback(data):
-    bridge = CvBridge()
+    # bridge = CvBridge()
+    # cv_image = bridge.imgmsg_to_cv2(data, 'bgr16')
 
-    cv_image = bridge.imgmsg_to_cv2(data, 'bgr16')
-    vst.setFrame(cv_image)
+    np_img = ros_numpy.numpify(data)
+    vst.setFrame(np_img)
     # (rows, cols, channels) = cv_image.shape
 
     # rospy.loginfo(
@@ -163,7 +164,7 @@ async def run(session):
             }
         }
     )
-    await publish(plugin=plugin, player=None)
+    await publish(plugin=plugin)
 
     print("Exchanging media")
 
