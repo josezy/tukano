@@ -27,7 +27,7 @@ class VideoStreamTrack(MediaStreamTrack):
 
     def __init__(self):
         super().__init__()
-        self._cap = cv2.VideoCapture(0)
+        self._cap = cv2.VideoCapture(0, cv2.CAP_V4L)
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
