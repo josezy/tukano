@@ -2,8 +2,9 @@ import logging
 import settings
 
 from settings import HOOK
+from util.util import is_raspberrypi
 
-if settings.PROD:
+if settings.PROD and is_raspberrypi():
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
@@ -17,7 +18,7 @@ class Hook():
         self.released = False
 
     def release(self):
-        if settings.PROD:
+        if settings.PROD and is_raspberrypi():
             GPIO.output(self.trigger_pin, GPIO.HIGH)
 
         self.released = True

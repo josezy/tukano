@@ -6,6 +6,7 @@
 import ssl
 import json
 import time
+import math
 import settings
 import logging
 import traceback
@@ -16,7 +17,6 @@ from pymavlink import mavutil
 from websocket import create_connection
 
 from tasks import collect_data, prepare_data
-from camera import Camera
 from actuators import Hook
 from util import leds
 from timer import Timer
@@ -137,7 +137,8 @@ def command_to_drone(drone, command: ty.Dict[str, ty.Any]) -> ty.NoReturn:
     target_system = command.get('target_system')
     target_component = command.get('target_component')
     params = command.get('params')
-    params = [params.get(f"param{i+1}", 0) for i in range(7)]
+    params = [params.get(f"param{i+1}", math.nan) for i in range(7)]
+        
     drone.mav.command_long_send(
         target_system,
         target_component,
@@ -203,6 +204,7 @@ timer = Timer({
 })
 
 if any((settings.TAKE_PIC, settings.RECORD)):
+    from camera import Camera
     cam = Camera()
 
 cloud_mav_link = create_cloud_link(settings.WS_MAV_ENDPOINT)
