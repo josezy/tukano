@@ -4,3 +4,4 @@ pyserial
 redis
 websocket-client
 python-dotenv
+requests

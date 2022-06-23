@@ -24,17 +24,25 @@ echo "       Installing from $REPO_DIR..."
 
 
 info "--> Installing system packages..."
-    sudo apt update
     curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    curl https://www.linux-projects.org/listing/uv4l_repo/lpkey.asc | sudo apt-key add -
+
+    echo "deb https://www.linux-projects.org/listing/uv4l_repo/raspbian/stretch stretch main" | sudo tee /etc/apt/sources.list.d/uv4l.list
+
+    sudo apt update
     sudo apt install -y python3.8 python3-pip python3-dev python-dev \
-                   virtualenv redis-server supervisor nodejs \
-                   libxml2-dev libxslt-dev libatlas-base-dev libpython3.8-dev
+        libxml2-dev libxslt-dev libatlas-base-dev libpython3.8-dev \
+        virtualenv redis-server supervisor nodejs \
+        uv4l uv4l-raspicam uv4l-raspicam-extras uv4l-server uv4l-webrtc
 
     sudo systemctl stop redis-server
     sudo systemctl disable redis-server
 
+    sudo systemctl stop uv4l_raspicam.service
+    sudo systemctl disable uv4l_raspicam.service
+
 echo "   √   Apt packages installed:"
-echo "           Python, redis, supervisor and some others..."
+echo "           Python, redis, supervisor, uv4l and some others..."
 
 
 
