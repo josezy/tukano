@@ -3,6 +3,7 @@ import time
 import asyncio
 import fractions
 
+from sys import platform
 from av import VideoFrame
 from av.frame import Frame
 from typing import Tuple
@@ -27,9 +28,12 @@ class VideoStreamTrack(MediaStreamTrack):
 
     def __init__(self):
         super().__init__()
-        # VIDEOIO ERROR: V4L: can't open camera by index 0
-        # Run: sudo modprobe bcm2835-v4l2
-        self._cap = cv2.VideoCapture(0, cv2.CAP_V4L)
+        if platform == "darwin":
+            self._cap = cv2.VideoCapture(0)
+        else:
+            # VIDEOIO ERROR: V4L: can't open camera by index 0
+            # Run: sudo modprobe bcm2835-v4l2
+            self._cap = cv2.VideoCapture(0, cv2.CAP_V4L)
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
