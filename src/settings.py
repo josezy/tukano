@@ -135,7 +135,7 @@ else:
     WS_MAV_ENDPOINT = (
         f"wss://ikaro.tucanorobotics.co/mavlink/plate/{PLATE}"
         if PROD else
-        f"ws://localhost:8000/mavlink/plate/{PLATE}"
+        f"ws://localhost:3000/mavlink/plate/{PLATE}"
     )
 
 WS_MAV_MSG_TYPES = (
