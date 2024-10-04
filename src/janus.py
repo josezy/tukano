@@ -23,7 +23,11 @@ class JanusPlugin:
         self._url = url
 
     async def send(self, payload):
-        message = {"janus": "message", "transaction": transaction_id()}
+        message = {
+            "janus": "message",
+            "transaction": transaction_id(),
+            "token": self._session._token
+        }
         message.update(payload)
         async with self._session._http.post(self._url, json=message) as response:
             data = await response.json()
@@ -35,18 +39,20 @@ class JanusPlugin:
 
 
 class JanusSession:
-    def __init__(self, url):
+    def __init__(self, url, token):
         self._http = None
         self._poll_task = None
         self._plugins = {}
         self._root_url = url
         self._session_url = None
+        self._token = token
 
     async def attach(self, plugin_name: str) -> JanusPlugin:
         message = {
             "janus": "attach",
             "plugin": plugin_name,
             "transaction": transaction_id(),
+            "token": self._token
         }
         async with self._http.post(self._session_url, json=message) as response:
             data = await response.json()
@@ -58,7 +64,11 @@ class JanusSession:
 
     async def create(self):
         self._http = aiohttp.ClientSession()
-        message = {"janus": "create", "transaction": transaction_id()}
+        message = {
+            "janus": "create",
+            "transaction": transaction_id(),
+            "token": self._token
+        }
         async with self._http.post(self._root_url, json=message) as response:
             data = await response.json()
             assert data["janus"] == "success", data
@@ -73,7 +83,11 @@ class JanusSession:
             self._poll_task = None
 
         if self._session_url:
-            message = {"janus": "destroy", "transaction": transaction_id()}
+            message = {
+                "janus": "destroy",
+                "transaction": transaction_id(),
+                "token": self._token
+            }
             async with self._http.post(self._session_url, json=message) as response:
                 data = await response.json()
                 assert data["janus"] == "success"
@@ -85,7 +99,11 @@ class JanusSession:
 
     async def _poll(self):
         while True:
-            params = {"maxev": 1, "rid": int(time.time() * 1000)}
+            params = {
+                "maxev": 1,
+                "rid": int(time.time() * 1000),
+                "token": self._token
+            }
             async with self._http.get(self._session_url, params=params) as response:
                 data = await response.json()
                 if data["janus"] == "event":
@@ -152,17 +170,28 @@ async def run(room, session):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Janus")
-    parser.add_argument("url", help="Janus root URL, e.g. http://localhost:8088/janus")
+    parser.add_argument(
+        "url",
+        type=str,
+        default="http://localhost:8088/janus",
+        help="Janus root URL, e.g. http://localhost:8088/janus",
+    )
     parser.add_argument(
         "--room",
         type=int,
         default=1234,
         help="The video room ID to join (default: 1234).",
     ),
+    parser.add_argument(
+        "--token",
+        type=str,
+        default="janusrocks",
+        help="The token to use for authentication (default: janusrocks).",
+    )
     args = parser.parse_args()
 
     # create signaling and peer connection
-    session = JanusSession(args.url)
+    session = JanusSession(args.url, token=args.token)
 
     loop = asyncio.get_event_loop()
     try:
