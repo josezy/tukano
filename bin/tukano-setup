@@ -1,7 +1,5 @@
 #!/bin/bash
-
 REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
-
 function info {
     echo -e "\\n$(tput bold)$(tput setaf 4)" "$@" "$(tput sgr0)"
 }
@@ -11,8 +9,6 @@ function success {
 function error {
     echo -e "\\n$(tput bold)$(tput setaf 1)" "$@" "$(tput sgr0)"
 }
-
-
 success " 🔵    Setup: Development Machine w/ supervisord"
     if [[ "$(uname)" != 'Linux' ]]; then
         error "Not on Linux!: $(uname)"
@@ -20,79 +16,54 @@ success " 🔵    Setup: Development Machine w/ supervisord"
     fi
     ln -fs "$REPO_DIR" /opt/tukano
 echo "       Installing from $REPO_DIR..."
-
-
-
 info "--> Installing system packages..."
     curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
     curl https://www.linux-projects.org/listing/uv4l_repo/lpkey.asc | sudo apt-key add -
-
     echo "deb https://www.linux-projects.org/listing/uv4l_repo/raspbian/stretch stretch main" | sudo tee /etc/apt/sources.list.d/uv4l.list
-
     sudo apt update
-    sudo apt install -y python3.8 python3-pip python3-dev python-dev \
-        libxml2-dev libxslt-dev libatlas-base-dev libpython3.8-dev \
+    sudo apt install -y python3.11 python3-pip python3-dev python-dev \
+        libxml2-dev libxslt-dev libatlas-base-dev libpython3.11-dev \
         virtualenv redis-server supervisor nodejs \
         uv4l uv4l-raspicam uv4l-raspicam-extras uv4l-server uv4l-webrtc
-
     sudo systemctl stop redis-server
     sudo systemctl disable redis-server
-
     sudo systemctl stop uv4l_raspicam.service
     sudo systemctl disable uv4l_raspicam.service
-
 echo "   √   Apt packages installed:"
 echo "           Python, redis, supervisor, uv4l and some others..."
-
-
-
 info "--> Setting up pip + virtualenv..."
     sudo pip3 install --upgrade pip setuptools virtualenv
-    virtualenv -p "$(which python3.8)" .venv
+    virtualenv -p "$(which python3.11)" .venv
     source .venv/bin/activate
 success "   √   Virtualenv is active: $(which python) ($(python --version))"
-
-
-
 info "--> Creating data directory and subfolders..."
     echo " > Creating data/logs dir..."
     mkdir -p "$REPO_DIR/data/logs"
     mkdir -p "$REPO_DIR/data/pics"
     mkdir -p "$REPO_DIR/data/videos"
-    mkdir -p "$REPO_DIR/.venv/lib/python3.8/site-packages/message_definitions/v1.0/"
+    mkdir -p "$REPO_DIR/.venv/lib/python3.11/site-packages/message_definitions/v1.0/"
 success "   √   Done"
-
-
-
 info "--> Installing python dependencies + copying MAVLink dialect..."
     pip install -r requirements.txt
-    cp "$REPO_DIR/dialects/*" "$REPO_DIR/.venv/lib/python3.8/site-packages/message_definitions/v1.0/"
+    cp "$REPO_DIR/dialects/*" "$REPO_DIR/.venv/lib/python3.11/site-packages/message_definitions/v1.0/"
     npm install
 success "   √   PyPI requirements are installed: requirements.txt"
-
-
-
 info "--> Setting up supervisor configuration..."
     echo " > Creating symbolic links..."
     sudo rm -f /etc/supervisor/supervisord.conf
     sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/supervisord.conf
     sudo ln -fs "$REPO_DIR" /opt
-
     echo " > Reloading supervisor service..."
     sudo service supervisor reload
     sleep 3
     supervisorctl status
-
 success "   √   Supervisor is up a running"
-
 # if [[ $PATH == *"/opt/tukano/bin"* ]]; then
 #     echo " > 'tukano' command is in \$PATH"
 # else
 #     echo " > Adding 'tukano' to PATH..."
 #     echo "PATH=/opt/tukano/bin:\$PATH" >> ~/.bashrc
 # fi
-
 success " ✅ Done."
     echo "       - Data is stored in tukano/data/"
-
 exit 0
