@@ -1,5 +1,4 @@
 RPi.GPIO
 picamera
-numpy
 
 -r base-requirements.txt

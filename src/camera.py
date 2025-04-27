@@ -5,7 +5,6 @@ from util.util import is_raspberrypi
 
 if settings.PROD and is_raspberrypi():
     import io
-    import numpy as np
     import picamera
 else:
     import cv2
@@ -89,14 +88,6 @@ class Camera(object):
             cv2.imwrite(pic_path, frame)
 
         return pic_path.split('/')[-1]
-
-    def grab_frame(self):
-        if settings.PROD:
-            frame = np.fromstring(self.stream.getvalue(), dtype=np.uint8)
-        else:
-            frame = self.cam.read()[1]
-
-        return frame
 
     def start_recording(self, filename=None):
         self.vid_path = f"{self._vid_dir}/{filename or self._ts_name()}.h264"
