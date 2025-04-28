@@ -3,6 +3,10 @@ Tukano Project
 
 Software running on a Raspberry connected to a Pixhawk for multiple aerial purposes.
 
+## Super quick setup for RPi
+0. Clone the repo (duh)
+1. Execute `./bin/tukano-setup`
+
 ### Setup
 
 To install packages and setup enviroment run (or follow by steps) the `bin/tukano-setup` file. Or follow summary commands
