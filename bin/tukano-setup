@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+REPO_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function info {
     echo -e "\\n$(tput bold)$(tput setaf 4)" "$@" "$(tput sgr0)"
@@ -47,7 +47,6 @@ echo "           Python, redis, supervisor, uv4l and some others..."
 
 
 info "--> Setting up pip + virtualenv..."
-    sudo pip3 install --upgrade pip setuptools virtualenv
     virtualenv -p "$(which python3.11)" .venv
     source .venv/bin/activate
 success "   √   Virtualenv is active: $(which python) ($(python --version))"
