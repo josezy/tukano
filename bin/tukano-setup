@@ -75,7 +75,6 @@ success "   √   PyPI requirements are installed: requirements.txt"
 info "--> Setting up supervisor configuration..."
     echo " > Creating symbolic links..."
     sudo ln -fs "$REPO_DIR/etc/supervisor/tukano.conf" /etc/supervisor/conf.d/tukano.conf
-    sudo ln -fs "$REPO_DIR" /opt
 
     echo " > Reloading supervisor service..."
     sudo service supervisor reload
