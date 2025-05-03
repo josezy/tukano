@@ -78,7 +78,7 @@ info "--> Setting up supervisor configuration..."
     echo " > Reloading supervisor service..."
     sudo service supervisor reload
     sleep 3
-    supervisorctl status
+    sudo supervisorctl status
 
 success "   √   Supervisor is up a running"
 
