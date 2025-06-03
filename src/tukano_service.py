@@ -7,11 +7,13 @@ import ssl
 import json
 import time
 import math
+import socket
 import settings
 import logging
 import traceback
 import websocket
 import typing as ty
+import serial
 
 from pymavlink import mavutil
 from websocket import create_connection
@@ -30,8 +32,56 @@ def connect_drone():
         except Exception as e:
             logging.warning(f"MAVLink vehicle connection failed: {e}")
             logging.warning("Retrying...")
+            time.sleep(1)  # Add delay between retries
 
     return drone
+
+
+def init_drone(drone, timeout=None):
+    """Initialize drone connection and set up data streams"""
+    try:
+        heartbeat = drone.wait_heartbeat(timeout=timeout)
+        logging.info("Heartbeat received!")
+        
+        vehicle = {
+            'system_id': heartbeat.get_srcSystem(),
+            'component_id': heartbeat.get_srcComponent(),
+            'armed': False,
+            'position': None,
+            'battery': None,
+        }
+        
+        # Request data streams
+        drone.mav.request_data_stream_send(
+            vehicle['system_id'],
+            vehicle['component_id'],
+            mavutil.mavlink.MAV_DATA_STREAM_ALL,
+            10,  # Rate in Hertz
+            1  # Start/Stop
+        )
+        
+        return drone, vehicle
+    except Exception as e:
+        logging.error(f"Failed to get heartbeat: {e}")
+        raise
+
+
+def reconnect_drone(prev_drone=None):
+    """Safely close previous connection if exists and establish a new connection"""
+    if prev_drone is not None:
+        try:
+            prev_drone.close()
+        except Exception as e:
+            logging.warning(f"Error closing previous connection: {e}")
+    
+    logging.info("Attempting to reconnect to drone...")
+    new_drone = connect_drone()
+    
+    try:
+        return init_drone(new_drone, timeout=5)
+    except Exception as e:
+        logging.error(f"Failed to initialize drone after reconnection: {e}")
+        return reconnect_drone(new_drone)  # Recursive retry if initialization fails
 
 
 def is_trustable(msg, vehicle):
@@ -42,10 +92,21 @@ def is_trustable(msg, vehicle):
 
 
 def cleanup_msg(link):
-    msg = link.recv_msg()
-    msg_type = msg and msg.get_type()
-    message_is_valid = msg_type and msg_type != 'BAD_DATA'
-    return msg if message_is_valid else None
+    try:
+        msg = link.recv_msg()
+        msg_type = msg and msg.get_type()
+        message_is_valid = msg_type and msg_type != 'BAD_DATA'
+        return msg if message_is_valid else None
+    except (serial.serialutil.SerialException, socket.error, OSError, IOError, Exception) as e:
+        # This will be caught in the main loop - handle both serial and socket errors
+        if isinstance(e, serial.serialutil.SerialException):
+            logging.error(f"Serial exception in cleanup_msg: {e}")
+        else:
+            logging.error(f"Connection error in cleanup_msg: {e}")
+        # Check specifically for EOF errors which might not raise exceptions
+        if hasattr(link, 'port') and hasattr(link.port, 'file') and link.port.file.closed:
+            logging.error("Connection closed or EOF detected")
+        raise
 
 
 def update_vehicle_state(msg, vehicle):
@@ -176,25 +237,7 @@ logging.info(f"Initialising vehicle at {settings.MAVLINK_TUKANO['device']}")
 
 leds.led_on('red')
 drone = connect_drone()
-heartbeat = drone.wait_heartbeat()
-
-logging.info("Hearbeat received!")
-
-vehicle = {
-    'system_id': heartbeat.get_srcSystem(),
-    'component_id': heartbeat.get_srcComponent(),
-    'armed': False,
-    'position': None,
-    'battery': None,
-}
-
-drone.mav.request_data_stream_send(
-    vehicle['system_id'],
-    vehicle['component_id'],
-    mavutil.mavlink.MAV_DATA_STREAM_ALL,
-    10,  # Rate in Hertz
-    1  # Start/Stop
-)
+drone, vehicle = init_drone(drone)
 
 hook = Hook()
 timer = Timer({
@@ -216,10 +259,22 @@ while True:
     time.sleep(settings.SLEEPING_TIME)
 
     try:
-
-        mav_msg = cleanup_msg(drone)
-        if mav_msg is not None:
-            vehicle = update_vehicle_state(mav_msg, vehicle)
+        try:
+            mav_msg = cleanup_msg(drone)
+            # Check for EOF on TCP socket which might be logged but not raise an exception
+            if hasattr(drone, 'port') and hasattr(drone.port, 'file') and drone.port.file.closed:
+                raise Exception("EOF on TCP socket detected")
+                
+            if mav_msg is not None:
+                vehicle = update_vehicle_state(mav_msg, vehicle)
+        except (serial.serialutil.SerialException, socket.error, OSError, IOError, Exception) as e:
+            logging.error(f"Connection lost: {e}")
+            leds.led_on('red')
+            # Attempt to reconnect
+            drone, vehicle = reconnect_drone(drone)
+            leds.led_on('blue')
+            # Skip the rest of this iteration
+            continue
 
         if cloud_mav_link is not None and cloud_mav_link.connected:
             if mav_msg is not None:
