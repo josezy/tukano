@@ -78,7 +78,7 @@ logging.info(f"Working on {'production' if PROD else 'development'}")
 
 MAVLINK_TUKANO = (
     {
-        'device': "/dev/ttyS0",  # UART on x86 and x86_64 architectures (RPi3)
+        'device': "/dev/ttyACM0",
         'baud': 57600,
     }
     if PROD else
