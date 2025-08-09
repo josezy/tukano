@@ -46,26 +46,17 @@ class CameraStreamer:
         sys.exit(0)
 
     def _build_gstreamer_pipeline(self):
-        """Build GStreamer pipeline for Janus WebRTC streaming"""
+        """Build GStreamer pipeline for UDP RTP streaming to Janus"""
+        # Stream H.264 RTP to Janus gateway via UDP
         pipeline = [
-            "gst-launch-1.0",
-            "-v",
-            # Camera source using libcamera
+            "gst-launch-1.0", "-v",
             "libcamerasrc",
             f"! video/x-raw,width={self.width},height={self.height},framerate={self.framerate}/1",
-            # Convert and encode
             "! videoconvert",
-            "! v4l2h264enc",
-            f"bitrate={self.bitrate}",
+            "! v4l2h264enc", f"bitrate={self.bitrate}",
             "! h264parse",
-            "! rtph264pay",
-            "config-interval=1",
-            "pt=96",
-            # WebRTC sink (requires gst-plugins-bad with webrtc support)
-            "! webrtcsink",
-            f"janus-endpoint={self.janus_url}/janus",
-            f"room-id={self.janus_room}",
-            f"token={self.janus_token}",
+            "! rtph264pay", "config-interval=1", "pt=96",
+            "! udpsink", "host=207.246.118.54", "port=5004"
         ]
 
         return pipeline
