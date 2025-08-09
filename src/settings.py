@@ -11,7 +11,6 @@ PROD = os.getenv('TUKANO_ENV', 'DEV') == "PROD"  # Development flag
 LOGGING_LEVEL = "INFO"
 
 PLATE = "00000000"
-GATO_ENABLED = True
 
 ###############################################################################
 # Paths and files
@@ -128,15 +127,12 @@ SERIAL_PARAMS = {
 WS_CONNECTION_PARAMS = {'sslopt': {"cert_reqs": ssl.CERT_NONE}} if PROD else {}
 
 # WebSocket for mavlink
-if GATO_ENABLED:
-    WS_MAV_ENDPOINT = "ws://localhost:5055" # Nodejs websockets proxy
-else:
-    assert type(PLATE) == str and len(PLATE) == 8, "No PLATE set"
-    WS_MAV_ENDPOINT = (
-        f"wss://ikaro.tucanorobotics.co/mavlink/plate/{PLATE}"
-        if PROD else
-        f"ws://localhost:3000/mavlink/plate/{PLATE}"
-    )
+assert type(PLATE) == str and len(PLATE) == 8, "No PLATE set"
+WS_MAV_ENDPOINT = (
+    f"wss://ikaro.tucanorobotics.co/mavlink/plate/{PLATE}"
+    if PROD else
+    f"ws://localhost:3000/mavlink/plate/{PLATE}"
+)
 
 WS_MAV_MSG_TYPES = (
     'HEARTBEAT', 'TUKANO_DATA', 'GLOBAL_POSITION_INT', 'SYS_STATUS', 'VFR_HUD',

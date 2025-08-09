@@ -1,5 +1,5 @@
 ipdb
-pymavlink
+pymavlink==2.4.15
 pyserial
 redis
 websocket-client
