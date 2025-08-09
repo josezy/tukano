@@ -47,10 +47,10 @@ class CameraStreamer:
 
     def _build_gstreamer_pipeline(self):
         """Build GStreamer pipeline for UDP RTP streaming to Janus"""
-        # Stream H.264 RTP to Janus gateway via UDP
+        # Use v4l2src for camera access on RPi
         pipeline = [
             "gst-launch-1.0", "-v",
-            "libcamerasrc",
+            "v4l2src", "device=/dev/video0",
             f"! video/x-raw,width={self.width},height={self.height},framerate={self.framerate}/1",
             "! videoconvert",
             "! v4l2h264enc", f"bitrate={self.bitrate}",
